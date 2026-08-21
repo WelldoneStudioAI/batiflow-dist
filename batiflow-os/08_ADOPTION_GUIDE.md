@@ -17,7 +17,13 @@ cp -R path/to/batiflow-dist/batiflow-os <target-repo>/batiflow-os
 ```
 
 Keeping a copy per repository (rather than a submodule) is deliberate: the living app map in `06` is
-repository-specific and must diverge.
+repository-specific and must diverge. The `departments/` folder travels with it — the processes are
+the same everywhere; only their §10 (BatiFlow notes) is repository-specific and should be rewritten
+for the target repo.
+
+`scripts/check_os.sh` verifies the system's own structure (files present, the ten canonical sections
+in every department file, links and cross-references resolving). Copy it too, and run it after any
+edit to `batiflow-os/`.
 
 ### Step 2 — Bind it in `CLAUDE.md`
 
@@ -62,6 +68,14 @@ Audit the current change against batiflow-os/04_DEFINITION_OF_DONE.md.
 For each gate: PASS / FAIL / N-A with one line of justification. If any gate fails, state the status
 as IMPLEMENTED — NOT VALIDATED and list what remains. Then produce the completion report from
 batiflow-os/07_COMPLETION_REPORT_TEMPLATE.md.
+```
+
+`.claude/commands/dept.md`:
+```markdown
+Identify the lead department for this request using batiflow-os/departments/README.md, then run that
+department's process (sections 4, 6 and 9 of its file) on top of the global gates in
+batiflow-os/04_DEFINITION_OF_DONE.md. Name the lead and the consulted departments first.
+Request: $ARGUMENTS
 ```
 
 `.claude/commands/cr.md`:

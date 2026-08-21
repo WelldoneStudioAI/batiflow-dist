@@ -12,6 +12,8 @@ This repository is governed by `batiflow-os/`. Before any change, read and follo
 - `batiflow-os/03_REGRESSION_VALIDATION_PROTOCOL.md` — after implementing
 - `batiflow-os/04_DEFINITION_OF_DONE.md` — before saying "done"
 - `batiflow-os/06_LIVING_APP_MAP.md` — read the relevant zone; update it when you learn something
+- `batiflow-os/departments/README.md` — route the request to a lead department, then follow that
+  department's process (sections 4, 6, 9) on top of the global gates
 
 Never report a change as done, fixed, or working until `04` passes. Until then the status is
 **IMPLEMENTED — NOT VALIDATED**. Never claim output from a command you did not run in this session.
@@ -25,3 +27,5 @@ Never report a change as done, fixed, or working until `04` passes. Until then t
   invariants only; signature verification requires the release key held with the private source repo
   and must be disclosed as a gap here.
 - Never remove a previously published `<item>` — machines mid-upgrade still resolve it.
+- Release work is `batiflow-os/departments/D07_RELEASE_AND_DISTRIBUTION.md`; run its §9 checklist.
+- Run `scripts/check_os.sh` after editing anything under `batiflow-os/`.

@@ -19,6 +19,8 @@ is recorded.
 - `06_LIVING_APP_MAP.md` — living architecture / UI / flow coverage map.
 - `07_COMPLETION_REPORT_TEMPLATE.md` — required post-change report.
 - `08_ADOPTION_GUIDE.md` — how to install this system in Claude Code.
+- `departments/` — one senior development process per engineering function (D01–D10), each plugging
+  into the gates of `04`. Start at `departments/README.md` for the routing table.
 
 ## Core loop
 
@@ -59,6 +61,11 @@ Definition of done (04) ──► gate passed? ──► Completion report (07)
 `01` is the standing behavior contract; `02`, `03`, `04` are the protocols it invokes; `05` and `07`
 are the input and output artifacts of a single iteration; `06` is the memory that survives across
 iterations; `08` explains how to make all of it active inside Claude Code.
+
+`departments/` is the second axis. `01`–`08` say *how any change is handled*; `departments/D01`–`D10`
+say *how each function is run at a senior level* — what it owns, where its evidence comes from, what
+it hands to the next department, and what it adds to the checklist of `04`. Route the request to a
+lead department, run its process, keep the global gates.
 
 ## Scope of this repository
 
