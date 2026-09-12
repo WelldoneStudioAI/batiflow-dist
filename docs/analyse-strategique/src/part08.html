@@ -1,0 +1,185 @@
+<!-- ============ PARTIE VI ============ -->
+<section class="part">
+  <div class="part-head">
+    <span class="part-num">VI</span>
+    <span class="part-label">Partie VI</span>
+    <h1>Modèle opérationnel, produit et gouvernance de la donnée</h1>
+    <p class="part-abstract">L’architecture de données qui rend la chaîne possible, les verrous qui empêchent le système de franchir une frontière réservée, et les règles qui encadrent l’usage de l’intelligence artificielle.</p>
+  </div>
+
+  <h2><span class="h-num">6.1</span>Architecture de données</h2>
+  <p>Huit objets suffisent à porter l’ensemble de la chaîne. Leur discipline de saisie conditionne à la fois la qualité du livrable, la défense en responsabilité et la valeur résiduelle de l’actif de données.</p>
+  <table>
+    <thead><tr><th style="width:34mm">Objet</th><th>Champs minimaux</th></tr></thead>
+    <tbody>
+      <tr><td>Constat</td><td>catégorie, localisation, photo, gravité, recommandation, source d’inspection, date</td></tr>
+      <tr><td>Intervention</td><td>type de travaux, portée estimable, profession requise, dépendances, horizon</td></tr>
+      <tr><td>Quantité</td><td>valeur nette, unité, source, date, méthode de relevé, précision</td></tr>
+      <tr><td>Coût unitaire</td><td>matériau, main-d’œuvre, équipement, région, date d’effet, source, version</td></tr>
+      <tr><td>Ajustement</td><td>perte, mobilisation, accessibilité, complexité, contingence</td></tr>
+      <tr><td>Estimation</td><td>bas, probable, haut, niveau de confiance, exclusions, hypothèses</td></tr>
+      <tr><td>Soumission</td><td>entrepreneur, quantité, perte, heures, taux, inclusions, exclusions, garanties, prix</td></tr>
+      <tr><td>Normalisation</td><td>écarts, questions de clarification, coût comparable, postes manquants</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <div class="c-label">Règle d’or</div>
+    <p>Aucun montant ne doit exister dans le système sans être rattaché à une quantité, à une version de base de coûts et à un ensemble d’hypothèses. Un montant orphelin est <strong>non défendable</strong> : il ne peut être ni expliqué à un client, ni justifié à un assureur, ni reconstitué en cas de litige.</p>
+  </div>
+
+  <h2><span class="h-num">6.2</span>Moteur de compétence et de routage</h2>
+  <p>Chaque intervention doit franchir un contrôle en six points avant émission du livrable. Le contrôle est bloquant : il n’existe pas de contournement discrétionnaire.</p>
+  <ol>
+    <li>La portée est-elle suffisamment définie pour être estimée ?</li>
+    <li>Une quantité mesurée est-elle disponible, avec sa méthode et sa précision ?</li>
+    <li>L’estimation est-elle possible sans franchir la frontière de la conception ?</li>
+    <li>L’intervention touche-t-elle une activité potentiellement réservée ?</li>
+    <li>Un professionnel habilité est-il requis, et lequel ?</li>
+    <li>Le niveau de confiance minimal est-il atteint pour publier un montant ?</li>
+  </ol>
+  <table>
+    <thead><tr><th style="width:56mm">Exemple d’intervention</th><th>Décision BatiFlow</th></tr></thead>
+    <tbody>
+      <tr><td>Remplacement équivalent d’un chauffe-eau</td><td>Estimation possible ; vérifier les règles spécifiques applicables et la portée exacte.</td></tr>
+      <tr><td>Réfection standard d’un revêtement de toiture</td><td>Quantification et budget possibles ; méthode technique spécialisée à confirmer si les constats l’exigent.</td></tr>
+      <tr><td>Fissure présentant un enjeu structural</td><td>Allocation budgétaire provisoire seulement ; expertise d’ingénieur requise pour la solution.</td></tr>
+      <tr><td>Modification d’un mur porteur</td><td>Conception bloquée par le système ; routage professionnel obligatoire.</td></tr>
+      <tr><td>Reprise de drain français</td><td>Estimation d’une allocation possible ; portée réelle dépendante d’un diagnostic complémentaire à signaler.</td></tr>
+      <tr><td>Soumission dont la quantité dépasse le relevé de 30 %</td><td>Drapeau d’écart et question de clarification automatique, sans accusation ni qualification.</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="h-num">6.3</span>Règles d’utilisation de l’intelligence artificielle</h2>
+  <p>L’IA est un accélérateur de production et un détecteur d’incohérences. Elle n’est en aucun cas une autorité de prix ni une autorité technique. Trois niveaux d’autonomie sont définis.</p>
+  <table>
+    <thead><tr><th style="width:26mm">Niveau</th><th style="width:46mm">Tâches</th><th>Contrôle requis</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill p-green">Autonome</span></td><td>Classification des constats, association à des postes de travaux, rédaction d’explications, mise en forme, génération de questions de clarification.</td><td>Revue humaine de sortie avant transmission au client.</td></tr>
+      <tr><td><span class="pill p-amber">Assisté</span></td><td>Proposition de facteurs de perte, détection d’anomalies dans une soumission, suggestion de niveau de confiance, hiérarchisation des horizons.</td><td>Validation humaine explicite et consignée au journal d’audit.</td></tr>
+      <tr><td><span class="pill p-red">Interdit</span></td><td>Production autonome d’un prix de marché, choix d’une méthode structurale, attestation de conformité, contournement d’un verrou professionnel.</td><td>Bloqué au niveau du système ; aucune exception opérationnelle.</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li>Tout montant remis au client doit provenir d’une <strong>formule auditable</strong> appliquée à une donnée de coût versionnée.</li>
+    <li>Toute suggestion générée par IA touchant une activité potentiellement réservée doit passer par une validation humaine ou professionnelle avant publication.</li>
+    <li>Le journal d’audit doit distinguer ce qui a été proposé par le système de ce qui a été retenu par un humain.</li>
+  </ul>
+
+  <h2><span class="h-num">6.4</span>Gouvernance de la base de coûts</h2>
+  <p>La base de coûts est l’actif central du modèle. Sa gouvernance doit être formalisée au même titre qu’un référentiel comptable.</p>
+  <table class="compact">
+    <thead><tr><th style="width:36mm">Règle</th><th>Contenu</th></tr></thead>
+    <tbody>
+      <tr><td>Versionnage</td><td>Chaque version porte un identifiant, une date d’effet, une région et une liste de modifications. Aucune modification en place.</td></tr>
+      <tr><td>Traçabilité des sources</td><td>Chaque coût unitaire référence sa source et sa date d’observation ; les prix issus de soumissions réelles sont marqués comme tels.</td></tr>
+      <tr><td>Fréquence de révision</td><td>Révision trimestrielle systématique ; révision immédiate en cas de variation matérielle d’un poste majeur.</td></tr>
+      <tr><td>Inscription au livrable</td><td>La version utilisée figure dans chaque Plan d’investissement remis ; toute réémission déclenche une revalidation.</td></tr>
+      <tr><td>Boucle de rétroaction</td><td>Chaque soumission normalisée alimente la mesure d’écart entre estimation et prix de marché, consolidée mensuellement.</td></tr>
+      <tr><td>Séparation des rôles</td><td>La personne qui met à jour la base de coûts n’est pas celle qui approuve la version publiée.</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="h-num">6.5</span>Architecture contractuelle</h2>
+  <table>
+    <thead><tr><th style="width:50mm">Document</th><th>Objectif</th></tr></thead>
+    <tbody>
+      <tr><td>Contrat A — Inspection</td><td>Mandat réglementé et obligations propres à l’inspection ; aucune mention de prix de travaux.</td></tr>
+      <tr><td>Rapport A — Inspection</td><td>Constats et recommandations selon la norme applicable, sans contenu budgétaire.</td></tr>
+      <tr><td>Contrat B — Plan d’investissement</td><td>Portée, méthodologie, données utilisées, hypothèses, exclusions, niveau de précision, régime de responsabilité.</td></tr>
+      <tr><td>Rapport B — Plan d’investissement</td><td>Budget, calendrier, quantités, niveaux de confiance, contingences, professionnels requis.</td></tr>
+      <tr><td>Contrat C — Consultation et normalisation</td><td>Portée commerciale, nombre d’offres traitées, règles de comparaison, limites techniques explicites.</td></tr>
+      <tr><td>Rapport C — Analyse des soumissions</td><td>Tableau comparatif, écarts, exclusions, demandes de clarification, coût comparable.</td></tr>
+      <tr><td>Politique interne d’indépendance</td><td>Interdiction de toute rémunération d’entrepreneur ; procédure de divulgation d’apparence de conflit.</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="h-num">6.6</span>Capacité de production et point de tension</h2>
+  <p>Au scénario central, la charge annuelle s’établit comme suit. Le point de tension apparaît non pas sur le volume total, mais sur la <strong>concentration saisonnière</strong> des transactions immobilières.</p>
+  <table class="num compact">
+    <thead><tr><th>Activité</th><th style="width:22mm">Volume</th><th style="width:26mm">Heures unitaires</th><th style="width:24mm">Heures totales</th></tr></thead>
+    <tbody>
+      <tr><td>Inspections</td><td>180</td><td>6,0 h</td><td>1 080 h</td></tr>
+      <tr><td>Plans d’investissement</td><td>63</td><td>5,0 h</td><td>315 h</td></tr>
+      <tr><td>Normalisations de soumissions</td><td>44</td><td>2,0 h</td><td>88 h</td></tr>
+      <tr class="total"><td>Charge de production annuelle</td><td>—</td><td>—</td><td>1 483 h</td></tr>
+    </tbody>
+  </table>
+  <p class="t-note">À rythme de production pilote (Plan 12 h, normalisation 5 h), la même activité représenterait 2 056 heures, soit une charge additionnelle de 573 heures — l’équivalent d’un tiers de ressource à temps plein. C’est la justification opérationnelle directe de l’investissement en développement.</p>
+  <div class="callout">
+    <div class="c-label">Règle de capacité</div>
+    <p>Le délai de livraison du Plan d’investissement doit demeurer inférieur à <strong>sept jours ouvrables</strong>. Au-delà, la fenêtre décisionnelle du client se referme et la conversion du niveau 3 s’effondre. Lorsque le délai cible ne peut être tenu en haute saison, la règle est de <strong>limiter les invitations</strong> plutôt que de dégrader le délai ou la méthode.</p>
+  </div>
+
+  <h2><span class="h-num">6.7</span>Journal d’audit</h2>
+  <p>Le journal d’audit est le dispositif qui rend la méthodologie opposable. Il doit être automatique, non modifiable rétroactivement, et conservé selon la durée recommandée par l’avocat et l’assureur.</p>
+  <ul>
+    <li><strong>Pour chaque montant :</strong> quantité source, méthode de relevé, version de base de coûts, facteurs appliqués, formule, auteur et horodatage.</li>
+    <li><strong>Pour chaque suggestion automatisée :</strong> ce qui a été proposé, ce qui a été retenu, par qui, et sur quel fondement.</li>
+    <li><strong>Pour chaque routage professionnel :</strong> le déclencheur, la profession identifiée, la communication faite au client.</li>
+    <li><strong>Pour chaque livrable émis :</strong> version du gabarit, version de la méthodologie, exclusions applicables et date d’émission.</li>
+  </ul>
+</section>
+
+<!-- ============ PARTIE VII ============ -->
+<section class="part">
+  <div class="part-head">
+    <span class="part-num">VII</span>
+    <span class="part-label">Partie VII</span>
+    <h1>Registre des risques et gouvernance du projet</h1>
+    <p class="part-abstract">Douze risques identifiés, leur exposition, leur mitigation, leur propriétaire et leur indicateur d’alerte — puis les quatre conditions dans lesquelles le projet doit être arrêté.</p>
+  </div>
+
+  <h2><span class="h-num">7.1</span>Registre des risques</h2>
+  <table>
+    <thead><tr><th style="width:7mm">#</th><th style="width:40mm">Risque</th><th style="width:16mm">Prob.</th><th style="width:16mm">Impact</th><th>Mitigation et indicateur d’alerte</th></tr></thead>
+    <tbody>
+      <tr><td>R1</td><td>Requalification d’un livrable en acte professionnel réservé</td><td>Moyenne</td><td><span class="pill p-red">Critique</span></td><td>Avis juridique écrit ; terminologie gelée ; verrous de routage dans l’outil. <em>Alerte : toute demande client sortant du gabarit standard.</em></td></tr>
+      <tr><td>R2</td><td>Refus ou exclusion de couverture E&amp;O sur les activités nouvelles</td><td>Moyenne</td><td><span class="pill p-red">Critique</span></td><td>Confirmation écrite préalable ; réexamen à chaque renouvellement. <em>Alerte : réponse évasive ou orale de l’assureur.</em></td></tr>
+      <tr><td>R3</td><td>Écart matériel entre estimation et coût réel conduisant à une réclamation</td><td>Élevée</td><td><span class="pill p-amber">Élevé</span></td><td>Fourchettes, niveaux de confiance, exclusions écrites, mesure systématique de l’écart. <em>Alerte : écart médian supérieur à 25 %.</em></td></tr>
+      <tr><td>R4</td><td>Confusion perçue entre le rapport d’inspection et le Plan d’investissement</td><td>Moyenne</td><td><span class="pill p-amber">Élevé</span></td><td>Contrats, gabarits et vocabulaire strictement distincts ; aucune promotion avant remise du rapport. <em>Alerte : questions clients mélangeant les deux mandats.</em></td></tr>
+      <tr><td>R5</td><td>Conflit d’intérêts réel ou apparent</td><td>Faible</td><td><span class="pill p-red">Critique</span></td><td>Interdiction absolue de rémunération d’entrepreneur ; procédure de divulgation écrite [9]. <em>Alerte : toute proposition de partenariat rémunéré.</em></td></tr>
+      <tr><td>R6</td><td>Base de coûts obsolète ; volatilité des prix des matériaux</td><td>Élevée</td><td><span class="pill p-amber">Moyen</span></td><td>Révision trimestrielle et révision immédiate sur variation matérielle ; version inscrite au livrable. <em>Alerte : version de plus de 120 jours utilisée.</em></td></tr>
+      <tr><td>R7</td><td>Dépendance à l’IA pour des montants non traçables</td><td>Moyenne</td><td><span class="pill p-amber">Élevé</span></td><td>Niveaux d’autonomie codés dans l’outil ; blocage technique du niveau interdit. <em>Alerte : montant sans chaîne d’audit complète.</em></td></tr>
+      <tr><td>R8</td><td>Conversion inférieure au seuil de rentabilité du produit</td><td>Moyenne</td><td><span class="pill p-amber">Élevé</span></td><td>Séquence de vente scriptée ; objections formées ; ciblage par indicateur d’opportunité. <em>Alerte : conversion inférieure à 20 % sur 40 dossiers exposés.</em></td></tr>
+      <tr><td>R9</td><td>Capacité de production insuffisante en haute saison</td><td>Élevée</td><td><span class="pill p-amber">Moyen</span></td><td>Limitation du nombre d’invitations plutôt que dégradation du délai. <em>Alerte : délai de livraison supérieur à 7 jours ouvrables.</em></td></tr>
+      <tr><td>R10</td><td>Réaction négative d’entrepreneurs à la normalisation</td><td>Moyenne</td><td><span class="pill p-green">Faible à moyen</span></td><td>Formulation neutre ; demandes de clarification factuelles ; aucune accusation. <em>Alerte : baisse du taux de réponse au bordereau sous 70 %.</em></td></tr>
+      <tr><td>R11</td><td>Imitation de l’offre par un concurrent</td><td>Élevée</td><td><span class="pill p-amber">Moyen</span></td><td>Accumulation de la base de coûts et de la boucle d’apprentissage ; option de licence (section 4.10). <em>Alerte : apparition d’une offre similaire dans la zone.</em></td></tr>
+      <tr><td>R12</td><td>Dérive de portée vers la gestion de projet non assurée</td><td>Moyenne</td><td><span class="pill p-amber">Élevé</span></td><td>Portée contractuelle fermée ; procédure de refus documentée. <em>Alerte : demandes répétées d’accompagnement de chantier.</em></td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="h-num">7.2</span>Cartographie de l’exposition</h2>
+  <table class="matrix">
+    <thead><tr><th></th><th>Impact faible</th><th>Impact moyen</th><th>Impact élevé</th><th>Impact critique</th></tr></thead>
+    <tbody>
+      <tr><td class="axis">Probabilité<br>élevée</td><td class="m-lo"></td><td class="m-md"><span class="rid">R6</span><span class="rid">R9</span><span class="rid">R11</span></td><td class="m-hi"><span class="rid">R3</span></td><td class="m-hi"></td></tr>
+      <tr><td class="axis">Probabilité<br>moyenne</td><td class="m-lo"><span class="rid">R10</span></td><td class="m-md"></td><td class="m-hi"><span class="rid">R4</span><span class="rid">R7</span><span class="rid">R8</span><span class="rid">R12</span></td><td class="m-hi"><span class="rid">R1</span><span class="rid">R2</span></td></tr>
+      <tr><td class="axis">Probabilité<br>faible</td><td class="m-lo"></td><td class="m-lo"></td><td class="m-md"></td><td class="m-hi"><span class="rid">R5</span></td></tr>
+    </tbody>
+  </table>
+  <p class="t-note">Les risques R1, R2 et R5 justifient à eux seuls le caractère bloquant des conditions suspensives 1 et 2. Leur traitement est antérieur à tout engagement commercial.</p>
+
+  <h2><span class="h-num">7.3</span>Gouvernance et seuils d’escalade</h2>
+  <table class="compact">
+    <thead><tr><th style="width:44mm">Événement</th><th>Escalade</th></tr></thead>
+    <tbody>
+      <tr><td>Demande client hors gabarit touchant une activité potentiellement réservée</td><td>Suspension du livrable ; revue par le responsable conformité avant émission.</td></tr>
+      <tr><td>Écart estimation / offre normalisée supérieur à 25 % sur un poste majeur</td><td>Revue méthodologique documentée ; correction de la base de coûts si la cause est systémique.</td></tr>
+      <tr><td>Réclamation ou contestation écrite d’un client</td><td>Notification immédiate à la direction générale et à l’assureur ; gel du gabarit concerné.</td></tr>
+      <tr><td>Conversion sous 20 % sur trois mois consécutifs</td><td>Revue de la séquence de vente et du ciblage ; réexamen du prix avant tout élargissement.</td></tr>
+      <tr><td>Proposition de rémunération par un entrepreneur</td><td>Refus documenté ; consignation au registre d’indépendance.</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="h-num">7.4</span>Critères d’arrêt du projet</h2>
+  <p>Un projet sans critère d’arrêt écrit dérive. Les quatre conditions suivantes commandent la suspension du déploiement et un réexamen complet par le comité.</p>
+  <div class="callout-warn">
+    <div class="c-label">Conditions d’arrêt</div>
+    <ol>
+      <li><strong>Juridique.</strong> L’avis juridique conclut qu’un élément central du livrable constitue un acte réservé non contournable sans professionnel habilité, et qu’aucune reformulation viable n’existe.</li>
+      <li><strong>Assurance.</strong> Trois assureurs au minimum refusent de couvrir nommément les activités d’estimation, de métré et d’analyse de soumissions.</li>
+      <li><strong>Méthodologie.</strong> Après le pilote rétroactif sur 20 dossiers, l’écart médian entre l’estimation et les coûts réels observés dépasse 25 % sans cause identifiable et corrigible.</li>
+      <li><strong>Commercial.</strong> La conversion demeure inférieure à 15 % après 60 dossiers effectivement exposés à une invitation qualifiée.</li>
+    </ol>
+  </div>
+</section>

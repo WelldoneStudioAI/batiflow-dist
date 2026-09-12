@@ -1,0 +1,1625 @@
+<title>Dossier post-inspection BatiFlow</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>/* BATIFLOW — édition web du dossier de décision */
+
+:root{
+  --paper:#FFFFFF;
+  --ground:#F2F5F7;
+  --surface:#FFFFFF;
+  --surface-2:#F4F7F9;
+  --ink:#0F1A24;
+  --navy:#0E2439;
+  --navy-deep:#0B1B2B;
+  --slate:#4F5D6B;
+  --mute:#7E8A97;
+  --rule:#DCE3E9;
+  --rule-s:#EBEFF3;
+  --brass:#9C6F35;
+  --brass-l:#C9A36B;
+  --brass-pale:#F5EDE0;
+  --green:#26614A;
+  --green-bg:#EEF5F1;
+  --green-br:#C2D8CC;
+  --amber:#8E6314;
+  --amber-bg:#FBF5E8;
+  --amber-br:#E2D2AE;
+  --red:#8A2E2B;
+  --red-bg:#FBF0EF;
+  --red-br:#DFBEBC;
+  --shadow:0 1px 2px rgba(14,36,57,.05),0 8px 28px -18px rgba(14,36,57,.25);
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0C1620; --ground:#080F17; --surface:#111E2B; --surface-2:#162534;
+    --ink:#E3E9EF; --navy:#E8EEF4; --navy-deep:#050B12; --slate:#A3B0BC; --mute:#75838F;
+    --rule:#223446; --rule-s:#1A2A39;
+    --brass:#CFA469; --brass-l:#D9B887; --brass-pale:#241B10;
+    --green:#7FBFA2; --green-bg:#12241C; --green-br:#28483A;
+    --amber:#D9B06A; --amber-bg:#241D0F; --amber-br:#4A3B20;
+    --red:#DF9A96; --red-bg:#2A1514; --red-br:#4E2725;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 32px -20px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0C1620; --ground:#080F17; --surface:#111E2B; --surface-2:#162534;
+  --ink:#E3E9EF; --navy:#E8EEF4; --navy-deep:#050B12; --slate:#A3B0BC; --mute:#75838F;
+  --rule:#223446; --rule-s:#1A2A39;
+  --brass:#CFA469; --brass-l:#D9B887; --brass-pale:#241B10;
+  --green:#7FBFA2; --green-bg:#12241C; --green-br:#28483A;
+  --amber:#D9B06A; --amber-bg:#241D0F; --amber-br:#4A3B20;
+  --red:#DF9A96; --red-bg:#2A1514; --red-br:#4E2725;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 32px -20px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;scroll-padding-top:84px;}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}*{animation:none!important;transition:none!important;}}
+body{
+  margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--sans);font-size:16px;line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+p{margin:0 0 1em;}
+strong{font-weight:600;color:var(--ink);}
+sup{font-size:.7em;}
+
+/* ---- Barre supérieure ---- */
+.topbar{
+  position:sticky;top:0;z-index:40;background:var(--paper);
+  border-bottom:1px solid var(--rule);
+  display:flex;align-items:center;gap:16px;
+  padding:10px max(16px,4vw);
+}
+.topbar .wm{font-weight:700;font-size:13px;letter-spacing:.26em;color:var(--navy);white-space:nowrap;}
+.topbar .wm span{color:var(--brass);font-weight:400;}
+.topbar .tb-t{font-size:12px;color:var(--mute);letter-spacing:.04em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.topbar .tb-v{margin-left:auto;font-size:10.5px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--brass);border:1px solid var(--rule);
+  padding:4px 9px;border-radius:3px;white-space:nowrap;}
+
+/* ---- Héros ---- */
+.cover{position:relative;overflow:hidden;background:var(--navy-deep);color:#fff;isolation:isolate;}
+.cover::after{content:"";position:absolute;right:-14%;top:-42%;width:62%;aspect-ratio:1;
+  border:1px solid rgba(201,163,107,.30);border-radius:50%;}
+.cover::before{content:"";position:absolute;right:-28%;bottom:-70%;width:78%;aspect-ratio:1;
+  border:1px solid rgba(255,255,255,.09);border-radius:50%;}
+.cover-inner{position:relative;z-index:2;max-width:1180px;margin:0 auto;
+  padding:clamp(44px,7vw,96px) max(16px,4vw) clamp(32px,4vw,54px);}
+.cover-mark{font-weight:700;font-size:15px;letter-spacing:.32em;}
+.cover-mark span{color:var(--brass-l);font-weight:400;}
+.cover-rule{width:96px;height:3px;background:#B88949;margin:26px 0 0;}
+.cover-kicker{margin-top:24px;font-size:11px;font-weight:600;letter-spacing:.24em;
+  text-transform:uppercase;color:#C9A36B;}
+.cover h1{font-family:var(--serif);font-weight:600;font-size:clamp(34px,5.6vw,60px);
+  line-height:1.1;letter-spacing:-.02em;margin:14px 0 0;max-width:16ch;text-wrap:balance;color:#fff;}
+.cover h1 em{font-style:italic;font-weight:400;color:#C9A36B;}
+.cover-sub{margin-top:22px;font-size:clamp(15px,1.5vw,18px);line-height:1.55;
+  color:rgba(255,255,255,.78);max-width:56ch;font-weight:300;}
+.cover-meta{margin:clamp(38px,6vw,72px) 0 0;display:grid;gap:22px 34px;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  border-top:1px solid rgba(255,255,255,.18);padding-top:24px;}
+.cover-meta div{min-width:0;}
+.cover-meta dt{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;
+  color:#C9A36B;margin-bottom:7px;}
+.cover-meta dd{margin:0;font-size:13.5px;line-height:1.45;color:rgba(255,255,255,.85);}
+.cover-class{margin-top:26px;padding-top:16px;border-top:1px solid rgba(255,255,255,.12);
+  font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.5);}
+
+/* ---- Ossature ---- */
+.shell{max-width:1180px;margin:0 auto;padding:0 max(16px,4vw) 96px;
+  display:grid;grid-template-columns:1fr;gap:0;}
+@media (min-width:1040px){
+  .shell{grid-template-columns:236px minmax(0,1fr);gap:56px;}
+}
+.rail{display:none;}
+@media (min-width:1040px){
+  .rail{display:block;position:sticky;top:76px;align-self:start;
+    max-height:calc(100vh - 96px);overflow-y:auto;padding:40px 0;}
+}
+.rail .r-grp{font-size:9.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--brass);margin:26px 0 9px;}
+.rail .r-grp:first-child{margin-top:0;}
+.rail a{display:flex;gap:10px;align-items:baseline;text-decoration:none;
+  padding:5px 0 5px 11px;border-left:2px solid var(--rule-s);
+  font-size:13px;line-height:1.35;color:var(--slate);transition:color .15s,border-color .15s;}
+.rail a:hover{color:var(--ink);border-left-color:var(--brass-l);}
+.rail a.on{color:var(--navy);font-weight:600;border-left-color:var(--brass);}
+.rail a .rn{font-family:var(--serif);font-size:11.5px;color:var(--brass);min-width:20px;flex:none;}
+
+.doc{min-width:0;padding-top:40px;}
+
+/* ---- Sections ---- */
+section{scroll-margin-top:84px;}
+section + section{margin-top:clamp(56px,7vw,96px);}
+.part-head{padding-bottom:22px;border-bottom:2px solid var(--navy);margin-bottom:34px;}
+.part-num{display:block;font-family:var(--serif);font-weight:600;
+  font-size:clamp(44px,6vw,66px);line-height:.92;color:var(--brass);margin-bottom:10px;}
+.part-label{display:block;font-size:10.5px;font-weight:600;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--mute);margin-bottom:10px;}
+.part-head h1{font-family:var(--serif);font-weight:600;
+  font-size:clamp(27px,3.6vw,40px);line-height:1.14;letter-spacing:-.015em;
+  margin:0;color:var(--navy);text-wrap:balance;max-width:22ch;}
+.part-abstract{margin:16px 0 0;font-size:16.5px;line-height:1.55;color:var(--slate);max-width:62ch;}
+
+h2{font-family:var(--serif);font-weight:600;font-size:clamp(21px,2.4vw,27px);
+  line-height:1.24;color:var(--navy);margin:52px 0 14px;letter-spacing:-.01em;
+  text-wrap:balance;max-width:30ch;}
+h2 .h-num{color:var(--brass);margin-right:.45em;}
+h3{font-family:var(--sans);font-weight:600;font-size:16px;color:var(--ink);margin:34px 0 10px;}
+h4{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--brass);margin:30px 0 10px;}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--slate);}
+.doc p,.doc li{max-width:68ch;}
+p.lead{font-size:18.5px;line-height:1.56;color:var(--navy);max-width:62ch;}
+
+/* ---- Listes ---- */
+ul,ol{margin:0 0 1.1em;padding:0;list-style:none;}
+ul li{position:relative;padding-left:22px;margin-bottom:9px;}
+ul li::before{content:"";position:absolute;left:4px;top:.72em;width:7px;height:2px;background:var(--brass);}
+ol{counter-reset:ol;}
+ol li{position:relative;padding-left:34px;margin-bottom:13px;counter-increment:ol;}
+ol li::before{content:counter(ol);position:absolute;left:0;top:.1em;width:22px;
+  text-align:right;padding-right:8px;border-right:1px solid var(--rule);
+  font-size:12px;font-weight:600;color:var(--brass);line-height:1.7;}
+ul.check li::before{content:"—";background:none;color:var(--brass);
+  font-weight:600;top:0;left:0;width:auto;height:auto;font-size:13px;}
+
+/* ---- Tableaux ---- */
+.tw{overflow-x:auto;margin:20px 0 26px;
+  border-top:2px solid var(--navy);border-bottom:1px solid var(--rule);}
+table{width:100%;min-width:min(560px,100%);border-collapse:collapse;
+  font-size:14px;line-height:1.45;font-variant-numeric:tabular-nums;}
+th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--navy);padding:13px 16px 10px 0;
+  border-bottom:1px solid var(--rule);vertical-align:bottom;white-space:nowrap;}
+td{padding:12px 16px 12px 0;border-bottom:1px solid var(--rule-s);
+  vertical-align:top;color:var(--slate);}
+td:first-child,th:first-child{padding-left:2px;}
+td:last-child,th:last-child{padding-right:2px;}
+td:first-child{color:var(--ink);font-weight:500;}
+tbody tr:last-child td{border-bottom:none;}
+table.num td:not(:first-child),table.num th:not(:first-child){text-align:right;}
+tr.total td{border-top:1px solid var(--navy);background:var(--surface-2);
+  font-weight:700;color:var(--navy);}
+tr.hl td{background:var(--brass-pale);color:var(--ink);}
+caption{caption-side:top;text-align:left;font-size:11px;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--brass);padding-bottom:10px;}
+.t-note{font-size:13px;color:var(--mute);line-height:1.5;margin:-14px 0 26px;
+  font-style:italic;max-width:72ch;}
+
+/* ---- Pastilles ---- */
+.pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;padding:3px 8px;border:1px solid;border-radius:3px;
+  white-space:nowrap;line-height:1.3;}
+.p-green{color:var(--green);border-color:var(--green-br);background:var(--green-bg);}
+.p-amber{color:var(--amber);border-color:var(--amber-br);background:var(--amber-bg);}
+.p-red{color:var(--red);border-color:var(--red-br);background:var(--red-bg);}
+.p-navy{color:var(--slate);border-color:var(--rule);background:var(--surface-2);}
+.p-brass{color:var(--brass);border-color:var(--amber-br);background:var(--brass-pale);}
+.hyp{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--amber);border:1px solid var(--amber-br);
+  background:var(--amber-bg);padding:2px 6px;border-radius:3px;
+  margin-left:6px;vertical-align:1px;white-space:nowrap;}
+
+/* ---- Encadrés ---- */
+.callout,.callout-warn{margin:26px 0;padding:22px 26px;background:var(--surface);
+  border:1px solid var(--rule);border-left:3px solid var(--brass);box-shadow:var(--shadow);}
+.callout-warn{border-left-color:var(--red);background:var(--red-bg);border-color:var(--red-br);}
+.callout .c-label,.callout-warn .c-label{font-size:10.5px;font-weight:700;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--brass);margin-bottom:11px;}
+.callout-warn .c-label{color:var(--red);}
+.callout p:last-child,.callout-warn p:last-child,
+.callout ul:last-child,.callout-warn ul:last-child,
+.callout ol:last-child,.callout-warn ol:last-child{margin-bottom:0;}
+.callout-dark{margin:30px 0;padding:26px 30px;background:var(--navy-deep);color:rgba(255,255,255,.9);}
+.callout-dark .c-label{font-size:10.5px;font-weight:700;letter-spacing:.2em;
+  text-transform:uppercase;color:#C9A36B;margin-bottom:13px;}
+.callout-dark p{color:rgba(255,255,255,.88);}
+.callout-dark p:last-child,.callout-dark ol:last-child{margin-bottom:0;}
+.callout-dark strong{color:#fff;}
+.callout-dark li{color:rgba(255,255,255,.88);}
+.callout-dark li::before{background:#C9A36B;color:#C9A36B;border-color:rgba(255,255,255,.2);}
+.callout-dark ol li::before{border-right-color:rgba(255,255,255,.2);}
+
+.quote{margin:34px 0;padding:2px 0 2px 26px;border-left:3px solid var(--brass);
+  font-family:var(--serif);font-style:italic;font-size:clamp(19px,2.2vw,25px);
+  line-height:1.38;color:var(--navy);max-width:34ch;}
+.quote-attrib{font-family:var(--sans);font-style:normal;font-size:10.5px;font-weight:600;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--mute);margin-top:12px;}
+
+/* ---- Indicateurs ---- */
+.stats{display:grid;gap:1px;background:var(--rule);
+  grid-template-columns:repeat(auto-fit,minmax(168px,1fr));
+  margin:30px 0 34px;border-top:2px solid var(--navy);border-bottom:1px solid var(--rule);}
+.stats div{background:var(--paper);padding:20px 18px 20px 0;display:flex;flex-direction:column;}
+.stats .s-val{font-family:var(--serif);font-size:clamp(28px,3.4vw,38px);font-weight:600;
+  color:var(--navy);line-height:1;letter-spacing:-.025em;}
+.stats .s-val small{font-size:.5em;color:var(--brass);font-weight:600;}
+.stats .s-lab{font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--slate);margin-top:14px;line-height:1.4;}
+.stats .s-sub{font-size:12px;color:var(--mute);margin-top:auto;padding-top:12px;line-height:1.4;}
+
+.cards{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin:26px 0 32px;}
+.card{background:var(--surface);border:1px solid var(--rule);border-top:3px solid var(--navy);
+  padding:22px;display:flex;flex-direction:column;box-shadow:var(--shadow);}
+.card .k-num{font-family:var(--serif);font-size:12px;font-weight:600;color:var(--brass);letter-spacing:.12em;}
+.card h5{font-family:var(--sans);font-size:16px;font-weight:600;margin:8px 0 10px;
+  color:var(--navy);line-height:1.3;}
+.card p{font-size:14px;line-height:1.5;color:var(--slate);margin:0;}
+.card .k-price{font-family:var(--serif);font-size:26px;font-weight:600;color:var(--navy);
+  margin-top:auto;padding-top:16px;display:block;letter-spacing:-.02em;}
+
+.flow{display:grid;gap:1px;background:var(--rule);
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  margin:26px 0 32px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);}
+.flow-step{background:var(--paper);padding:18px 16px 18px 0;}
+.flow-step .f-lab{font-size:10px;font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--brass);}
+.flow-step .f-txt{font-size:13.5px;color:var(--slate);margin-top:8px;line-height:1.45;}
+
+/* ---- Matrice de risque ---- */
+.matrix{width:100%;min-width:560px;border-collapse:collapse;font-size:13px;}
+.matrix th{font-size:10px;padding:0 8px 10px;text-align:center;border-bottom:none;
+  color:var(--mute);white-space:normal;}
+.matrix td{border:1px solid var(--rule);padding:16px 10px;text-align:center;
+  vertical-align:middle;height:74px;color:var(--ink);}
+.matrix td.axis{border:none;font-size:10px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--mute);text-align:right;padding-right:14px;width:110px;}
+.m-lo{background:var(--green-bg);}
+.m-md{background:var(--amber-bg);}
+.m-hi{background:var(--red-bg);}
+.matrix .rid{display:inline-block;font-weight:700;color:var(--navy);font-size:13px;margin:0 5px;}
+
+/* ---- Chronogramme ---- */
+.gantt{width:100%;min-width:620px;border-collapse:collapse;font-size:13px;}
+.gantt th{font-size:10px;text-align:center;padding:0 6px 10px;border-bottom:1px solid var(--navy);}
+.gantt th:first-child{text-align:left;width:38%;}
+.gantt td{padding:8px 5px;border-bottom:1px solid var(--rule-s);text-align:center;}
+.gantt td:first-child{text-align:left;font-weight:500;color:var(--ink);font-size:13.5px;}
+.bar{display:block;height:12px;border-radius:2px;background:var(--navy);}
+:root[data-theme="dark"] .bar,:root:not([data-theme="light"]) .bar{}
+.bar.b2{background:#1E4266;}
+.bar.b3{background:var(--brass);}
+.bar.b4{background:#C9A36B;}
+.bar.ghost{background:var(--rule);}
+
+/* ---- Sources / glossaire ---- */
+.sources li{padding-left:36px;margin-bottom:14px;font-size:14px;line-height:1.5;}
+.sources li::before{content:"[" counter(ol) "]";left:0;width:30px;text-align:left;
+  padding-right:0;border-right:none;color:var(--brass);font-weight:700;font-size:12.5px;}
+.sources .s-url{display:block;margin-top:3px;font-size:12px;color:var(--mute);word-break:break-all;}
+.glossary dt{font-weight:600;color:var(--navy);font-size:15px;margin-top:20px;}
+.glossary dd{margin:5px 0 0;font-size:14.5px;color:var(--slate);line-height:1.55;max-width:68ch;}
+.endmark{margin:64px 0 0;text-align:center;font-size:10.5px;letter-spacing:.26em;
+  text-transform:uppercase;color:var(--mute);}
+.endmark::before{content:"";display:block;width:56px;height:2px;background:var(--brass);margin:0 auto 20px;}
+.rule{border:none;border-top:1px solid var(--rule);margin:34px 0;}
+
+a{color:var(--navy);}
+:focus-visible{outline:2px solid var(--brass);outline-offset:3px;}
+
+footer.doc-foot{border-top:1px solid var(--rule);background:var(--paper);
+  padding:28px max(16px,4vw);font-size:12.5px;color:var(--mute);}
+footer.doc-foot div{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 24px;}
+</style>
+
+<div class="topbar">
+  <div class="wm">BATI<span>FLOW</span></div>
+  <div class="tb-t">Analyse juridique, stratégique et commerciale — offre post-inspection</div>
+  <div class="tb-v">v2.0 · Confidentiel</div>
+</div>
+
+<!-- ============ COUVERTURE ============ -->
+<section class="cover">
+  <div class="cover-inner">
+    <div class="cover-mark">BATI<span>FLOW</span></div>
+    <div class="cover-rule"></div>
+    <div class="cover-kicker">Dossier de décision · Comité de direction</div>
+    <h1>Analyse juridique,<br>stratégique et <em>commerciale</em></h1>
+    <div class="cover-sub">
+      Création d’une chaîne de valeur post-inspection : Plan d’investissement de la propriété
+      et normalisation des soumissions d’entrepreneurs.
+    </div>
+    <dl class="cover-meta">
+      <div><dt>Marché visé</dt><dd>Québec — inspection résidentielle, estimation de travaux et consultation d’entrepreneurs</dd></div>
+      <div><dt>Objet</dt><dd>Faisabilité réglementaire, positionnement, architecture de prix et plan de déploiement</dd></div>
+      <div><dt>Version</dt><dd>2.0 — édition augmentée<br>12 septembre 2026</dd></div>
+    </dl>
+    <div class="cover-class">Confidentiel — diffusion restreinte · Document de travail · Ne constitue pas un avis juridique</div>
+  </div>
+</section>
+
+<div class="shell">
+  <nav class="rail" aria-label="Sections du document"><div class="r-grp">Ouverture</div>
+<a href="#preambule"><span class="rn">—</span><span>Portée et limites</span></a>
+<a href="#synthese"><span class="rn">—</span><span>Sommaire exécutif</span></a>
+<a href="#decisions"><span class="rn">—</span><span>Décisions demandées</span></a>
+<div class="r-grp">Corps de l’analyse</div>
+<a href="#p1"><span class="rn">I</span><span>Cadre et thèse économique</span></a>
+<a href="#p2"><span class="rn">II</span><span>Faisabilité réglementaire</span></a>
+<a href="#p3"><span class="rn">III</span><span>Marché et positionnement</span></a>
+<a href="#p4"><span class="rn">IV</span><span>Prix et modèle économique</span></a>
+<a href="#p5"><span class="rn">V</span><span>Mise en marché</span></a>
+<a href="#p6"><span class="rn">VI</span><span>Modèle opérationnel</span></a>
+<a href="#p7"><span class="rn">VII</span><span>Risques et gouvernance</span></a>
+<a href="#p8"><span class="rn">VIII</span><span>Plan de déploiement</span></a>
+<a href="#p9"><span class="rn">IX</span><span>Tableau de bord</span></a>
+<div class="r-grp">Annexes</div>
+<a href="#ax1"><span class="rn">A–E</span><span>Fiches, lexique, questions</span></a>
+<a href="#ax2"><span class="rn">F–H</span><span>Glossaire, sources, checklist</span></a></nav>
+  <main class="doc"><!-- ============ NOTICE ============ -->
+<section id="preambule"None>
+  <div class="part-head">
+    <span class="part-label">Préambule</span>
+    <h1>Statut du document, portée et limites</h1>
+    <p class="part-abstract">Ce que ce document établit, ce qu’il ne peut pas établir, et les conditions dans lesquelles ses conclusions demeurent valides.</p>
+  </div>
+
+  <h2><span class="h-num">A.</span>Nature du document</h2>
+  <p>Ce document est une <strong>analyse de faisabilité réglementaire, stratégique et commerciale</strong> destinée à éclairer une décision d’investissement produit. Il s’appuie sur les textes réglementaires, normatifs et statistiques cités en annexe G, ainsi que sur un ensemble d’hypothèses de travail explicitement identifiées.</p>
+  <p>Il remplit trois fonctions : (1) déterminer si l’offre envisagée peut être exploitée légalement au Québec et sous quelles conditions ; (2) établir le positionnement, l’architecture de prix et le modèle économique correspondants ; (3) définir un plan de déploiement assorti de portes de décision, d’indicateurs et de critères d’arrêt.</p>
+
+  <h2><span class="h-num">B.</span>Ce que le document ne remplace pas</h2>
+  <div class="callout-warn">
+    <div class="c-label">Avertissement</div>
+    <p>Ce document <strong>ne constitue pas un avis juridique formel</strong> et <strong>ne constitue pas une confirmation de couverture d’assurance</strong>. Avant toute mise en marché, les contrats, les appellations commerciales, les limites de mandat et la terminologie des livrables doivent être validés par un avocat québécois exerçant en droit de la construction et en droit professionnel, ainsi que par l’assureur responsabilité professionnelle de l’entreprise. Les conclusions juridiques présentées sont des <em>positions de travail argumentées</em>, non des certitudes opposables.</p>
+  </div>
+
+  <h2><span class="h-num">C.</span>Convention de lecture des données</h2>
+  <p>Trois registres de données coexistent dans ce document et sont signalés distinctement :</p>
+  <div class="tw"><table class="compact">
+    <thead><tr><th style="width:34mm">Registre</th><th>Signification</th><th style="width:32mm">Signalement</th></tr></thead>
+    <tbody>
+      <tr><td>Donnée sourcée</td><td>Fait vérifiable issu d’un texte réglementaire, normatif ou d’une publication institutionnelle citée.</td><td>Référence <strong>[n]</strong> en annexe G</td></tr>
+      <tr><td>Hypothèse de travail</td><td>Valeur retenue pour construire le modèle, non mesurée à ce jour. Doit être validée en phase pilote.</td><td><span class="hyp">Hypothèse</span></td></tr>
+      <tr><td>Position recommandée</td><td>Conclusion ou arbitrage proposé par l’analyse, sujet à validation professionnelle.</td><td>Encadré « Recommandation »</td></tr>
+    </tbody>
+  </table></div>
+  <p>Aucune projection financière de ce document ne doit être présentée à un tiers comme une prévision. Les modèles servent à dimensionner un investissement et à fixer des seuils de décision, non à promettre un résultat.</p>
+
+  <h2><span class="h-num">D.</span>Conditions de validité</h2>
+  <p>Les conclusions de ce document demeurent valides tant que les quatre conditions suivantes sont réunies. La rupture de l’une d’elles impose une réévaluation avant poursuite.</p>
+  <ol>
+    <li><strong>Séparation contractuelle maintenue.</strong> L’inspection réglementée et les mandats post-inspection demeurent régis par des contrats, des livrables et des rémunérations distincts.</li>
+    <li><strong>Périmètre non conceptuel.</strong> Les livrables demeurent des analyses budgétaires et économiques et ne franchissent pas la frontière de la conception technique ni des documents professionnels réservés.</li>
+    <li><strong>Couverture confirmée par écrit.</strong> L’assureur responsabilité professionnelle a confirmé nommément la couverture des activités d’estimation, de métré et d’analyse de soumissions.</li>
+    <li><strong>Traçabilité effective.</strong> Chaque montant produit remonte à une base de coûts versionnée, à une quantité mesurée et à une hypothèse documentée, conservées dans un journal d’audit.</li>
+  </ol>
+</section>
+<!-- ============ SOMMAIRE EXÉCUTIF ============ -->
+<section id="synthese">
+  <div class="part-head">
+    <span class="part-label">Synthèse pour la direction</span>
+    <h1>Sommaire exécutif</h1>
+    <p class="part-abstract">Une page de thèse, cinq conclusions, la carte des risques et les conditions suspensives à lever avant toute mise en marché.</p>
+  </div>
+
+  <p class="lead">Le projet consiste à transformer l’inspection préachat — service réglementé, à marge plafonnée et à valeur perçue décroissante — en <strong>point d’entrée d’une chaîne de valeur distincte</strong>, sans jamais intégrer l’estimation au rapport réglementé. L’architecture recommandée comporte trois niveaux contractuellement séparés : inspection préachat à 1 500 $, Plan d’investissement de la propriété à 3 500 $, puis Normalisation et analyse des soumissions à 1 500 $. Le revenu potentiel par client pleinement converti atteint <strong>6 500 $</strong>, contre 1 500 $ aujourd’hui.</p>
+
+  <div class="stats">
+    <div><div class="s-val">6 500 <small>$</small></div><div class="s-lab">Revenu par client<br>pleinement converti</div><div class="s-sub">contre 1 500 $ en offre d’inspection seule</div></div>
+    <div><div class="s-val">+ 106 <small>%</small></div><div class="s-lab">Revenu annuel<br>à volume constant</div><div class="s-sub">scénario central, 180 inspections <span class="hyp">Hyp.</span></div></div>
+    <div><div class="s-val">97 214</div><div class="s-lab">Ventes résidentielles<br>au Québec en 2025</div><div class="s-sub">3<sup>e</sup> meilleure année de la série [13]</div></div>
+    <div><div class="s-val">16</div><div class="s-lab">Dossiers convertis pour<br>rentabiliser l’investissement</div><div class="s-sub">mise de fonds de 63 500 $ <span class="hyp">Hyp.</span></div></div>
+  </div>
+
+  <h2><span class="h-num">1.</span>Conclusion principale</h2>
+  <div class="callout-dark">
+    <div class="c-label">Verdict de faisabilité</div>
+    <p>La faisabilité est <strong>favorable</strong>, sous quatre conditions cumulatives : (1) les services sont juridiquement séparés ; (2) l’estimation demeure une analyse budgétaire et non une conception technique ; (3) les documents de consultation évitent de se présenter comme des « plans et devis » professionnels lorsque ces actes sont réservés ; (4) la couverture erreurs et omissions est confirmée par écrit pour les activités visées.</p>
+    <p>L’article 20 du Règlement sur l’encadrement des inspecteurs en bâtiments d’habitation prévoit <strong>expressément un contrat écrit distinct</strong> lorsqu’un service supplémentaire est fourni en plus de l’inspection [1]. Cette disposition est le fondement réglementaire le plus solide de l’architecture proposée : elle ne tolère pas seulement la séparation des mandats, elle l’exige.</p>
+  </div>
+
+  <h2><span class="h-num">2.</span>Les cinq conclusions de l’analyse</h2>
+  <ol>
+    <li><strong>Le droit n’interdit pas de chiffrer ; il encadre ce qui est conçu et attesté.</strong> Quantifier, estimer et analyser des soumissions sont des activités reconnues par l’État québécois comme relevant du métier d’estimateur en construction [4]. La frontière critique n’est pas « mettre un prix », mais le moment où le service conçoit une solution, prépare un document professionnel réservé ou atteste la conformité d’un ouvrage.</li>
+    <li><strong>La valeur défendable n’est pas le rapport ; c’est la continuité de la donnée.</strong> Un relevé de quantités produit une seule fois sert successivement à l’estimation, au bordereau de consultation, à la normalisation des offres puis à la vérification des extras. Chaque étape réutilise et enrichit la précédente : c’est là que se situe l’avantage concurrentiel, non dans la rédaction.</li>
+    <li><strong>Le niveau 2 porte la valeur ; le niveau 3 ferme la vente.</strong> Le Plan d’investissement concentre l’expertise, les hypothèses et la responsabilité, et justifie seul un prix de 3 500 $. La normalisation des soumissions, volontairement placée à 1 500 $, est un produit de clôture à faible friction et à très forte marge, adossé à des données déjà structurées.</li>
+    <li><strong>Le modèle est un levier de marge, pas un levier de volume.</strong> À volume d’inspections inchangé, le revenu annuel du scénario central progresse de 106 % et le profit brut de plus de 130 %. La sensibilité du modèle au taux de conversion est bien supérieure à sa sensibilité au nombre d’inspections : la priorité opérationnelle est la conversion, pas l’acquisition.</li>
+    <li><strong>Deux conditions suspensives sont de nature « go / no-go ».</strong> L’avis juridique écrit sur la terminologie et les frontières d’actes réservés, et la confirmation écrite de couverture E&O, ne sont pas des formalités administratives. Tant qu’elles ne sont pas levées, aucune commercialisation ne devrait être engagée, et aucun budget de développement au-delà de la phase de méthodologie ne devrait être libéré.</li>
+  </ol>
+
+  <h2><span class="h-num">3.</span>Carte de position et d’exposition par volet</h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:42mm">Volet</th><th>Position recommandée</th><th style="width:26mm">Exposition</th></tr></thead>
+    <tbody>
+      <tr><td>Inspection BNQ 3009-500</td><td>Service réglementé autonome ; contrat et rapport propres, sans contenu d’estimation.</td><td><span class="pill p-green">Faible / connu</span></td></tr>
+      <tr><td>Plan d’investissement — 3 500 $</td><td>Mandat distinct : quantités, hypothèses, coûts, priorités, horizons et contingences.</td><td><span class="pill p-amber">Faible à moyen</span></td></tr>
+      <tr><td>Normalisation des soumissions — 1 500 $</td><td>Grille uniforme de prix ; analyse des écarts, exclusions, pertes, heures et quantités.</td><td><span class="pill p-amber">Faible à moyen</span></td></tr>
+      <tr><td>Métrés et relevés de quantités</td><td>Activité de mesure documentée ; source, méthode et précision consignées.</td><td><span class="pill p-green">Faible</span></td></tr>
+      <tr><td>Base de coûts et coûts unitaires</td><td>Référentiel interne versionné et daté ; l’IA n’est jamais la source du prix.</td><td><span class="pill p-amber">Moyen</span></td></tr>
+      <tr><td>Conception, plans et devis techniques</td><td>Routage vers architecte, ingénieur ou technologue professionnel selon le champ.</td><td><span class="pill p-red">Élevé si exécuté</span></td></tr>
+      <tr><td>Surveillance et attestation de conformité</td><td>Ne jamais promettre sous ces termes sans professionnel légalement habilité.</td><td><span class="pill p-red">Élevé</span></td></tr>
+      <tr><td>Appellation « estimation de classe C »</td><td>Écartée tant que les prérequis du référentiel ne sont pas systématiquement satisfaits [12].</td><td><span class="pill p-amber">Moyen (réputationnel)</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">4.</span>Architecture d’offre recommandée</h2>
+  <div class="cards">
+    <div class="card">
+      <div class="k-num">NIVEAU 1</div>
+      <h5>Inspection préachat</h5>
+      <p>Quel est l’état observable du bâtiment ? Service réglementé, rapport conforme à la norme applicable.</p>
+      <span class="k-price">1 500 $</span>
+    </div>
+    <div class="card">
+      <div class="k-num">NIVEAU 2</div>
+      <h5>Plan d’investissement de la propriété</h5>
+      <p>Quels travaux prévoir, quand, et avec quelle enveloppe budgétaire ? Quantités, horizons, contingences, scénarios.</p>
+      <span class="k-price">+ 3 500 $</span>
+    </div>
+    <div class="card">
+      <div class="k-num">NIVEAU 3</div>
+      <h5>Normalisation et analyse des soumissions</h5>
+      <p>Les offres sont-elles réellement comparables, et où se situent les écarts ? Coût comparable et clarifications.</p>
+      <span class="k-price">+ 1 500 $</span>
+    </div>
+  </div>
+
+  <div class="quote">
+    De l’état du bâtiment à la décision d’investissement, puis de la décision au prix réellement comparable.
+    <div class="quote-attrib">Positionnement synthétique</div>
+  </div>
+
+  <h2><span class="h-num">5.</span>Conditions suspensives avant commercialisation</h2>
+  <p>Cinq conditions doivent être levées, dans cet ordre. Les deux premières sont bloquantes ; les trois suivantes conditionnent la qualité et l’assurabilité du service.</p>
+  <div class="tw"><table class="compact">
+    <thead><tr><th style="width:8mm">#</th><th style="width:54mm">Condition</th><th>Critère de levée</th><th style="width:24mm">Nature</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Avis juridique écrit</td><td>Validation des trois mandats, de la terminologie des livrables et des frontières d’actes réservés par un avocat en droit de la construction et des professions.</td><td><span class="pill p-red">Bloquante</span></td></tr>
+      <tr><td>2</td><td>Confirmation écrite E&amp;O</td><td>Lettre de l’assureur décrivant nommément l’estimation budgétaire, les métrés et l’analyse de soumissions comme activités couvertes.</td><td><span class="pill p-red">Bloquante</span></td></tr>
+      <tr><td>3</td><td>Méthodologie de coûts propriétaire</td><td>Référentiel BatiFlow versionné et daté, distinct de toute appellation normative externe non satisfaite (« Classe C »).</td><td><span class="pill p-amber">Qualifiante</span></td></tr>
+      <tr><td>4</td><td>Matrice de routage professionnel</td><td>Règles opposables déterminant quand une portée devient réservée et vers quelle profession elle est dirigée.</td><td><span class="pill p-amber">Qualifiante</span></td></tr>
+      <tr><td>5</td><td>Base de coûts traçable</td><td>Chaîne d’audit complète : source, date, version, hypothèse et formule pour chaque montant produit.</td><td><span class="pill p-amber">Qualifiante</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout">
+    <div class="c-label">Principe directeur</div>
+    <p>L’intelligence artificielle peut assister la classification, la détection d’incohérences et la rédaction. Elle <strong>ne doit jamais être la source autonome d’un prix</strong>. Tout montant remis à un client doit provenir d’une formule auditable appliquée à une donnée de coût versionnée.</p>
+  </div>
+</section>
+<!-- ============ DÉCISIONS DEMANDÉES ============ -->
+<section id="decisions">
+  <div class="part-head">
+    <span class="part-label">Résolution</span>
+    <h1>Décisions demandées au comité</h1>
+    <p class="part-abstract">Quatre décisions structurantes, un budget à autoriser, une gouvernance à instituer. Les décisions 3 et 4 sont conditionnelles à la levée des conditions suspensives 1 et 2.</p>
+  </div>
+
+  <h2><span class="h-num">D1.</span>Approuver l’architecture d’offre à trois niveaux</h2>
+  <p>Adopter l’architecture Inspection (1 500 $) / Plan d’investissement (3 500 $) / Normalisation des soumissions (1 500 $) comme structure commerciale cible, avec séparation contractuelle stricte des trois mandats.</p>
+  <div class="tw"><table class="compact">
+    <thead><tr><th style="width:30mm">Objet</th><th>Détail</th></tr></thead>
+    <tbody>
+      <tr><td>Effet</td><td>Autorise la conception des contrats B et C et le gel de la terminologie des livrables.</td></tr>
+      <tr><td>Alternative écartée</td><td>Intégrer l’estimation au rapport d’inspection — exposition réglementaire élevée, valeur commerciale non isolable.</td></tr>
+      <tr><td>Réversibilité</td><td>Élevée tant que les contrats ne sont pas signés avec des clients.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">D2.</span>Autoriser le budget de phase 0 à 2</h2>
+  <p>Libérer une enveloppe de <strong>63 500 $</strong> <span class="hyp">Hypothèse</span> couvrant la validation de risque, la construction de la méthodologie de coûts, le développement des modules et le pilote rétroactif. Fourchette de dimensionnement : 50 000 $ à 85 000 $.</p>
+  <div class="tw"><table class="num compact">
+    <thead><tr><th>Poste</th><th style="width:24mm">Montant</th><th style="width:22mm">Phase</th></tr></thead>
+    <tbody>
+      <tr><td>Avis juridique — contrats, terminologie, frontières d’actes réservés</td><td>12 000 $</td><td>0</td></tr>
+      <tr><td>Assurance — analyse de couverture et surprime annuelle estimée</td><td>5 000 $</td><td>0</td></tr>
+      <tr><td>Méthodologie de coûts — construction, sources et versionnage</td><td>12 000 $</td><td>1</td></tr>
+      <tr><td>Développement BatiFlow — modules estimation, bordereau, normalisation</td><td>25 000 $</td><td>1–2</td></tr>
+      <tr><td>Pilote rétroactif — 20 dossiers historiques et mesure d’écart</td><td>4 500 $</td><td>1</td></tr>
+      <tr><td>Collatéral commercial et formation</td><td>5 000 $</td><td>2</td></tr>
+      <tr class="total"><td>Total autorisé</td><td>63 500 $</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+  <p class="t-note">Montants indicatifs établis sur un taux horaire interne chargé de 75 $ et un taux de développement de 90 $. À confirmer par devis fermes en phase 0.</p>
+
+  <h2><span class="h-num">D3.</span>Confirmer le positionnement d’indépendance</h2>
+  <p>Interdire formellement toute rémunération, commission ou avantage provenant d’un entrepreneur dont BatiFlow analyserait ou comparerait l’offre. Ce choix sacrifie une source de revenu apparente mais constitue le socle de la proposition de valeur et la protection contre le risque de conflit d’intérêts prévu aux articles 18 et 19 du règlement [8, 9].</p>
+  <div class="callout">
+    <div class="c-label">Arbitrage</div>
+    <p>Un modèle de commission d’apporteur d’affaires générerait un revenu additionnel non négligeable. Il détruirait simultanément la crédibilité du produit de niveau 3, dont la valeur entière repose sur la neutralité de l’analyse, et exposerait l’entreprise à une contravention réglementaire. <strong>Recommandation : exclusion sans exception.</strong></p>
+  </div>
+
+  <h2><span class="h-num">D4.</span>Instituer la gouvernance du projet</h2>
+  <p>Créer un comité produit et risque, doté d’un mandat écrit, se réunissant mensuellement pendant les phases 0 à 2 puis trimestriellement, avec autorité sur les portes de décision et les critères d’arrêt définis en partie VIII.</p>
+  <div class="tw"><table class="compact">
+    <thead><tr><th style="width:36mm">Fonction</th><th>Responsabilité</th><th style="width:26mm">Cadence</th></tr></thead>
+    <tbody>
+      <tr><td>Direction générale</td><td>Décision d’investissement, arbitrage des portes de décision, application des critères d’arrêt.</td><td>Mensuelle → trimestrielle</td></tr>
+      <tr><td>Responsable conformité</td><td>Veille réglementaire, matrice de routage, revue des livrables à risque, journal d’audit.</td><td>Continue</td></tr>
+      <tr><td>Responsable méthodologie</td><td>Base de coûts, versionnage, mesure d’écart estimation / offres réelles.</td><td>Mensuelle</td></tr>
+      <tr><td>Responsable produit</td><td>Développement BatiFlow, temps de production, verrous professionnels dans l’outil.</td><td>Bimensuelle</td></tr>
+      <tr><td>Responsable commercial</td><td>Conversion, séquence de vente, retour terrain sur les objections.</td><td>Mensuelle</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout-dark">
+    <div class="c-label">Séquence d’exécution demandée</div>
+    <p><strong>D1</strong> et <strong>D4</strong> sont exécutables immédiatement. <strong>D2</strong> est libérable par tranches : phase 0 sans condition, phases 1 et 2 après levée des conditions suspensives 1 et 2. <strong>D3</strong> est une décision de principe permanente, à inscrire dans la politique interne et dans les trois contrats.</p>
+  </div>
+</section>
+
+<!-- ============ PARTIE I ============ -->
+<section id="p1">
+  <div class="part-head">
+    <span class="part-num">I</span>
+    <span class="part-label">Partie I</span>
+    <h1>Cadre, problème d’affaires et thèse économique</h1>
+    <p class="part-abstract">Ce que le projet cherche réellement à résoudre, l’hypothèse commerciale testée, et le raisonnement économique qui en fait autre chose qu’une hausse de prix.</p>
+  </div>
+
+  <h2><span class="h-num">1.1</span>Le problème d’affaires</h2>
+  <p>L’inspection préachat est un service dont les caractéristiques économiques se dégradent structurellement : normalisation croissante de la pratique, comparabilité des offres, pression sur les prix, et valeur perçue concentrée sur un document que le client peine à exploiter. Le prestataire capte une rémunération unique au moment précis où le client s’apprête à engager des décisions de capital d’un ordre de grandeur bien supérieur.</p>
+  <p>L’objectif du projet n’est <strong>pas d’ajouter une estimation de coût à l’inspection</strong>. Il est de créer deux produits commerciaux supplémentaires, contractuellement séparés du mandat d’inspection, qui exploitent les données déjà recueillies sur le bâtiment et les enrichissent par des relevés, une méthodologie de coûts et une normalisation des offres du marché.</p>
+
+  <div class="flow">
+    <div class="flow-step"><div class="f-lab">Constat</div><div class="f-txt">Ce que l’inspection observe et documente.</div></div>
+    <div class="flow-step"><div class="f-lab">Quantité</div><div class="f-txt">Le relevé qui transforme un constat en volume mesurable.</div></div>
+    <div class="flow-step"><div class="f-lab">Coût</div><div class="f-txt">L’enveloppe budgétaire et son niveau de confiance.</div></div>
+    <div class="flow-step"><div class="f-lab">Offre</div><div class="f-txt">La mise en concurrence sur une base commune.</div></div>
+    <div class="flow-step"><div class="f-lab">Décision</div><div class="f-txt">Le capital engagé, séquencé dans le temps.</div></div>
+  </div>
+
+  <h2><span class="h-num">1.2</span>Hypothèse commerciale étudiée</h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:44mm">Produit</th><th>Contenu principal</th><th style="width:20mm">Prix</th></tr></thead>
+    <tbody>
+      <tr><td>Inspection préachat</td><td>Inspection et rapport conformes au cadre applicable ; appréciation de l’état observable des systèmes et composantes.</td><td>1 500 $</td></tr>
+      <tr><td>Plan d’investissement de la propriété</td><td>Inventaire des interventions, quantités, priorités, horizons, coût indicatif, contingence, hypothèses et scénarios.</td><td>3 500 $</td></tr>
+      <tr><td>Normalisation et analyse des soumissions</td><td>Consultation uniforme, décomposition des prix, analyse des quantités, pertes, heures et exclusions, coût comparable.</td><td>1 500 $</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">1.3</span>Thèse économique</h2>
+  <p>Le rapport d’inspection devient un <strong>actif de données</strong> plutôt qu’un livrable terminal. Le deuxième produit monétise la traduction de cet actif en décisions financières ; le troisième monétise la mise en concurrence et la comparabilité des offres. BatiFlow vise à diminuer le coût de production interne des étapes 2 et 3 <em>sans réduire la valeur perçue</em>, ce qui transforme l’automatisation en levier de marge plutôt qu’en justification de baisse de prix.</p>
+  <div class="callout">
+    <div class="c-label">Distinction fondamentale</div>
+    <p>Le prix du Plan d’investissement reflète la <strong>valeur de décision</strong> livrée au client — l’enveloppe de capital qu’il n’aura pas à découvrir par essais et erreurs — et non le nombre d’heures que l’automatisation permettra d’économiser. Un modèle qui répercute les gains de productivité sur le prix détruit exactement la valeur que l’investissement technologique était censé créer.</p>
+  </div>
+
+  <h2><span class="h-num">1.4</span>Trois questions, trois produits</h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:26mm">Étape</th><th style="width:40mm">Question du client</th><th>Problème traditionnel</th><th style="width:34mm">Produit BatiFlow</th></tr></thead>
+    <tbody>
+      <tr><td>Inspection</td><td>Qu’est-ce qui ne va pas ?</td><td>Rapport techniquement riche mais non budgétaire ; difficile à transformer en actions.</td><td>Inspection préachat</td></tr>
+      <tr><td>Décision</td><td>Combien dois-je prévoir, et quand ?</td><td>Appels disparates à des entrepreneurs ; absence de budget consolidé et de séquence.</td><td>Plan d’investissement</td></tr>
+      <tr><td>Mise en concurrence</td><td>Pourquoi les trois prix sont-ils si différents ?</td><td>Quantités, pertes, exclusions et heures non comparables d’une offre à l’autre.</td><td>Normalisation des soumissions</td></tr>
+      <tr><td>Exécution</td><td>Les extras sont-ils cohérents avec la portée ?</td><td>Perte de la base de référence dès le premier changement de portée.</td><td>Extension future : assistance propriétaire</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">1.5</span>Périmètre de l’analyse</h2>
+  <p>Sont couverts : la faisabilité réglementaire au Québec, le positionnement de marché, l’architecture de prix, le modèle économique, le modèle opérationnel et le plan de déploiement. Ne sont pas couverts, et devront faire l’objet de travaux distincts :</p>
+  <ul>
+    <li><strong>La structure fiscale et comptable</strong> de la facturation multi-produits, y compris le traitement des taxes et l’opportunité d’une séparation d’entités.</li>
+    <li><strong>La rédaction juridique</strong> des trois contrats, qui relève de l’avocat mandaté en phase 0.</li>
+    <li><strong>L’architecture technique détaillée</strong> de BatiFlow, dont seuls les objets de données et les verrous fonctionnels sont spécifiés ici.</li>
+    <li><strong>Le plan de recrutement</strong> associé à la montée en capacité au-delà du seuil défini en partie VI.</li>
+  </ul>
+</section>
+
+<!-- ============ PARTIE II ============ -->
+<section id="p2">
+  <div class="part-head">
+    <span class="part-num">II</span>
+    <span class="part-label">Partie II</span>
+    <h1>Analyse juridique et faisabilité réglementaire</h1>
+    <p class="part-abstract">Où se situent exactement les frontières, pourquoi la séparation contractuelle est la clé de voûte du modèle, et quelles zones grises doivent impérativement être tranchées par un avocat avant la mise en marché.</p>
+  </div>
+
+  <h2><span class="h-num">2.1</span>L’inspection est désormais encadrée par un régime spécifique</h2>
+  <p>La norme BNQ 3009-500 a été élaborée pour uniformiser les pratiques d’inspection d’un bâtiment d’habitation en vue d’une transaction immobilière. Elle vise l’appréciation de l’état observable des systèmes et composantes ainsi que la compréhension des limites de l’inspection [2]. Le règlement québécois encadrant les inspecteurs impose le respect de la norme applicable dans l’exercice des fonctions d’inspection [1, 3].</p>
+  <p>Ce régime a une conséquence structurante pour le projet : il définit ce qu’est une inspection, donc, en creux, ce qu’elle n’est pas. Une estimation de coûts n’est pas une appréciation de l’état observable. La tentation naturelle — enrichir le rapport d’inspection de fourchettes de prix — revient à ajouter au livrable réglementé un contenu que la norme ne prévoit pas et dont le standard de performance n’est pas défini.</p>
+  <div class="callout">
+    <div class="c-label">Conséquence opérationnelle</div>
+    <p>Le produit à 3 500 $ ne devrait <strong>jamais</strong> être présenté comme une « version supérieure », « premium » ou « enrichie » du rapport BNQ. Il doit être un mandat nouveau, avec sa propre portée, ses propres hypothèses, sa propre rémunération et son propre livrable. Le vocabulaire commercial doit refléter cette séparation aussi rigoureusement que les contrats.</p>
+  </div>
+
+  <h2><span class="h-num">2.2</span>Le règlement prévoit expressément un service supplémentaire distinct</h2>
+  <p>L’article 20 du Règlement sur l’encadrement des inspecteurs en bâtiments d’habitation prévoit que le titulaire qui s’engage à réaliser, en plus d’une inspection BNQ 3009-500, un service supplémentaire doit conclure un <strong>contrat écrit distinct</strong> [1]. Cette disposition constitue le meilleur fondement réglementaire de l’architecture proposée : elle permet de dissocier clairement l’inspection du mandat post-inspection, sans confondre leurs objectifs ni leurs responsabilités.</p>
+  <p>Autrement dit, le législateur a déjà anticipé le cas de figure. Le risque n’est pas d’offrir un service supplémentaire ; il est de l’offrir <em>sans</em> le séparer.</p>
+  <div class="tw"><table>
+    <thead><tr><th style="width:50%">Architecture faible</th><th>Architecture recommandée</th></tr></thead>
+    <tbody>
+      <tr><td>Une seule convention ; rapport d’inspection contenant des prix et des recommandations de travaux détaillées.</td><td>Contrat A : inspection. Rapport A : constat. Contrat B : Plan d’investissement. Rapport B : coûts et planification.</td></tr>
+      <tr><td>Risque de brouiller la norme d’inspection avec l’estimation et d’importer un standard de performance non défini.</td><td>Traçabilité claire de la mission, des hypothèses, de la méthodologie et du régime de responsabilité applicable.</td></tr>
+      <tr><td>Valeur commerciale du service additionnel difficile à isoler, donc difficile à défendre en prix.</td><td>Produit premium identifiable, facturable séparément et opposable en cas de contestation de portée.</td></tr>
+      <tr><td>Une réclamation sur l’estimation contamine le mandat d’inspection et la couverture associée.</td><td>Les régimes de responsabilité et d’assurance sont cloisonnés par mandat.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">2.3</span>Estimation de coûts : une activité reconnue, une compétence à démontrer</h2>
+  <p>Le Gouvernement du Québec décrit le métier d’estimateur en construction comme comprenant l’évaluation des coûts de matériaux, de main-d’œuvre et d’équipements, l’étude et l’analyse des soumissions, la recommandation d’acceptation, la mise en place de systèmes de soumission et la préparation de relevés et de prévisions de coûts [4]. Cela soutient fortement la thèse selon laquelle <strong>quantifier et estimer ne sont pas, en soi, synonymes d’architecture ou d’ingénierie</strong>.</p>
+  <p>La limite critique n’est donc pas « mettre un prix ». Elle est de déterminer à quel moment le service commence à concevoir une solution, à préparer un document professionnel réservé, ou à attester la conformité d’un ouvrage. Cette distinction — <em>décrire et chiffrer</em> versus <em>concevoir et attester</em> — est le principe organisateur de toute la partie II.</p>
+
+  <h2><span class="h-num">2.4</span>Frontière avec les activités réservées aux architectes</h2>
+  <p>La Loi sur les architectes réserve, dans le cadre de l’exercice de l’architecture et lorsque la loi s’applique, la préparation, la modification, la signature et le scellement de plans, devis, cahiers des charges, certificats de fin des travaux, rapports d’expertise et rapports de surveillance relatifs à la construction, l’agrandissement ou la modification d’un bâtiment ; elle réserve aussi certaines activités de surveillance [5]. L’Ordre des architectes précise que la notion de plan peut comprendre un document « préliminaire » ou « pour soumission » [6].</p>
+  <p>Ce dernier point mérite une attention particulière : l’intuition commerciale consistant à qualifier le livrable de niveau 3 de « devis pour soumission » tomberait précisément dans la zone que l’Ordre identifie comme potentiellement réservée. La nature du document ne dépend pas de son titre, mais le titre choisi crée une présomption sur la nature du document.</p>
+  <div class="callout">
+    <div class="c-label">Choix terminologique recommandé</div>
+    <p>Éviter de vendre le niveau 3 sous l’appellation « devis pour soumission ». Préférer <strong>« Dossier de consultation des entrepreneurs »</strong>, <strong>« Bordereau de quantités et de prix »</strong> et <strong>« Normalisation et analyse des soumissions »</strong>. Le contenu doit organiser et comparer l’information économique sans prétendre concevoir ce qui nécessite un professionnel habilité.</p>
+  </div>
+
+  <h2><span class="h-num">2.5</span>Frontière avec les activités réservées aux ingénieurs</h2>
+  <p>La Loi sur les ingénieurs réserve certaines activités lorsqu’elles concernent un ouvrage visé, notamment la détermination de concepts ou de paramètres issus de principes d’ingénierie, certains essais et calculs, la surveillance, l’inspection d’un ouvrage et la préparation de plans, devis, rapports, calculs, études, dessins ou cahiers des charges [7]. La loi prévoit toutefois des exceptions, notamment pour certains bâtiments relevant de solutions acceptables complètes de la partie 9 du Code national du bâtiment [7].</p>
+  <div class="callout-warn">
+    <div class="c-label">Erreur à ne pas commettre</div>
+    <p>Le système BatiFlow ne devrait <strong>jamais</strong> appliquer une règle simpliste du type « maison unifamiliale = jamais d’ingénieur ». La décision doit dépendre du type d’ouvrage, du système concerné, de la modification envisagée et de la nature exacte de l’avis ou du document produit. Une règle binaire codée dans le logiciel deviendrait une source systématique et reproductible d’exposition.</p>
+  </div>
+
+  <h2><span class="h-num">2.6</span>Expertise technique, références et conflits d’intérêts</h2>
+  <p>Lorsqu’un inspecteur recommande une expertise technique au sens de la norme, l’article 19 exige qu’il guide le client sur les qualifications requises et lui interdit de recommander une entreprise particulière ; il peut toutefois proposer de réaliser lui-même l’expertise s’il possède les qualifications requises, sous réserve des exigences applicables au service supplémentaire [8].</p>
+  <p>L’article 18 impose par ailleurs honnêteté, loyauté et prévention des conflits d’intérêts ; une apparence de conflit doit être divulguée par écrit et acceptée par le client [9].</p>
+  <div class="callout">
+    <div class="c-label">Implication commerciale</div>
+    <p>Éviter tout modèle où l’inspecteur reçoit une commission d’un entrepreneur qu’il aide ensuite à sélectionner. La proposition de valeur doit être celle d’un <strong>représentant économique du propriétaire</strong>, structurellement indépendant des entrepreneurs. Cette contrainte réglementaire coïncide avec le positionnement commercial le plus fort : elle doit être présentée comme un choix, pas subie comme une limite.</p>
+  </div>
+  <p>Une conséquence opérationnelle doit être codée dans le produit : la liste d’entrepreneurs sollicités doit être constituée par le client, ou issue d’un répertoire ouvert et documenté, et jamais d’une sélection discrétionnaire de BatiFlow présentée comme une recommandation.</p>
+
+  <h2><span class="h-num">2.7</span>Assurance responsabilité : validation obligatoire avant lancement</h2>
+  <p>Le régime applicable exige une assurance responsabilité civile générale et une assurance responsabilité professionnelle erreurs et omissions couvrant notamment les fonctions d’inspecteur en bâtiments d’habitation [10]. Cette exigence ne permet toutefois <strong>pas</strong> de conclure automatiquement que la police couvre l’estimation de construction, les métrés, l’analyse des soumissions ou l’assistance commerciale post-inspection.</p>
+  <p>Il faut obtenir une confirmation écrite de l’assureur décrivant précisément les activités envisagées. Cette étape est un <strong>« go / no-go » opérationnel</strong>, et non une formalité administrative. Les activités à soumettre nommément à l’assureur sont les suivantes :</p>
+  <ul class="check">
+    <li>Estimation budgétaire des travaux correctifs à partir de relevés et de données documentées.</li>
+    <li>Métrés et quantification de postes de travaux.</li>
+    <li>Utilisation d’une banque de prix et application d’ajustements régionaux et temporels.</li>
+    <li>Préparation d’un bordereau uniforme pour consultation d’entrepreneurs.</li>
+    <li>Analyse des quantités, facteurs de perte, taux, heures, exclusions et écarts entre offres.</li>
+    <li>Formulation de demandes de clarification adressées à des entrepreneurs pour le compte du client.</li>
+    <li>Absence de conception structurale, mécanique ou électrique réservée.</li>
+    <li>Absence d’attestation de conformité ou de surveillance professionnelle réservée.</li>
+  </ul>
+  <p>La lettre obtenue doit être conservée, datée, et réexaminée à chaque renouvellement de police ainsi qu’à chaque élargissement significatif de la portée des services.</p>
+
+  <h2><span class="h-num">2.8</span>Obligation de prudence et qualité méthodologique</h2>
+  <p>L’article 2100 du Code civil du Québec impose au prestataire de services d’agir au mieux des intérêts de son client, avec prudence et diligence, conformément aux usages et règles de son art et, le cas échéant, conformément au contrat [11].</p>
+  <p>Un avertissement contractuel ne remplace donc pas une méthodologie solide. <strong>La défense du service repose davantage sur la traçabilité du calcul que sur une formule générale de non-responsabilité.</strong> Une clause limitative mal adossée à une pratique rigoureuse offre une protection illusoire ; une méthode documentée, versionnée et reproductible constitue la véritable ligne de défense.</p>
+  <div class="tw"><table>
+    <thead><tr><th style="width:44%">Mauvaise pratique</th><th>Pratique BatiFlow recommandée</th></tr></thead>
+    <tbody>
+      <tr><td>« Toiture : environ 25 000 $ », sans détail ni hypothèse.</td><td>Quantité nette, facteur de perte, unités, coût unitaire, mobilisation, contingence, date des prix et niveau de confiance.</td></tr>
+      <tr><td>Prix produit par un modèle de langage.</td><td>Prix produit par une base de coûts structurée et versionnée ; IA limitée à l’association, la détection d’anomalies et la rédaction.</td></tr>
+      <tr><td>Promesse de précision uniforme sur tous les postes.</td><td>Fourchette et niveau de confiance différenciés selon la qualité des données et la maturité de la portée.</td></tr>
+      <tr><td>Estimation sans exclusions.</td><td>Hypothèses et exclusions explicites, avec drapeau « expertise requise » lorsque la portée n’est pas suffisamment définie.</td></tr>
+      <tr><td>Base de coûts non datée, réutilisée d’un dossier à l’autre.</td><td>Version de base de coûts inscrite au livrable, avec région, date d’effet et source ; toute réémission entraîne une revalidation.</td></tr>
+      <tr><td>Portée implicite reconstituée de mémoire en cas de litige.</td><td>Journal d’audit conservant sources, hypothèses, versions et auteur de chaque décision d’estimation.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">2.9</span>Pourquoi écarter temporairement l’appellation « Classe C »</h2>
+  <p>Le Guide des services d’ingénierie — volet bâtiment du Secrétariat du Conseil du trésor associe une estimation de classe C à la phase concept, à une précision indicative de 15 % à 20 %, à une contingence de conception de 10 % et à un niveau Uniformat II déterminé [12]. Il distingue les classes D, C, B et A selon la maturité de la conception et des documents.</p>
+  <p>Une estimation produite exclusivement à partir de déficiences observées ne satisfait pas nécessairement ces prérequis. Employer « Classe C » comme simple synonyme de « budget approximatif » créerait un <strong>standard de performance inutilement exigeant et potentiellement attaquable</strong> : l’entreprise s’obligerait contractuellement à une précision qu’elle n’a pas les moyens documentaires de garantir.</p>
+  <div class="callout">
+    <div class="c-label">Recommandation</div>
+    <p>Commercialiser sous l’appellation <strong>« Plan d’investissement de la propriété — analyse budgétaire et planification des travaux correctifs »</strong>. Une véritable estimation de Classe C pourra être ajoutée ultérieurement comme niveau méthodologique formel et facturable, lorsque les données et les livrables satisferont systématiquement le référentiel choisi. Cette réserve est une option stratégique, pas un renoncement.</p>
+  </div>
+
+  <h2><span class="h-num">2.10</span>Matrice de faisabilité juridique</h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:52mm">Activité</th><th style="width:26mm">Statut proposé</th><th>Garde-fou</th></tr></thead>
+    <tbody>
+      <tr><td>Identifier les travaux découlant des constats</td><td><span class="pill p-green">Vert</span></td><td>Ne pas transformer un constat en conception réservée ; décrire l’intervention, pas la solution technique.</td></tr>
+      <tr><td>Mesurer des quantités, superficies, longueurs</td><td><span class="pill p-green">Vert</span></td><td>Documenter la source et la méthode de relevé ainsi que la précision associée.</td></tr>
+      <tr><td>Appliquer des coûts unitaires</td><td><span class="pill p-green">Vert</span></td><td>Base de prix versionnée, datée et régionalisée ; hypothèses affichées au livrable.</td></tr>
+      <tr><td>Produire une fourchette budgétaire</td><td><span class="pill p-green">Vert</span></td><td>Contingence, niveau de confiance et exclusions systématiquement joints.</td></tr>
+      <tr><td>Prioriser et séquencer les interventions</td><td><span class="pill p-green">Vert</span></td><td>Priorisation fondée sur l’urgence constatée et la dépendance entre travaux, non sur une performance technique promise.</td></tr>
+      <tr><td>Comparer les soumissions</td><td><span class="pill p-green">Vert</span></td><td>Analyse économique et commerciale ; distinguer explicitement de la validation technique.</td></tr>
+      <tr><td>Relever des quantités gonflées ou incohérentes</td><td><span class="pill p-green">Vert</span></td><td>Présenter comme un écart à expliquer, jamais comme une accusation de fraude.</td></tr>
+      <tr><td>Formuler des questions de clarification aux entrepreneurs</td><td><span class="pill p-green">Vert</span></td><td>Questions factuelles sur quantités, exclusions et garanties ; pas d’instruction de méthode.</td></tr>
+      <tr><td>Recommander un entrepreneur nommément</td><td><span class="pill p-red">Rouge</span></td><td>Interdit par l’article 19 ; fournir des critères de qualification, jamais un nom [8].</td></tr>
+      <tr><td>Rédiger la méthode structurale corrective</td><td><span class="pill p-red">Rouge / routage</span></td><td>Ingénieur ou autre professionnel légalement habilité.</td></tr>
+      <tr><td>Préparer un plan ou devis réservé</td><td><span class="pill p-red">Rouge / routage</span></td><td>Architecte, ingénieur ou technologue professionnel selon le champ et les exceptions applicables.</td></tr>
+      <tr><td>Attester la conformité des travaux</td><td><span class="pill p-red">Rouge / routage</span></td><td>Professionnel légalement habilité ; aucune formulation approchante au marketing.</td></tr>
+      <tr><td>Surveillance professionnelle de chantier</td><td><span class="pill p-amber">Orange / rouge</span></td><td>Appellation et portée à valider selon l’ouvrage et la profession concernée avant toute offre.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">2.11</span>Zones grises à trancher avant la mise en marché</h2>
+  <p>Cinq questions ne peuvent pas être résolues par l’analyse documentaire seule et doivent être tranchées par l’avocat mandaté. Elles sont reprises sous forme opérationnelle en annexe D.</p>
+  <div class="tw"><table class="compact">
+    <thead><tr><th style="width:8mm">#</th><th style="width:48mm">Zone grise</th><th>Enjeu</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Qualification du bordereau de consultation</td><td>À partir de quel niveau de prescription un bordereau de quantités cesse-t-il d’être un document économique pour devenir un document de nature professionnelle réservée ?</td></tr>
+      <tr><td>2</td><td>Portée du service supplémentaire de l’article 20</td><td>Le Plan d’investissement et la normalisation constituent-ils un ou deux services supplémentaires, et le régime de l’article 20 s’applique-t-il au second lorsqu’il est vendu des semaines après l’inspection ?</td></tr>
+      <tr><td>3</td><td>Encadrement du contrat de consommation</td><td>Quelles obligations de forme, de délai de résolution et de contenu s’appliquent aux contrats B et C lorsque le client est un consommateur ?</td></tr>
+      <tr><td>4</td><td>Opposabilité des limitations de responsabilité</td><td>Dans quelle mesure une clause limitant la responsabilité sur l’exactitude de l’estimation est-elle opposable au regard de l’article 2100 [11] et du droit de la consommation ?</td></tr>
+      <tr><td>5</td><td>Apparence de conflit dans la relation courtier</td><td>Une source d’affaires provenant d’un courtier immobilier crée-t-elle une apparence de conflit devant être divulguée par écrit au sens de l’article 18 [9] ?</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout-dark">
+    <div class="c-label">Synthèse de la partie II</div>
+    <p>Le modèle est juridiquement praticable. Sa praticabilité ne tient toutefois pas à une tolérance, mais à une <strong>discipline</strong> : séparation contractuelle, vocabulaire contrôlé, refus de la conception et de l’attestation, indépendance vis-à-vis des entrepreneurs, et traçabilité méthodologique. Chacun de ces cinq éléments est simultanément une protection juridique et un argument commercial.</p>
+  </div>
+</section>
+
+<!-- ============ PARTIE III ============ -->
+<section id="p3">
+  <div class="part-head">
+    <span class="part-num">III</span>
+    <span class="part-label">Partie III</span>
+    <h1>Marché, positionnement et avantage défendable</h1>
+    <p class="part-abstract">La profondeur réelle du marché, la nature du vide que l’offre comble, les substituts contre lesquels elle se bat, et ce qui empêche un concurrent de la copier en six mois.</p>
+  </div>
+
+  <h2><span class="h-num">3.1</span>Un marché transactionnel suffisamment profond</h2>
+  <p>Le Québec a enregistré <strong>97 214 ventes résidentielles en 2025</strong>, soit une hausse de 8 % sur 2024 et la troisième meilleure année de la série récente [13]. Au deuxième trimestre de 2026, <strong>27 296 ventes</strong> ont encore été réalisées, un niveau légèrement supérieur à la moyenne des dix dernières années malgré une baisse annuelle de 5 % [14]. Le bassin potentiel demeure donc important, même dans un contexte de normalisation du marché.</p>
+  <p>Le positionnement ne dépend toutefois pas d’une pénétration massive du marché. La logique est de <strong>maximiser la valeur par dossier sur une clientèle déjà acquise</strong> au moment de l’inspection, ce qui supprime le second coût d’acquisition client. C’est une différence de nature, pas de degré : le modèle n’a pas besoin de gagner des parts de marché pour croître.</p>
+
+  <h3>Cascade de marché</h3>
+  <div class="tw"><table class="num compact">
+    <thead><tr><th>Niveau</th><th style="width:26mm">Volume</th><th style="width:30mm">Statut</th></tr></thead>
+    <tbody>
+      <tr><td>Transactions résidentielles au Québec (2025)</td><td>97 214</td><td>Sourcé [13]</td></tr>
+      <tr><td>Transactions donnant lieu à une inspection préachat</td><td>~ 58 000</td><td><span class="hyp">Hypothèse 60 %</span></td></tr>
+      <tr><td>Inspections dans la zone de service desservie</td><td>~ 26 000</td><td><span class="hyp">Hypothèse 45 %</span></td></tr>
+      <tr><td>Inspections réalisées par BatiFlow — capacité annuelle</td><td>180</td><td><span class="hyp">Hypothèse</span></td></tr>
+      <tr class="hl"><td>Dossiers convertis au Plan d’investissement — scénario central</td><td>63</td><td><span class="hyp">Hypothèse 35 %</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="t-note">Seule la première ligne est une donnée sourcée. Les quatre suivantes sont des hypothèses de dimensionnement à valider en phase pilote ; elles servent à établir un ordre de grandeur, non une prévision.</p>
+  <div class="callout">
+    <div class="c-label">Lecture stratégique</div>
+    <p>L’écart entre 26 000 inspections adressables et 180 inspections réalisées signifie que <strong>la contrainte du modèle n’est pas la demande, mais la capacité de production et la conversion</strong>. Toute réflexion de croissance doit donc porter en priorité sur le taux de conversion et le temps de production, et seulement ensuite sur l’acquisition — ou sur la cession de la méthode sous licence à d’autres titulaires (section 4.10).</p>
+  </div>
+
+  <h2><span class="h-num">3.2</span>Le vide entre le constat et la décision</h2>
+  <p>L’inspection répond principalement à la question « que voit-on et quelle est la condition observable ? ». Le propriétaire ou l’acheteur doit ensuite traduire seul un rapport technique en budget, en priorités, en séquence d’intervention et en demandes de prix. <strong>Ce passage du diagnostic au capital requis constitue le point de friction</strong> que le Plan d’investissement cherche à monétiser.</p>
+  <p>Ce vide est réel, coûteux et invisible dans les comptes du client. Il se manifeste par des appels dispersés à des entrepreneurs, des délais, des décisions prises dans le désordre, des travaux engagés sans coordination, et des écarts budgétaires découverts après l’acquisition. Aucun acteur du marché n’est aujourd’hui rémunéré pour le combler de manière indépendante.</p>
+
+  <h2><span class="h-num">3.3</span>La donnée de relevé comme source de vérité quantitative</h2>
+  <p>Le levier stratégique principal est la <strong>réutilisation des quantités</strong>. Une fois qu’un relevé établit par exemple 1 850 pi² de toiture, 640 pi² de maçonnerie, 175 pi linéaires de gouttière et 12 fenêtres, ces mêmes données servent à l’estimation, au bordereau de consultation, à la normalisation des soumissions et, éventuellement, à la vérification des extras en cours de chantier.</p>
+  <div class="callout-dark">
+    <div class="c-label">Avantage structurel</div>
+    <p>La valeur défendable de BatiFlow n’est pas la rédaction du rapport. Elle réside dans la <strong>continuité des données</strong> : constat → intervention → quantité → coût → consultation → offre normalisée → décision. Chaque étape réutilise et enrichit la précédente, et le coût marginal de l’étape suivante décroît à mesure que la chaîne s’allonge. Un concurrent qui attaque une seule étape supporte l’intégralité du coût d’acquisition de la donnée.</p>
+  </div>
+
+  <h2><span class="h-num">3.4</span>Positionnement recommandé</h2>
+  <p>Cinq attributs définissent la position visée. Ils doivent être tenus simultanément : chacun pris isolément est imitable, leur combinaison ne l’est pas.</p>
+  <div class="tw"><table class="compact">
+    <thead><tr><th style="width:34mm">Attribut</th><th>Traduction opérationnelle</th></tr></thead>
+    <tbody>
+      <tr><td>Indépendant</td><td>Rémunération exclusive par le propriétaire ; aucune commission d’entrepreneur, aucune exception.</td></tr>
+      <tr><td>Quantitatif</td><td>Les écarts de prix sont expliqués par des quantités, pertes, heures, taux et exclusions, non par une opinion.</td></tr>
+      <tr><td>Traçable</td><td>Chaque coût remonte à une source datée et à une hypothèse explicite, conservées au dossier.</td></tr>
+      <tr><td>Décisionnel</td><td>Le livrable priorise et séquence les travaux dans le temps, au lieu de produire une liste de déficiences.</td></tr>
+      <tr><td>Compatible</td><td>Le système route les portions techniques réservées vers le professionnel requis plutôt que d’essayer de tout internaliser.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">3.5</span>Segmentation et priorisation commerciale</h2>
+  <p>Le produit est particulièrement pertinent lorsque l’enjeu économique potentiel dépasse largement le coût du service. La priorité commerciale devrait aller aux propriétés où les décisions de travaux sont nombreuses, hétérogènes ou importantes.</p>
+  <div class="tw"><table>
+    <thead><tr><th style="width:44mm">Segment</th><th style="width:22mm">Potentiel</th><th>Justification</th><th style="width:20mm">Priorité</th></tr></thead>
+    <tbody>
+      <tr><td>Plex et petit immeuble résidentiel</td><td><span class="pill p-green">Très élevé</span></td><td>Multiplicité des composantes, des quantités et des arbitrages ; logique d’exploitation déjà financière.</td><td>1</td></tr>
+      <tr><td>Propriété haut de gamme</td><td><span class="pill p-green">Très élevé</span></td><td>Valeur absolue des erreurs de budget plus importante ; forte valeur attribuée à la délégation.</td><td>2</td></tr>
+      <tr><td>Maison de 30 ans et plus, rénovations reportées</td><td><span class="pill p-green">Élevé</span></td><td>Plusieurs systèmes arrivent à des horizons d’intervention différents et se concurrencent pour le même budget.</td><td>3</td></tr>
+      <tr><td>Acheteur investisseur</td><td><span class="pill p-green">Élevé</span></td><td>Besoin de CAPEX, d’horizon et de rendement ; le langage financier du livrable est naturellement adapté.</td><td>4</td></tr>
+      <tr><td>Copropriété avec travaux privatifs importants</td><td><span class="pill p-amber">Moyen à élevé</span></td><td>Portée privative à délimiter soigneusement par rapport aux parties communes.</td><td>5</td></tr>
+      <tr><td>Maison récente avec peu de constats</td><td><span class="pill p-amber">Faible à moyen</span></td><td>Peu de valeur à consolider ; le service peut sembler disproportionné et éroder la crédibilité de l’offre.</td><td>Non prioritaire</td></tr>
+    </tbody>
+  </table></div>
+  <p>Une règle commerciale en découle : <strong>ne pas proposer le Plan d’investissement lorsque le dossier ne le justifie pas</strong>. La retenue sur les dossiers légers protège la perception de valeur sur les dossiers lourds et constitue une preuve d’indépendance.</p>
+
+  <h2><span class="h-num">3.6</span>Paysage concurrentiel : contre quoi l’offre se bat réellement</h2>
+  <p>Le produit n’affronte pas un concurrent direct identifié, mais un ensemble de substituts dont le plus puissant est gratuit : le statu quo. Toute la stratégie commerciale doit être construite contre ces substituts, non contre des entreprises.</p>
+  <div class="tw"><table>
+    <thead><tr><th style="width:40mm">Substitut</th><th>Ce qu’il offre</th><th>Sa faiblesse structurelle</th></tr></thead>
+    <tbody>
+      <tr><td>Le statu quo — le client se débrouille</td><td>Gratuit en argent, immédiat, sans engagement.</td><td>Coûteux en risque et en temps ; aucune base de comparaison ; décisions prises dans le désordre.</td></tr>
+      <tr><td>Soumissions gratuites d’entrepreneurs</td><td>Un prix rapide, sans frais apparents.</td><td>Répond à une question différente : le prix du vendeur, pas le budget de l’acheteur. Portées non comparables entre elles.</td></tr>
+      <tr><td>Estimateur indépendant en construction</td><td>Compétence d’estimation réelle et reconnue [4].</td><td>Orienté vers des projets déjà définis ; peu accessible et peu adapté au résidentiel diffus ; pas d’accès au moment de l’inspection.</td></tr>
+      <tr><td>Gestionnaire de projet ou conseiller en rénovation</td><td>Accompagnement d’exécution.</td><td>Qualité très variable ; souvent lié économiquement à des exécutants ; rarement quantitatif et traçable.</td></tr>
+      <tr><td>Architecte ou technologue professionnel</td><td>Conception et documents professionnels valides.</td><td>Coût et délai supérieurs ; pertinent lorsqu’un acte réservé est requis, non pour arbitrer un budget d’entretien.</td></tr>
+      <tr><td>Plateformes de mise en relation</td><td>Volume de contacts d’entrepreneurs.</td><td>Modèle de commission : conflit d’intérêts structurel et incompatible avec l’article 19 [8].</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">3.7</span>Analyse des forces et vulnérabilités</h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:50%">Forces</th><th>Faiblesses</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Accès privilégié au client au moment exact où le besoin apparaît, sans second coût d’acquisition.<br>Données de bâtiment déjà collectées et exploitables.<br>Indépendance structurelle, alignée avec la contrainte réglementaire.<br>Chaîne de production automatisable à forte marge incrémentale.</td>
+        <td>Capacité de production limitée par les ressources internes.<br>Base de coûts à construire intégralement, sans historique.<br>Responsabilité professionnelle accrue sur un terrain nouveau.<br>Dépendance au volume d’inspections en amont.</td>
+      </tr>
+    </tbody>
+  </table></div>
+  <div class="tw"><table>
+    <thead><tr><th style="width:50%">Opportunités</th><th>Menaces</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Absence d’acteur indépendant occupant explicitement l’espace « budget de propriété ».<br>Licence de la méthode à d’autres titulaires d’inspection (section 4.10).<br>Segment investisseur et plex sous-servi.<br>Effet d’apprentissage : chaque soumission reçue améliore la base de coûts.</td>
+        <td>Évolution réglementaire élargissant le périmètre des actes réservés.<br>Refus ou restriction de couverture E&amp;O.<br>Imitation rapide de l’offre par un concurrent sans la rigueur méthodologique, dégradant la catégorie.<br>Volatilité des coûts de construction affaiblissant la précision perçue.</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">3.8</span>Ce qui rend la position défendable</h2>
+  <p>Quatre barrières s’accumulent dans le temps. Aucune n’est absolue ; leur superposition rend l’imitation coûteuse et lente.</p>
+  <ol>
+    <li><strong>Le corpus de relevés et la base de coûts versionnée.</strong> Un concurrent peut copier la grille tarifaire en une semaine ; il ne peut pas copier trois ans de quantités mesurées, de prix datés et d’écarts observés.</li>
+    <li><strong>La boucle d’apprentissage estimation ↔ offres réelles.</strong> Chaque soumission normalisée renseigne l’écart entre le budget estimé et le prix de marché réel, ce qui améliore mécaniquement la précision du produit suivant. Cet effet est cumulatif et non rattrapable par un nouvel entrant.</li>
+    <li><strong>La position dans le flux.</strong> L’accès au client au moment de l’inspection est un avantage de distribution que ni l’estimateur indépendant ni la plateforme ne possèdent.</li>
+    <li><strong>La méthodologie documentée et assurable.</strong> Une méthode écrite, versionnée et validée juridiquement est simultanément un actif commercial, une défense en responsabilité et une condition d’assurabilité. Elle est longue à constituer et difficile à répliquer superficiellement.</li>
+  </ol>
+  <div class="callout">
+    <div class="c-label">Corollaire opérationnel</div>
+    <p>Si la valeur défendable réside dans la donnée accumulée, alors la <strong>discipline de saisie est une priorité stratégique</strong>, pas une contrainte administrative. Un dossier produit sans consigner quantités, hypothèses, version de base de coûts et écart constaté détruit l’essentiel de sa valeur résiduelle pour l’entreprise.</p>
+  </div>
+</section>
+
+<!-- ============ PARTIE IV ============ -->
+<section id="p4">
+  <div class="part-head">
+    <span class="part-num">IV</span>
+    <span class="part-label">Partie IV</span>
+    <h1>Architecture de prix et modèle économique</h1>
+    <p class="part-abstract">Pourquoi 3 500 $ puis 1 500 $, ce que chaque produit rapporte réellement, à quel seuil l’investissement est récupéré, et à quelle variable le modèle est le plus sensible.</p>
+  </div>
+
+  <h2><span class="h-num">4.1</span>Tarification recommandée</h2>
+  <div class="tw"><table class="num">
+    <thead><tr><th>Offre</th><th style="width:26mm">Prix</th><th style="width:30mm">Valeur cumulée</th></tr></thead>
+    <tbody>
+      <tr><td>Inspection préachat</td><td>1 500 $</td><td>1 500 $</td></tr>
+      <tr><td>Plan d’investissement de la propriété</td><td>+ 3 500 $</td><td>5 000 $</td></tr>
+      <tr><td>Normalisation et analyse des soumissions</td><td>+ 1 500 $</td><td>6 500 $</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">4.2</span>Pourquoi 3 500 $ sur le produit stratégique</h2>
+  <p>Le Plan d’investissement est le produit qui concentre le plus d’expertise, de relevés, d’hypothèses et de responsabilité. Il produit également l’<strong>actif réutilisable</strong> qui rend le niveau 3 rapide et rentable. Le prix doit donc refléter la valeur de décision fournie au client, et non le nombre d’heures que BatiFlow permettra éventuellement d’économiser.</p>
+  <ul>
+    <li>Le client obtient une <strong>enveloppe de capital</strong>, et non une simple liste de coûts par déficience.</li>
+    <li>Le produit structure les investissements par horizon : immédiat, 0–12 mois, 1–3 ans, 3–5 ans, entretien préventif.</li>
+    <li>Il crée les quantités de référence utilisées ensuite dans tous les appels de prix.</li>
+    <li>Il permet à BatiFlow de capturer la valeur économique de son automatisation : si le temps de production chute, la marge augmente au lieu de fuir vers le client.</li>
+  </ul>
+  <p>Le prix doit également se comparer à la bonne référence. Rapporté au coût d’une seule erreur de portée sur un poste majeur — typiquement plusieurs milliers de dollars —, 3 500 $ constitue une prime d’assurance décisionnelle, non un honoraire de rédaction.</p>
+
+  <h2><span class="h-num">4.3</span>Pourquoi réduire le niveau 3 à 1 500 $</h2>
+  <p>Le troisième niveau est volontairement placé à un prix inférieur. Une fois 5 000 $ engagés dans l’inspection et le Plan d’investissement, 1 500 $ supplémentaires représentent un coût marginal relativement faible pour éviter des soumissions incomparables sur des travaux pouvant représenter des dizaines ou des centaines de milliers de dollars. Cette architecture réduit l’incitation du client à « faire lui-même » la dernière étape.</p>
+  <div class="callout">
+    <div class="c-label">Logique de prix</div>
+    <p>Le niveau 2 porte la valeur intellectuelle et économique principale. Le niveau 3 agit comme un <strong>produit de clôture</strong> : faible friction, très forte pertinence contextuelle, et excellent potentiel de marge grâce aux données déjà structurées. Augmenter son prix améliorerait marginalement le revenu unitaire tout en dégradant significativement le taux d’attache — c’est-à-dire la variable qui compte.</p>
+  </div>
+
+  <h2><span class="h-num">4.4</span>Valeur économique du niveau 3 : exemple normalisé</h2>
+  <div class="tw"><table class="num">
+    <thead><tr><th>Élément</th><th style="width:26mm">Entrepreneur A</th><th style="width:26mm">Entrepreneur B</th><th style="width:26mm">Entrepreneur C</th></tr></thead>
+    <tbody>
+      <tr><td>Quantité nette BatiFlow</td><td>1 000 pi²</td><td>1 000 pi²</td><td>1 000 pi²</td></tr>
+      <tr><td>Quantité utilisée dans l’offre</td><td>1 200 pi²</td><td>1 100 pi²</td><td>1 300 pi²</td></tr>
+      <tr><td>Perte / écart apparent</td><td>20 %</td><td>10 %</td><td>30 %</td></tr>
+      <tr><td>Taux horaire</td><td>85 $</td><td>106 $</td><td>87 $</td></tr>
+      <tr><td>Heures prévues</td><td>180</td><td>140</td><td>175</td></tr>
+      <tr><td>Poste critique</td><td>Inclus</td><td>Inclus</td><td><strong>Exclu</strong></td></tr>
+      <tr><td>Prix soumis</td><td>31 500 $</td><td>30 800 $</td><td>38 900 $</td></tr>
+      <tr><td>Ajustement d’exclusion <span class="hyp">Réf. BatiFlow</span></td><td>—</td><td>—</td><td>+ 3 200 $</td></tr>
+      <tr class="total"><td>Coût comparable</td><td>31 500 $</td><td>30 800 $</td><td>42 100 $</td></tr>
+      <tr><td>Écart par rapport au plus bas</td><td>+ 2,3 %</td><td>référence</td><td>+ 36,7 %</td></tr>
+    </tbody>
+  </table></div>
+  <p>La fonction de BatiFlow n’est pas d’accuser l’entrepreneur d’avoir « gonflé » sa quantité. Elle est d’identifier objectivement l’écart et de générer une demande de clarification : <em>pourquoi la quantité utilisée dépasse-t-elle la quantité mesurée de référence de X % ?</em> Cette posture est plus neutre, plus défendable juridiquement et plus utile au client.</p>
+
+  <h3>Le cas inverse, plus fréquent : le prix le plus bas devient le plus élevé</h3>
+  <div class="tw"><table class="num compact">
+    <thead><tr><th>Élément</th><th style="width:30mm">Entrepreneur D</th><th style="width:30mm">Entrepreneur E</th></tr></thead>
+    <tbody>
+      <tr><td>Prix soumis</td><td>27 400 $</td><td>31 900 $</td></tr>
+      <tr><td>Solins et raccords</td><td>Exclus → + 2 600 $</td><td>Inclus</td></tr>
+      <tr><td>Disposition des matériaux</td><td>Exclue → + 1 400 $</td><td>Incluse</td></tr>
+      <tr><td>Garantie de main-d’œuvre</td><td>5 ans → + 1 800 $</td><td>10 ans</td></tr>
+      <tr class="total"><td>Coût comparable</td><td>33 200 $</td><td>31 900 $</td></tr>
+    </tbody>
+  </table></div>
+  <p class="t-note">Exemple illustratif construit sur les règles de normalisation proposées. L’offre apparemment moins chère de 4 500 $ est en réalité plus chère de 1 300 $ à portée équivalente.</p>
+
+  <h2><span class="h-num">4.5</span>Économie unitaire par produit</h2>
+  <p>Les temps de production ci-dessous correspondent au <strong>régime cible</strong>, une fois les modules BatiFlow déployés. Les temps de la phase pilote, plus élevés, figurent en note.</p>
+  <div class="tw"><table class="num">
+    <thead><tr><th>Produit</th><th style="width:18mm">Prix</th><th style="width:22mm">Temps cible</th><th style="width:24mm">Coût direct</th><th style="width:24mm">Marge brute</th><th style="width:16mm">%</th></tr></thead>
+    <tbody>
+      <tr><td>Inspection préachat</td><td>1 500 $</td><td>6,0 h</td><td>450 $</td><td>1 050 $</td><td>70 %</td></tr>
+      <tr><td>Plan d’investissement</td><td>3 500 $</td><td>5,0 h</td><td>375 $</td><td>3 125 $</td><td>89 %</td></tr>
+      <tr><td>Normalisation des soumissions</td><td>1 500 $</td><td>2,0 h</td><td>150 $</td><td>1 350 $</td><td>90 %</td></tr>
+      <tr class="total"><td>Parcours complet</td><td>6 500 $</td><td>13,0 h</td><td>975 $</td><td>5 525 $</td><td>85 %</td></tr>
+    </tbody>
+  </table></div>
+  <p class="t-note">Taux horaire interne chargé retenu : 75 $ <span class="hyp">Hypothèse</span>. Temps de phase pilote avant automatisation : Plan d’investissement 12 h (marge 2 600 $, 74 %) ; normalisation 5 h (marge 1 125 $, 75 %). L’écart entre le régime pilote et le régime cible mesure précisément la valeur du développement logiciel.</p>
+
+  <h2><span class="h-num">4.6</span>Scénarios annuels à volume d’inspections constant</h2>
+  <p>Les trois scénarios reposent sur un volume identique de <strong>180 inspections</strong> <span class="hyp">Hypothèse</span> et ne diffèrent que par le taux de conversion vers le Plan d’investissement et le taux d’attache du niveau 3.</p>
+  <div class="tw"><table class="num">
+    <thead><tr><th>Indicateur</th><th style="width:26mm">Référence<br>inspection seule</th><th style="width:22mm">Bas</th><th style="width:22mm">Central</th><th style="width:22mm">Haut</th></tr></thead>
+    <tbody>
+      <tr><td>Taux de conversion vers le Plan</td><td>—</td><td>20 %</td><td>35 %</td><td>50 %</td></tr>
+      <tr><td>Taux d’attache du niveau 3</td><td>—</td><td>50 %</td><td>70 %</td><td>80 %</td></tr>
+      <tr><td>Plans d’investissement vendus</td><td>0</td><td>36</td><td>63</td><td>90</td></tr>
+      <tr><td>Normalisations vendues</td><td>0</td><td>18</td><td>44</td><td>72</td></tr>
+      <tr><td>Revenu — inspections</td><td>270 000 $</td><td>270 000 $</td><td>270 000 $</td><td>270 000 $</td></tr>
+      <tr><td>Revenu — Plans d’investissement</td><td>—</td><td>126 000 $</td><td>220 500 $</td><td>315 000 $</td></tr>
+      <tr><td>Revenu — normalisations</td><td>—</td><td>27 000 $</td><td>66 000 $</td><td>108 000 $</td></tr>
+      <tr class="total"><td>Revenu total</td><td>270 000 $</td><td>423 000 $</td><td>556 500 $</td><td>693 000 $</td></tr>
+      <tr><td>Coûts directs de production</td><td>81 000 $</td><td>97 200 $</td><td>111 225 $</td><td>125 550 $</td></tr>
+      <tr class="total"><td>Marge brute</td><td>189 000 $</td><td>325 800 $</td><td>445 275 $</td><td>567 450 $</td></tr>
+      <tr><td>Taux de marge brute</td><td>70,0 %</td><td>77,0 %</td><td>80,0 %</td><td>81,9 %</td></tr>
+      <tr class="hl"><td>Revenu moyen par inspection acquise</td><td>1 500 $</td><td>2 350 $</td><td>3 092 $</td><td>3 850 $</td></tr>
+      <tr class="hl"><td>Progression du revenu total</td><td>référence</td><td>+ 57 %</td><td>+ 106 %</td><td>+ 157 %</td></tr>
+    </tbody>
+  </table></div>
+  <p class="t-note">Modèle illustratif construit sur les hypothèses de la section 4.5. Ne constitue pas une prévision financière. Les coûts indirects, la charge commerciale et l’amortissement de l’investissement produit ne sont pas inclus dans la marge brute présentée.</p>
+
+  <h2><span class="h-num">4.7</span>Sensibilité au taux de conversion</h2>
+  <p>À 180 inspections et un taux d’attache du niveau 3 maintenu à 70 %, chaque point de conversion supplémentaire vers le Plan d’investissement vaut environ <strong>8 190 $ de revenu annuel</strong>.</p>
+  <div class="tw"><table class="num compact">
+    <thead><tr><th>Conversion vers le Plan</th><th style="width:30mm">Revenu total</th><th style="width:34mm">Revenu moyen<br>par inspection</th><th style="width:28mm">Écart vs central</th></tr></thead>
+    <tbody>
+      <tr><td>15 %</td><td>392 850 $</td><td>2 182 $</td><td>− 29 %</td></tr>
+      <tr><td>20 %</td><td>433 800 $</td><td>2 410 $</td><td>− 22 %</td></tr>
+      <tr><td>25 %</td><td>474 750 $</td><td>2 638 $</td><td>− 15 %</td></tr>
+      <tr><td>30 %</td><td>515 700 $</td><td>2 865 $</td><td>− 7 %</td></tr>
+      <tr class="hl"><td>35 % — scénario central</td><td>556 650 $</td><td>3 093 $</td><td>référence</td></tr>
+      <tr><td>40 %</td><td>597 600 $</td><td>3 320 $</td><td>+ 7 %</td></tr>
+      <tr><td>50 %</td><td>679 500 $</td><td>3 775 $</td><td>+ 22 %</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout-dark">
+    <div class="c-label">Conclusion de sensibilité</div>
+    <p>Une hausse de <strong>10 points de conversion</strong> (de 35 % à 45 %) génère environ 82 000 $ de revenu additionnel. Une hausse de <strong>10 % du volume d’inspections</strong> (de 180 à 198) en génère environ 56 000 $, tout en exigeant de la capacité, du déplacement et un coût d’acquisition. La priorité d’allocation des ressources est donc sans ambiguïté : <strong>la conversion avant le volume</strong>.</p>
+  </div>
+
+  <h2><span class="h-num">4.8</span>Seuil de récupération de l’investissement</h2>
+  <p>Sur une enveloppe autorisée de 63 500 $ (décision D2), la marge brute incrémentale par client pleinement converti s’établit à 4 070 $ en régime cible (3 125 $ pour le Plan, plus 945 $ d’espérance sur le niveau 3 à 70 % d’attache).</p>
+  <div class="stats">
+    <div><div class="s-val">16</div><div class="s-lab">Clients convertis</div><div class="s-sub">pour récupérer l’investissement en régime cible</div></div>
+    <div><div class="s-val">19</div><div class="s-lab">Clients convertis</div><div class="s-sub">au rythme de production de la phase pilote</div></div>
+    <div><div class="s-val">~ 3</div><div class="s-lab">Mois d’exploitation</div><div class="s-sub">au scénario central, 63 conversions annuelles</div></div>
+    <div><div class="s-val">9 %</div><div class="s-lab">Du volume annuel</div><div class="s-sub">d’inspections suffit à atteindre le seuil</div></div>
+  </div>
+  <p>Le point important n’est pas la rapidité du retour, mais son <strong>asymétrie</strong> : le coût est essentiellement fixe et engagé une seule fois, tandis que la marge incrémentale est récurrente et croît avec la qualité de la base de coûts. Le risque financier du projet est donc borné et connu à l’avance ; le risque réel est réglementaire et méthodologique, non économique.</p>
+
+  <h2><span class="h-num">4.9</span>Lecture à petite échelle et présentation commerciale</h2>
+  <p>Sur 10 inspections à 1 500 $, le revenu de base est de 15 000 $. Si 40 % des clients achètent le Plan d’investissement, cela ajoute 14 000 $. Si 75 % de ces quatre clients prennent ensuite la normalisation des soumissions, cela ajoute 4 500 $. Le revenu passe alors à <strong>33 500 $</strong> pour le même volume initial, soit 3 350 $ de revenu moyen par inspection acquise.</p>
+  <div class="tw"><table class="num compact">
+    <thead><tr><th>Hypothèse</th><th style="width:30mm">Calcul</th><th style="width:24mm">Revenu</th></tr></thead>
+    <tbody>
+      <tr><td>10 inspections</td><td>10 × 1 500 $</td><td>15 000 $</td></tr>
+      <tr><td>40 % Plan d’investissement</td><td>4 × 3 500 $</td><td>14 000 $</td></tr>
+      <tr><td>75 % de niveau 3 parmi les 4</td><td>3 × 1 500 $</td><td>4 500 $</td></tr>
+      <tr class="total"><td>Total</td><td>—</td><td>33 500 $</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Présentation des prix au client</h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:52mm">Présentation</th><th style="width:20mm">Prix</th><th>Rôle psychologique</th></tr></thead>
+    <tbody>
+      <tr><td>Inspection seule</td><td>1 500 $</td><td>Produit d’entrée : conformité et diagnostic. Aucune pression, aucune promesse budgétaire.</td></tr>
+      <tr><td>Inspection + Plan d’investissement</td><td>5 000 $</td><td>Produit principal : état du bâtiment et décision financière réunis dans un seul parcours.</td></tr>
+      <tr><td>Accompagnement complet jusqu’aux soumissions</td><td>6 500 $</td><td>Solution complète ; les 1 500 $ additionnels paraissent marginaux au regard du capital à engager.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">4.10</span>Options d’extension du modèle de revenus</h2>
+  <p>Quatre extensions sont identifiées. Aucune ne devrait être engagée avant la stabilisation du modèle à trois niveaux, mais leur existence modifie la valeur de l’investissement initial : la base de coûts et la méthodologie construites en phase 1 sont des actifs réutilisables.</p>
+  <div class="tw"><table>
+    <thead><tr><th style="width:42mm">Extension</th><th>Description</th><th style="width:24mm">Horizon</th><th style="width:22mm">Potentiel</th></tr></thead>
+    <tbody>
+      <tr><td>Mise à jour annuelle du Plan</td><td>Réémission actualisée du Plan d’investissement selon la base de coûts courante et les travaux réalisés. Revenu récurrent sur une clientèle acquise.</td><td>12–18 mois</td><td><span class="pill p-amber">Moyen</span></td></tr>
+      <tr><td>Forfait investisseur et plex</td><td>Version étendue orientée CAPEX 1-3-5 ans, rendement et arbitrage entre immeubles. Prix supérieur justifié par la complexité.</td><td>6–12 mois</td><td><span class="pill p-green">Élevé</span></td></tr>
+      <tr><td>Module de vérification des extras</td><td>Contrôle en cours de chantier de la cohérence des avenants avec la portée et les quantités de référence.</td><td>18–24 mois</td><td><span class="pill p-amber">Moyen</span></td></tr>
+      <tr><td>Licence de la méthode à d’autres titulaires</td><td>Cession sous licence du référentiel, des gabarits et de l’outil à d’autres inspecteurs titulaires. Revenu récurrent, indépendant de la capacité de production interne, et enrichissement mutualisé de la base de coûts.</td><td>24–36 mois</td><td><span class="pill p-green">Très élevé</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout">
+    <div class="c-label">Observation stratégique</div>
+    <p>La quatrième extension est la seule qui lève la contrainte structurelle identifiée en section 3.1 — la capacité de production interne. Elle transforme une entreprise de services à capacité bornée en fournisseur de méthode à revenus récurrents. Elle suppose toutefois que la méthodologie soit documentée, versionnée et juridiquement validée dès la phase 1 : <strong>cette option se construit maintenant ou pas du tout</strong>.</p>
+  </div>
+</section>
+
+<!-- ============ PARTIE V ============ -->
+<section id="p5">
+  <div class="part-head">
+    <span class="part-num">V</span>
+    <span class="part-label">Partie V</span>
+    <h1>Mise en marché, conversion et traitement des objections</h1>
+    <p class="part-abstract">Quand vendre, quoi dire, à qui, et comment répondre aux six objections qui décideront du taux de conversion — la variable à laquelle le modèle est le plus sensible.</p>
+  </div>
+
+  <h2><span class="h-num">5.1</span>Ne pas vendre une estimation ; vendre une décision</h2>
+  <p>L’angle marketing le plus fort consiste à déplacer la conversation de « combien coûte chaque déficience ? » vers « <strong>combien cette propriété exigera-t-elle réellement de capital, et à quel moment ?</strong> ». Le produit ne vend pas des chiffres : il vend la réduction de l’incertitude financière post-inspection.</p>
+  <p>Cette distinction n’est pas cosmétique. Vendue comme une estimation, l’offre est comparée à une soumission gratuite d’entrepreneur et perd. Vendue comme une décision d’investissement, elle est comparée au coût d’une erreur de budget et gagne.</p>
+
+  <h2><span class="h-num">5.2</span>Six angles de communication</h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:40mm">Angle</th><th>Promesse</th><th style="width:38mm">Cible</th></tr></thead>
+    <tbody>
+      <tr><td>1 — Le vrai coût de la propriété</td><td>« Vous connaissez le prix d’achat. Connaissez maintenant le capital à prévoir pour les cinq prochaines années. »</td><td>Acheteurs de propriétés anciennes ou haut de gamme, investisseurs.</td></tr>
+      <tr><td>2 — Du rapport au plan d’action</td><td>« Un rapport vous dit ce qui ne va pas. Le Plan d’investissement vous dit quoi prioriser, quand intervenir et combien prévoir. »</td><td>Client qui trouve le rapport d’inspection dense ou difficile à transformer en actions.</td></tr>
+      <tr><td>3 — Trois soumissions, trois réalités</td><td>« Le prix le plus bas n’est pas toujours l’offre la moins chère. Nous normalisons quantités, pertes, heures et exclusions pour comparer la même chose. »</td><td>Clients en phase de travaux.</td></tr>
+      <tr><td>4 — Une seule quantité de référence</td><td>« Une seule quantité de référence. Chaque entrepreneur explique ensuite ses pertes, sa méthode et son prix. »</td><td>Travaux de toiture, revêtement, maçonnerie et autres postes fortement quantifiables.</td></tr>
+      <tr><td>5 — Représentation indépendante</td><td>« Nous ne vendons pas les travaux et ne touchons aucune commission d’entrepreneur. Notre rôle : rendre votre décision plus lisible. »</td><td>Segment premium et clients sensibles à l’indépendance.</td></tr>
+      <tr><td>6 — Prévenir les extras avant le chantier</td><td>« Les exclusions invisibles dans une soumission deviennent souvent les extras visibles sur la facture. »</td><td>Client craignant les dépassements de coûts.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">5.3</span>Le moment de vente : après le rapport, jamais avant</h2>
+  <p>Le besoin est maximal lorsque le client vient de recevoir un rapport contenant plusieurs déficiences, mais ne sait pas encore transformer ces constats en budget. Le service doit être présenté comme l’<strong>étape naturelle suivante</strong>, non comme une option abstraite vendue avant que le problème soit ressenti.</p>
+  <p>Vendre le Plan d’investissement en amont de l’inspection produirait trois effets négatifs : une impression de vente liée, une confusion entre les deux mandats — précisément ce que l’architecture cherche à éviter —, et une conversion plus faible sur un besoin non encore éprouvé.</p>
+  <ol>
+    <li><strong>Inspection terminée et rapport remis.</strong> Aucune sollicitation commerciale n’accompagne la livraison du rapport réglementé.</li>
+    <li><strong>Calcul automatique d’un indicateur d’opportunité</strong> par BatiFlow : nombre de constats, systèmes majeurs touchés, urgence, complexité et valeur potentielle des travaux.</li>
+    <li><strong>Si le dossier dépasse le seuil défini</strong> : invitation personnalisée au Plan d’investissement, appuyée sur les constats réels du dossier, transmise après un délai de décantation.</li>
+    <li><strong>Après livraison du Plan d’investissement</strong> : proposition du service à 1 500 $ lorsque le client est effectivement prêt à solliciter des entrepreneurs.</li>
+    <li><strong>À la réception de chaque soumission</strong> : normalisation automatique et génération des demandes de clarification.</li>
+  </ol>
+
+  <h2><span class="h-num">5.4</span>Déclencheurs commerciaux fondés sur les données du rapport</h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:46mm">Déclencheur</th><th>Message possible</th></tr></thead>
+    <tbody>
+      <tr><td>Trois systèmes majeurs ou plus</td><td>« Votre rapport comporte plusieurs postes à coordonner ; un budget consolidé réduit le risque de traiter chaque élément isolément. »</td></tr>
+      <tr><td>Toiture + fondation + enveloppe</td><td>« Ces travaux peuvent se concurrencer pour le même budget. Le plan permet de prioriser et de séquencer. »</td></tr>
+      <tr><td>Horizons d’intervention multiples</td><td>« Tout n’est pas urgent : transformons les constats en calendrier d’investissement. »</td></tr>
+      <tr><td>Travaux fortement quantifiables</td><td>« Les relevés peuvent servir de base commune aux entrepreneurs, ce qui améliore la comparabilité des offres. »</td></tr>
+      <tr><td>Client investisseur</td><td>« Convertissez le rapport en CAPEX à 1, 3 et 5 ans. »</td></tr>
+      <tr><td>Plex ou immeuble à composantes multiples</td><td>« Plus il y a de systèmes, plus l’arbitrage entre eux détermine le rendement. »</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">5.5</span>Traitement des six objections déterminantes</h2>
+  <p>Le taux de conversion se joue sur un petit nombre d’objections récurrentes. Les réponses ci-dessous doivent être scriptées, formées et mesurées — et aucune ne doit dénigrer un entrepreneur.</p>
+  <div class="tw"><table>
+    <thead><tr><th style="width:48mm">Objection</th><th>Réponse recommandée</th></tr></thead>
+    <tbody>
+      <tr><td>« Je vais simplement demander des soumissions gratuites. »</td><td>Une soumission répond à la question du vendeur — quel est mon prix pour ce que j’ai compris de votre projet — et non à la vôtre : de combien de capital ai-je besoin, pour quels travaux, dans quel ordre. Les deux sont utiles ; elles ne sont pas substituables. Et sans quantité de référence commune, trois soumissions ne sont pas comparables entre elles.</td></tr>
+      <tr><td>« 3 500 $, c’est cher. »</td><td>Par rapport à quoi ? Le plan porte sur des décisions d’un ordre de grandeur bien supérieur. Une seule erreur de portée sur un poste majeur coûte généralement davantage. Le bon repère n’est pas le coût du document, mais le coût de décider sans lui.</td></tr>
+      <tr><td>« Mon entrepreneur me dira combien ça coûte. »</td><td>Il vous donnera son prix, ce qui est légitime et nécessaire. Il ne vous donnera pas votre budget, ni la priorisation entre des travaux qu’il ne réalise pas, ni l’arbitrage entre intervenir maintenant ou dans trois ans. Ces questions n’ont pas de réponse neutre du côté de celui qui vend les travaux.</td></tr>
+      <tr><td>« Cela devrait déjà figurer dans le rapport d’inspection. »</td><td>La norme d’inspection vise l’appréciation de l’état observable du bâtiment [2]. Le budget, les quantités et la planification relèvent d’un mandat différent, avec sa propre méthodologie et sa propre responsabilité — et le règlement prévoit expressément qu’un tel service fasse l’objet d’un contrat distinct [1].</td></tr>
+      <tr><td>« Je peux comparer les prix moi-même. »</td><td>Vous pouvez comparer des montants. Comparer des offres suppose de ramener les quantités, les pertes, les heures, les exclusions et les garanties à une même base. C’est ce travail-là qui est facturé, et c’est celui qui fait apparaître les écarts de 20 à 35 %.</td></tr>
+      <tr><td>« Et si votre budget se révèle faux ? »</td><td>Nous ne remettons pas un prix, mais une fourchette assortie d’un niveau de confiance, d’hypothèses explicites et d’exclusions écrites. Chaque montant est traçable jusqu’à sa quantité, sa source de coût et sa date. Lorsque la portée n’est pas suffisamment définie pour estimer sérieusement, nous le disons et nous orientons vers l’expertise requise.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">5.6</span>Canaux et partenariats</h2>
+  <p>Le canal principal est interne : la base d’inspections déjà réalisée. Les canaux externes sont secondaires et comportent, pour certains, une exigence de divulgation.</p>
+  <div class="tw"><table class="compact">
+    <thead><tr><th style="width:38mm">Canal</th><th>Logique</th><th style="width:30mm">Précaution</th></tr></thead>
+    <tbody>
+      <tr><td>Clientèle d’inspection existante</td><td>Séquence post-rapport ; coût d’acquisition nul ; contexte de besoin maximal.</td><td>Aucune sollicitation avant remise du rapport.</td></tr>
+      <tr><td>Anciens clients — réactivation</td><td>Mise à jour du plan, travaux reportés, changement de projet.</td><td>Base de coûts réactualisée obligatoire.</td></tr>
+      <tr><td>Courtiers immobiliers</td><td>Source d’affaires naturelle en amont de la transaction.</td><td>Apparence de conflit à évaluer et, le cas échéant, à divulguer par écrit [9]. Aucune rétribution liée à la vente du plan.</td></tr>
+      <tr><td>Notaires et conseillers financiers</td><td>Intervenants présents au moment de la décision de capital.</td><td>Relation de référencement non rémunérée, documentée.</td></tr>
+      <tr><td>Contenu démonstratif</td><td>Cas chiffrés anonymisés montrant un écart révélé par la normalisation.</td><td>Anonymisation stricte ; aucune identification d’entrepreneur.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">5.7</span>Garde-fous marketing</h2>
+  <div class="callout-warn">
+    <div class="c-label">Interdits de communication</div>
+    <ul>
+      <li>Ne pas promettre que l’estimation sera le prix final des travaux.</li>
+      <li>Ne pas utiliser « certifié », « garanti » ou « conforme » sans fondement professionnel précis.</li>
+      <li>Ne pas suggérer que BatiFlow remplace un architecte ou un ingénieur lorsqu’un acte réservé est requis.</li>
+      <li>Ne pas présenter un écart de quantité comme une fraude ; parler d’écart à clarifier.</li>
+      <li>Ne pas annoncer « Classe C » tant que la méthodologie n’est pas formellement conforme au référentiel choisi [12].</li>
+      <li>Ne pas nommer ni recommander d’entrepreneur, même informellement [8].</li>
+      <li>Mettre l’indépendance et la transparence au centre du discours, jamais la peur.</li>
+    </ul>
+  </div>
+
+  <h2><span class="h-num">5.8</span>Contenu du Plan d’investissement</h2>
+  <p>Le livrable doit être reconnaissable, constant d’un dossier à l’autre, et structuré de manière à ce que sa valeur soit lisible dès les deux premières pages.</p>
+  <div class="tw"><table class="compact">
+    <thead><tr><th style="width:44mm">Section</th><th>Contenu</th></tr></thead>
+    <tbody>
+      <tr><td>Sommaire exécutif</td><td>Enveloppe totale, répartition par horizon, principaux risques budgétaires et postes déterminants.</td></tr>
+      <tr><td>Calendrier d’investissement</td><td>Immédiat / 0–12 mois / 1–3 ans / 3–5 ans / entretien préventif, avec montants par période.</td></tr>
+      <tr><td>Fiches par intervention</td><td>Source du constat, quantité, unité, hypothèses, coût, contingence, niveau de confiance, exclusions.</td></tr>
+      <tr><td>Scénarios</td><td>Minimum fonctionnel, scénario recommandé, remplacement complet lorsque pertinent.</td></tr>
+      <tr><td>Carte des dépendances</td><td>Travaux devant être coordonnés ou séquencés, et coût de l’exécution désordonnée.</td></tr>
+      <tr><td>Professionnels requis</td><td>Drapeau automatique lorsqu’une expertise ou une conception réservée est nécessaire.</td></tr>
+      <tr><td>Annexe méthodologique</td><td>Méthode de relevé, version et date de la base de coûts, limites, exclusions générales.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ PARTIE VI ============ -->
+<section id="p6">
+  <div class="part-head">
+    <span class="part-num">VI</span>
+    <span class="part-label">Partie VI</span>
+    <h1>Modèle opérationnel, produit et gouvernance de la donnée</h1>
+    <p class="part-abstract">L’architecture de données qui rend la chaîne possible, les verrous qui empêchent le système de franchir une frontière réservée, et les règles qui encadrent l’usage de l’intelligence artificielle.</p>
+  </div>
+
+  <h2><span class="h-num">6.1</span>Architecture de données</h2>
+  <p>Huit objets suffisent à porter l’ensemble de la chaîne. Leur discipline de saisie conditionne à la fois la qualité du livrable, la défense en responsabilité et la valeur résiduelle de l’actif de données.</p>
+  <div class="tw"><table>
+    <thead><tr><th style="width:34mm">Objet</th><th>Champs minimaux</th></tr></thead>
+    <tbody>
+      <tr><td>Constat</td><td>catégorie, localisation, photo, gravité, recommandation, source d’inspection, date</td></tr>
+      <tr><td>Intervention</td><td>type de travaux, portée estimable, profession requise, dépendances, horizon</td></tr>
+      <tr><td>Quantité</td><td>valeur nette, unité, source, date, méthode de relevé, précision</td></tr>
+      <tr><td>Coût unitaire</td><td>matériau, main-d’œuvre, équipement, région, date d’effet, source, version</td></tr>
+      <tr><td>Ajustement</td><td>perte, mobilisation, accessibilité, complexité, contingence</td></tr>
+      <tr><td>Estimation</td><td>bas, probable, haut, niveau de confiance, exclusions, hypothèses</td></tr>
+      <tr><td>Soumission</td><td>entrepreneur, quantité, perte, heures, taux, inclusions, exclusions, garanties, prix</td></tr>
+      <tr><td>Normalisation</td><td>écarts, questions de clarification, coût comparable, postes manquants</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout">
+    <div class="c-label">Règle d’or</div>
+    <p>Aucun montant ne doit exister dans le système sans être rattaché à une quantité, à une version de base de coûts et à un ensemble d’hypothèses. Un montant orphelin est <strong>non défendable</strong> : il ne peut être ni expliqué à un client, ni justifié à un assureur, ni reconstitué en cas de litige.</p>
+  </div>
+
+  <h2><span class="h-num">6.2</span>Moteur de compétence et de routage</h2>
+  <p>Chaque intervention doit franchir un contrôle en six points avant émission du livrable. Le contrôle est bloquant : il n’existe pas de contournement discrétionnaire.</p>
+  <ol>
+    <li>La portée est-elle suffisamment définie pour être estimée ?</li>
+    <li>Une quantité mesurée est-elle disponible, avec sa méthode et sa précision ?</li>
+    <li>L’estimation est-elle possible sans franchir la frontière de la conception ?</li>
+    <li>L’intervention touche-t-elle une activité potentiellement réservée ?</li>
+    <li>Un professionnel habilité est-il requis, et lequel ?</li>
+    <li>Le niveau de confiance minimal est-il atteint pour publier un montant ?</li>
+  </ol>
+  <div class="tw"><table>
+    <thead><tr><th style="width:56mm">Exemple d’intervention</th><th>Décision BatiFlow</th></tr></thead>
+    <tbody>
+      <tr><td>Remplacement équivalent d’un chauffe-eau</td><td>Estimation possible ; vérifier les règles spécifiques applicables et la portée exacte.</td></tr>
+      <tr><td>Réfection standard d’un revêtement de toiture</td><td>Quantification et budget possibles ; méthode technique spécialisée à confirmer si les constats l’exigent.</td></tr>
+      <tr><td>Fissure présentant un enjeu structural</td><td>Allocation budgétaire provisoire seulement ; expertise d’ingénieur requise pour la solution.</td></tr>
+      <tr><td>Modification d’un mur porteur</td><td>Conception bloquée par le système ; routage professionnel obligatoire.</td></tr>
+      <tr><td>Reprise de drain français</td><td>Estimation d’une allocation possible ; portée réelle dépendante d’un diagnostic complémentaire à signaler.</td></tr>
+      <tr><td>Soumission dont la quantité dépasse le relevé de 30 %</td><td>Drapeau d’écart et question de clarification automatique, sans accusation ni qualification.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">6.3</span>Règles d’utilisation de l’intelligence artificielle</h2>
+  <p>L’IA est un accélérateur de production et un détecteur d’incohérences. Elle n’est en aucun cas une autorité de prix ni une autorité technique. Trois niveaux d’autonomie sont définis.</p>
+  <div class="tw"><table>
+    <thead><tr><th style="width:26mm">Niveau</th><th style="width:46mm">Tâches</th><th>Contrôle requis</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill p-green">Autonome</span></td><td>Classification des constats, association à des postes de travaux, rédaction d’explications, mise en forme, génération de questions de clarification.</td><td>Revue humaine de sortie avant transmission au client.</td></tr>
+      <tr><td><span class="pill p-amber">Assisté</span></td><td>Proposition de facteurs de perte, détection d’anomalies dans une soumission, suggestion de niveau de confiance, hiérarchisation des horizons.</td><td>Validation humaine explicite et consignée au journal d’audit.</td></tr>
+      <tr><td><span class="pill p-red">Interdit</span></td><td>Production autonome d’un prix de marché, choix d’une méthode structurale, attestation de conformité, contournement d’un verrou professionnel.</td><td>Bloqué au niveau du système ; aucune exception opérationnelle.</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Tout montant remis au client doit provenir d’une <strong>formule auditable</strong> appliquée à une donnée de coût versionnée.</li>
+    <li>Toute suggestion générée par IA touchant une activité potentiellement réservée doit passer par une validation humaine ou professionnelle avant publication.</li>
+    <li>Le journal d’audit doit distinguer ce qui a été proposé par le système de ce qui a été retenu par un humain.</li>
+  </ul>
+
+  <h2><span class="h-num">6.4</span>Gouvernance de la base de coûts</h2>
+  <p>La base de coûts est l’actif central du modèle. Sa gouvernance doit être formalisée au même titre qu’un référentiel comptable.</p>
+  <div class="tw"><table class="compact">
+    <thead><tr><th style="width:36mm">Règle</th><th>Contenu</th></tr></thead>
+    <tbody>
+      <tr><td>Versionnage</td><td>Chaque version porte un identifiant, une date d’effet, une région et une liste de modifications. Aucune modification en place.</td></tr>
+      <tr><td>Traçabilité des sources</td><td>Chaque coût unitaire référence sa source et sa date d’observation ; les prix issus de soumissions réelles sont marqués comme tels.</td></tr>
+      <tr><td>Fréquence de révision</td><td>Révision trimestrielle systématique ; révision immédiate en cas de variation matérielle d’un poste majeur.</td></tr>
+      <tr><td>Inscription au livrable</td><td>La version utilisée figure dans chaque Plan d’investissement remis ; toute réémission déclenche une revalidation.</td></tr>
+      <tr><td>Boucle de rétroaction</td><td>Chaque soumission normalisée alimente la mesure d’écart entre estimation et prix de marché, consolidée mensuellement.</td></tr>
+      <tr><td>Séparation des rôles</td><td>La personne qui met à jour la base de coûts n’est pas celle qui approuve la version publiée.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">6.5</span>Architecture contractuelle</h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:50mm">Document</th><th>Objectif</th></tr></thead>
+    <tbody>
+      <tr><td>Contrat A — Inspection</td><td>Mandat réglementé et obligations propres à l’inspection ; aucune mention de prix de travaux.</td></tr>
+      <tr><td>Rapport A — Inspection</td><td>Constats et recommandations selon la norme applicable, sans contenu budgétaire.</td></tr>
+      <tr><td>Contrat B — Plan d’investissement</td><td>Portée, méthodologie, données utilisées, hypothèses, exclusions, niveau de précision, régime de responsabilité.</td></tr>
+      <tr><td>Rapport B — Plan d’investissement</td><td>Budget, calendrier, quantités, niveaux de confiance, contingences, professionnels requis.</td></tr>
+      <tr><td>Contrat C — Consultation et normalisation</td><td>Portée commerciale, nombre d’offres traitées, règles de comparaison, limites techniques explicites.</td></tr>
+      <tr><td>Rapport C — Analyse des soumissions</td><td>Tableau comparatif, écarts, exclusions, demandes de clarification, coût comparable.</td></tr>
+      <tr><td>Politique interne d’indépendance</td><td>Interdiction de toute rémunération d’entrepreneur ; procédure de divulgation d’apparence de conflit.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">6.6</span>Capacité de production et point de tension</h2>
+  <p>Au scénario central, la charge annuelle s’établit comme suit. Le point de tension apparaît non pas sur le volume total, mais sur la <strong>concentration saisonnière</strong> des transactions immobilières.</p>
+  <div class="tw"><table class="num compact">
+    <thead><tr><th>Activité</th><th style="width:22mm">Volume</th><th style="width:26mm">Heures unitaires</th><th style="width:24mm">Heures totales</th></tr></thead>
+    <tbody>
+      <tr><td>Inspections</td><td>180</td><td>6,0 h</td><td>1 080 h</td></tr>
+      <tr><td>Plans d’investissement</td><td>63</td><td>5,0 h</td><td>315 h</td></tr>
+      <tr><td>Normalisations de soumissions</td><td>44</td><td>2,0 h</td><td>88 h</td></tr>
+      <tr class="total"><td>Charge de production annuelle</td><td>—</td><td>—</td><td>1 483 h</td></tr>
+    </tbody>
+  </table></div>
+  <p class="t-note">À rythme de production pilote (Plan 12 h, normalisation 5 h), la même activité représenterait 2 056 heures, soit une charge additionnelle de 573 heures — l’équivalent d’un tiers de ressource à temps plein. C’est la justification opérationnelle directe de l’investissement en développement.</p>
+  <div class="callout">
+    <div class="c-label">Règle de capacité</div>
+    <p>Le délai de livraison du Plan d’investissement doit demeurer inférieur à <strong>sept jours ouvrables</strong>. Au-delà, la fenêtre décisionnelle du client se referme et la conversion du niveau 3 s’effondre. Lorsque le délai cible ne peut être tenu en haute saison, la règle est de <strong>limiter les invitations</strong> plutôt que de dégrader le délai ou la méthode.</p>
+  </div>
+
+  <h2><span class="h-num">6.7</span>Journal d’audit</h2>
+  <p>Le journal d’audit est le dispositif qui rend la méthodologie opposable. Il doit être automatique, non modifiable rétroactivement, et conservé selon la durée recommandée par l’avocat et l’assureur.</p>
+  <ul>
+    <li><strong>Pour chaque montant :</strong> quantité source, méthode de relevé, version de base de coûts, facteurs appliqués, formule, auteur et horodatage.</li>
+    <li><strong>Pour chaque suggestion automatisée :</strong> ce qui a été proposé, ce qui a été retenu, par qui, et sur quel fondement.</li>
+    <li><strong>Pour chaque routage professionnel :</strong> le déclencheur, la profession identifiée, la communication faite au client.</li>
+    <li><strong>Pour chaque livrable émis :</strong> version du gabarit, version de la méthodologie, exclusions applicables et date d’émission.</li>
+  </ul>
+</section>
+
+<!-- ============ PARTIE VII ============ -->
+<section id="p7">
+  <div class="part-head">
+    <span class="part-num">VII</span>
+    <span class="part-label">Partie VII</span>
+    <h1>Registre des risques et gouvernance du projet</h1>
+    <p class="part-abstract">Douze risques identifiés, leur exposition, leur mitigation, leur propriétaire et leur indicateur d’alerte — puis les quatre conditions dans lesquelles le projet doit être arrêté.</p>
+  </div>
+
+  <h2><span class="h-num">7.1</span>Registre des risques</h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:7mm">#</th><th style="width:40mm">Risque</th><th style="width:16mm">Prob.</th><th style="width:16mm">Impact</th><th>Mitigation et indicateur d’alerte</th></tr></thead>
+    <tbody>
+      <tr><td>R1</td><td>Requalification d’un livrable en acte professionnel réservé</td><td>Moyenne</td><td><span class="pill p-red">Critique</span></td><td>Avis juridique écrit ; terminologie gelée ; verrous de routage dans l’outil. <em>Alerte : toute demande client sortant du gabarit standard.</em></td></tr>
+      <tr><td>R2</td><td>Refus ou exclusion de couverture E&amp;O sur les activités nouvelles</td><td>Moyenne</td><td><span class="pill p-red">Critique</span></td><td>Confirmation écrite préalable ; réexamen à chaque renouvellement. <em>Alerte : réponse évasive ou orale de l’assureur.</em></td></tr>
+      <tr><td>R3</td><td>Écart matériel entre estimation et coût réel conduisant à une réclamation</td><td>Élevée</td><td><span class="pill p-amber">Élevé</span></td><td>Fourchettes, niveaux de confiance, exclusions écrites, mesure systématique de l’écart. <em>Alerte : écart médian supérieur à 25 %.</em></td></tr>
+      <tr><td>R4</td><td>Confusion perçue entre le rapport d’inspection et le Plan d’investissement</td><td>Moyenne</td><td><span class="pill p-amber">Élevé</span></td><td>Contrats, gabarits et vocabulaire strictement distincts ; aucune promotion avant remise du rapport. <em>Alerte : questions clients mélangeant les deux mandats.</em></td></tr>
+      <tr><td>R5</td><td>Conflit d’intérêts réel ou apparent</td><td>Faible</td><td><span class="pill p-red">Critique</span></td><td>Interdiction absolue de rémunération d’entrepreneur ; procédure de divulgation écrite [9]. <em>Alerte : toute proposition de partenariat rémunéré.</em></td></tr>
+      <tr><td>R6</td><td>Base de coûts obsolète ; volatilité des prix des matériaux</td><td>Élevée</td><td><span class="pill p-amber">Moyen</span></td><td>Révision trimestrielle et révision immédiate sur variation matérielle ; version inscrite au livrable. <em>Alerte : version de plus de 120 jours utilisée.</em></td></tr>
+      <tr><td>R7</td><td>Dépendance à l’IA pour des montants non traçables</td><td>Moyenne</td><td><span class="pill p-amber">Élevé</span></td><td>Niveaux d’autonomie codés dans l’outil ; blocage technique du niveau interdit. <em>Alerte : montant sans chaîne d’audit complète.</em></td></tr>
+      <tr><td>R8</td><td>Conversion inférieure au seuil de rentabilité du produit</td><td>Moyenne</td><td><span class="pill p-amber">Élevé</span></td><td>Séquence de vente scriptée ; objections formées ; ciblage par indicateur d’opportunité. <em>Alerte : conversion inférieure à 20 % sur 40 dossiers exposés.</em></td></tr>
+      <tr><td>R9</td><td>Capacité de production insuffisante en haute saison</td><td>Élevée</td><td><span class="pill p-amber">Moyen</span></td><td>Limitation du nombre d’invitations plutôt que dégradation du délai. <em>Alerte : délai de livraison supérieur à 7 jours ouvrables.</em></td></tr>
+      <tr><td>R10</td><td>Réaction négative d’entrepreneurs à la normalisation</td><td>Moyenne</td><td><span class="pill p-green">Faible à moyen</span></td><td>Formulation neutre ; demandes de clarification factuelles ; aucune accusation. <em>Alerte : baisse du taux de réponse au bordereau sous 70 %.</em></td></tr>
+      <tr><td>R11</td><td>Imitation de l’offre par un concurrent</td><td>Élevée</td><td><span class="pill p-amber">Moyen</span></td><td>Accumulation de la base de coûts et de la boucle d’apprentissage ; option de licence (section 4.10). <em>Alerte : apparition d’une offre similaire dans la zone.</em></td></tr>
+      <tr><td>R12</td><td>Dérive de portée vers la gestion de projet non assurée</td><td>Moyenne</td><td><span class="pill p-amber">Élevé</span></td><td>Portée contractuelle fermée ; procédure de refus documentée. <em>Alerte : demandes répétées d’accompagnement de chantier.</em></td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">7.2</span>Cartographie de l’exposition</h2>
+  <div class="tw" style="border:none"><table class="matrix">
+    <thead><tr><th></th><th>Impact faible</th><th>Impact moyen</th><th>Impact élevé</th><th>Impact critique</th></tr></thead>
+    <tbody>
+      <tr><td class="axis">Probabilité<br>élevée</td><td class="m-lo"></td><td class="m-md"><span class="rid">R6</span><span class="rid">R9</span><span class="rid">R11</span></td><td class="m-hi"><span class="rid">R3</span></td><td class="m-hi"></td></tr>
+      <tr><td class="axis">Probabilité<br>moyenne</td><td class="m-lo"><span class="rid">R10</span></td><td class="m-md"></td><td class="m-hi"><span class="rid">R4</span><span class="rid">R7</span><span class="rid">R8</span><span class="rid">R12</span></td><td class="m-hi"><span class="rid">R1</span><span class="rid">R2</span></td></tr>
+      <tr><td class="axis">Probabilité<br>faible</td><td class="m-lo"></td><td class="m-lo"></td><td class="m-md"></td><td class="m-hi"><span class="rid">R5</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="t-note">Les risques R1, R2 et R5 justifient à eux seuls le caractère bloquant des conditions suspensives 1 et 2. Leur traitement est antérieur à tout engagement commercial.</p>
+
+  <h2><span class="h-num">7.3</span>Gouvernance et seuils d’escalade</h2>
+  <div class="tw"><table class="compact">
+    <thead><tr><th style="width:44mm">Événement</th><th>Escalade</th></tr></thead>
+    <tbody>
+      <tr><td>Demande client hors gabarit touchant une activité potentiellement réservée</td><td>Suspension du livrable ; revue par le responsable conformité avant émission.</td></tr>
+      <tr><td>Écart estimation / offre normalisée supérieur à 25 % sur un poste majeur</td><td>Revue méthodologique documentée ; correction de la base de coûts si la cause est systémique.</td></tr>
+      <tr><td>Réclamation ou contestation écrite d’un client</td><td>Notification immédiate à la direction générale et à l’assureur ; gel du gabarit concerné.</td></tr>
+      <tr><td>Conversion sous 20 % sur trois mois consécutifs</td><td>Revue de la séquence de vente et du ciblage ; réexamen du prix avant tout élargissement.</td></tr>
+      <tr><td>Proposition de rémunération par un entrepreneur</td><td>Refus documenté ; consignation au registre d’indépendance.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><span class="h-num">7.4</span>Critères d’arrêt du projet</h2>
+  <p>Un projet sans critère d’arrêt écrit dérive. Les quatre conditions suivantes commandent la suspension du déploiement et un réexamen complet par le comité.</p>
+  <div class="callout-warn">
+    <div class="c-label">Conditions d’arrêt</div>
+    <ol>
+      <li><strong>Juridique.</strong> L’avis juridique conclut qu’un élément central du livrable constitue un acte réservé non contournable sans professionnel habilité, et qu’aucune reformulation viable n’existe.</li>
+      <li><strong>Assurance.</strong> Trois assureurs au minimum refusent de couvrir nommément les activités d’estimation, de métré et d’analyse de soumissions.</li>
+      <li><strong>Méthodologie.</strong> Après le pilote rétroactif sur 20 dossiers, l’écart médian entre l’estimation et les coûts réels observés dépasse 25 % sans cause identifiable et corrigible.</li>
+      <li><strong>Commercial.</strong> La conversion demeure inférieure à 15 % après 60 dossiers effectivement exposés à une invitation qualifiée.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ PARTIE VIII ============ -->
+<section id="p8">
+  <div class="part-head">
+    <span class="part-num">VIII</span>
+    <span class="part-label">Partie VIII</span>
+    <h1>Plan de déploiement et portes de décision</h1>
+    <p class="part-abstract">Quatre phases, des livrables vérifiables, un propriétaire par phase, et trois portes de décision qui conditionnent la libération du budget suivant.</p>
+  </div>
+
+  <h2><span class="h-num">8.1</span>Phase 0 — Validation de risque</h2>
+  <p><strong>Objectif :</strong> lever les deux conditions suspensives bloquantes. <strong>Durée cible :</strong> 6 à 10 semaines. <strong>Propriétaire :</strong> direction générale et responsable conformité.</p>
+  <ol>
+    <li><strong>Avocat.</strong> Validation des trois contrats, de la terminologie des livrables et des frontières d’actes réservés ; réponses écrites aux cinq zones grises de la section 2.11 et aux questions de l’annexe D.</li>
+    <li><strong>Assureur.</strong> Confirmation écrite de couverture pour la liste d’activités de la section 2.7 et des questions de l’annexe E.</li>
+    <li><strong>Comptabilité et fiscalité.</strong> Structure de facturation, traitement des taxes, séparation comptable si nécessaire.</li>
+    <li><strong>Professions partenaires.</strong> Identification des professionnels de routage et formalisation du protocole de renvoi, sans rémunération croisée.</li>
+  </ol>
+  <div class="callout">
+    <div class="c-label">Porte de décision 1 — fin de phase 0</div>
+    <p>Conditions de passage : avis juridique écrit reçu et favorable sous conditions gérables <strong>et</strong> lettre de couverture E&amp;O obtenue. À défaut, application des critères d’arrêt 1 ou 2 (section 7.4). Aucun budget de phase 1 n’est libéré avant cette porte.</p>
+  </div>
+
+  <h2><span class="h-num">8.2</span>Phase 1 — Méthodologie et pilote</h2>
+  <p><strong>Objectif :</strong> prouver que la méthode produit des estimations fiables et reproductibles. <strong>Durée cible :</strong> 10 à 14 semaines. <strong>Propriétaire :</strong> responsable méthodologie.</p>
+  <ol>
+    <li>Sélectionner 10 à 20 catégories de travaux fréquents et fortement quantifiables.</li>
+    <li>Définir pour chacune : unités, facteurs de perte, sources de prix, contingences et limites de portée.</li>
+    <li>Construire le gabarit du Plan d’investissement et l’annexe méthodologique associée.</li>
+    <li>Tester rétroactivement sur 20 dossiers connus et comparer aux soumissions réelles obtenues.</li>
+    <li>Mesurer l’erreur, en identifier les causes, et corriger la base de coûts en conséquence.</li>
+    <li>Documenter la version 1.0 de la méthodologie et la faire approuver par le comité.</li>
+  </ol>
+  <div class="callout">
+    <div class="c-label">Porte de décision 2 — fin de phase 1</div>
+    <p>Conditions de passage : écart médian entre estimation et coûts réels inférieur ou égal à 20 % sur les 20 dossiers testés, causes d’écart identifiées et corrigées, méthodologie versionnée et approuvée. Un écart supérieur à 25 % sans cause corrigible déclenche le critère d’arrêt 3.</p>
+  </div>
+
+  <h2><span class="h-num">8.3</span>Phase 2 — Normalisation des soumissions</h2>
+  <p><strong>Objectif :</strong> rendre le niveau 3 industrialisable. <strong>Durée cible :</strong> 8 à 12 semaines. <strong>Propriétaire :</strong> responsable produit.</p>
+  <ol>
+    <li>Créer un bordereau structuré par poste et quantité de référence, sans contenu prescriptif de méthode.</li>
+    <li>Imposer la saisie séparée des pertes, heures, taux, matériaux, équipements et exclusions lorsque pertinent.</li>
+    <li>Définir les règles d’anomalie : écarts de quantité, postes absents, conditions contradictoires, garanties non équivalentes.</li>
+    <li>Générer automatiquement les questions de clarification à partir des anomalies détectées.</li>
+    <li>Implémenter le calcul du coût comparable et son explication au client.</li>
+  </ol>
+
+  <h2><span class="h-num">8.4</span>Phase 3 — Commercialisation</h2>
+  <p><strong>Objectif :</strong> atteindre le taux de conversion central. <strong>Durée cible :</strong> continue à compter du trimestre suivant. <strong>Propriétaire :</strong> responsable commercial.</p>
+  <ol>
+    <li>Déployer l’offre simple à trois niveaux et le collatéral associé.</li>
+    <li>Activer la séquence post-rapport sur les dossiers à fort potentiel budgétaire.</li>
+    <li>Former les objections de la section 5.5 et mesurer leur fréquence réelle.</li>
+    <li>Produire des cas clients chiffrés et anonymisés montrant comment une offre apparemment moins chère devient plus chère après normalisation.</li>
+    <li>Suivre les taux de conversion inspection → plan → soumissions et le revenu moyen par dossier.</li>
+  </ol>
+  <div class="callout">
+    <div class="c-label">Porte de décision 3 — fin du premier trimestre de commercialisation</div>
+    <p>Conditions de poursuite : conversion supérieure ou égale à 20 % sur au moins 40 dossiers exposés, aucune réclamation critique, délai de livraison respecté. Une conversion inférieure à 15 % sur 60 dossiers exposés déclenche le critère d’arrêt 4.</p>
+  </div>
+
+  <h2><span class="h-num">8.5</span>Chronogramme indicatif</h2>
+  <div class="tw"><table class="gantt">
+    <thead><tr><th>Phase et jalons</th><th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th></tr></thead>
+    <tbody>
+      <tr><td>Phase 0 — Validation juridique et assurance</td><td><span class="bar"></span></td><td><span class="bar"></span></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>Porte de décision 1</td><td></td><td><span class="bar b3"></span></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>Phase 1 — Méthodologie et base de coûts</td><td></td><td><span class="bar b2"></span></td><td><span class="bar b2"></span></td><td><span class="bar b2"></span></td><td></td><td></td></tr>
+      <tr><td>Pilote rétroactif — 20 dossiers</td><td></td><td></td><td><span class="bar b2"></span></td><td><span class="bar b2"></span></td><td></td><td></td></tr>
+      <tr><td>Porte de décision 2</td><td></td><td></td><td></td><td><span class="bar b3"></span></td><td></td><td></td></tr>
+      <tr><td>Phase 2 — Bordereau et moteur de normalisation</td><td></td><td></td><td></td><td><span class="bar b2"></span></td><td><span class="bar b2"></span></td><td></td></tr>
+      <tr><td>Phase 3 — Commercialisation</td><td></td><td></td><td></td><td></td><td><span class="bar b4"></span></td><td><span class="bar b4"></span></td></tr>
+      <tr><td>Porte de décision 3</td><td></td><td></td><td></td><td></td><td></td><td><span class="bar b3"></span></td></tr>
+      <tr><td>Extensions du modèle de revenus</td><td></td><td></td><td></td><td></td><td></td><td><span class="bar ghost"></span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="t-note">Unité : période d’environ six semaines. Le chronogramme est séquentiel par construction : les phases 1 et 2 ne peuvent chevaucher la phase 0, dont l’issue conditionne leur objet même.</p>
+</section>
+
+<!-- ============ PARTIE IX ============ -->
+<section id="p9">
+  <div class="part-head">
+    <span class="part-num">IX</span>
+    <span class="part-label">Partie IX</span>
+    <h1>Tableau de bord et pilotage par indicateurs</h1>
+    <p class="part-abstract">Dix indicateurs, une cible, un seuil d’alerte et un propriétaire pour chacun. Ce qui n’est pas mesuré ici n’est pas piloté.</p>
+  </div>
+
+  <h2><span class="h-num">9.1</span>Indicateurs de performance</h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:44mm">Indicateur</th><th>Ce qu’il mesure</th><th style="width:20mm">Cible</th><th style="width:22mm">Alerte</th><th style="width:20mm">Fréquence</th></tr></thead>
+    <tbody>
+      <tr><td>Conversion inspection → Plan</td><td>Adéquation du produit principal et qualité de la séquence de vente.</td><td>≥ 35 %</td><td>&lt; 20 %</td><td>Mensuelle</td></tr>
+      <tr><td>Attache Plan → normalisation</td><td>Effet du prix de 1 500 $ comme produit de clôture à faible friction.</td><td>≥ 70 %</td><td>&lt; 50 %</td><td>Mensuelle</td></tr>
+      <tr><td>Revenu moyen par inspection acquise</td><td>Indicateur économique central du modèle.</td><td>≥ 3 000 $</td><td>&lt; 2 200 $</td><td>Mensuelle</td></tr>
+      <tr><td>Temps de production du Plan</td><td>Levier logiciel et marge incrémentale réelle.</td><td>≤ 5 h</td><td>&gt; 9 h</td><td>Mensuelle</td></tr>
+      <tr><td>Marge brute du niveau 2</td><td>Capture effective de la valeur de l’automatisation.</td><td>≥ 85 %</td><td>&lt; 75 %</td><td>Trimestrielle</td></tr>
+      <tr><td>Délai de livraison du Plan</td><td>Maintien de la fenêtre décisionnelle du client.</td><td>≤ 7 j ouvr.</td><td>&gt; 12 j ouvr.</td><td>Continue</td></tr>
+      <tr><td>Écart médian estimation / offre normalisée</td><td>Qualité de la méthode et de la base de coûts.</td><td>≤ 15 %</td><td>&gt; 25 %</td><td>Mensuelle</td></tr>
+      <tr><td>Taux de réponse des entrepreneurs au bordereau</td><td>Acceptabilité du dispositif de consultation par le marché.</td><td>≥ 70 %</td><td>&lt; 50 %</td><td>Mensuelle</td></tr>
+      <tr><td>Interventions routées à un professionnel</td><td>Contrôle du risque réglementaire et opportunité de partenariat.</td><td>10 – 20 %</td><td>&lt; 5 %</td><td>Trimestrielle</td></tr>
+      <tr><td>Réclamations, corrections et écarts critiques</td><td>Qualité du service et assurabilité dans la durée.</td><td>0 critique</td><td>≥ 1</td><td>Continue</td></tr>
+    </tbody>
+  </table></div>
+  <p class="t-note">Un taux d’interventions routées inférieur à 5 % constitue un signal d’alerte et non une performance : il suggère que le moteur de routage ne se déclenche pas, ou qu’il est contourné.</p>
+
+  <h2><span class="h-num">9.2</span>Hiérarchie de pilotage</h2>
+  <p>Les dix indicateurs ne sont pas de même nature. Trois pilotent la valeur, trois pilotent la production, quatre pilotent le risque.</p>
+  <div class="tw"><table class="compact">
+    <thead><tr><th style="width:30mm">Famille</th><th style="width:56mm">Indicateurs</th><th>Question de direction associée</th></tr></thead>
+    <tbody>
+      <tr><td>Valeur</td><td>Conversion, attache, revenu moyen par inspection</td><td>Le marché achète-t-il ce que nous pensons vendre ?</td></tr>
+      <tr><td>Production</td><td>Temps de production, marge brute, délai de livraison</td><td>Le levier logiciel se matérialise-t-il en marge plutôt qu’en surcharge ?</td></tr>
+      <tr><td>Risque</td><td>Écart médian, taux de réponse, routage professionnel, réclamations</td><td>La méthode tient-elle, et restons-nous du bon côté de la frontière ?</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout-dark">
+    <div class="c-label">Règle de lecture</div>
+    <p>Un franchissement de seuil d’alerte sur la famille <strong>Risque</strong> commande une action immédiate, indépendamment de la performance commerciale. Un excellent taux de conversion accompagné d’un écart médian de 30 % n’est pas une réussite : c’est une exposition en cours de constitution.</p>
+  </div>
+</section>
+
+<!-- ============ ANNEXES ============ -->
+<section id="ax1">
+  <div class="part-head">
+    <span class="part-label">Annexes</span>
+    <h1>Annexe A — Exemple de fiche d’intervention</h1>
+    <p class="part-abstract">Gabarit de la fiche élémentaire du Plan d’investissement. Chaque champ est obligatoire ; un champ vide bloque l’émission du livrable.</p>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th style="width:44mm">Champ</th><th>Exemple</th></tr></thead>
+    <tbody>
+      <tr><td>Constat source</td><td>Revêtement de toiture en fin de vie utile ; remplacement à prévoir.</td></tr>
+      <tr><td>Intervention</td><td>Réfection du revêtement de toiture.</td></tr>
+      <tr><td>Horizon recommandé</td><td>0 – 12 mois.</td></tr>
+      <tr><td>Quantité nette</td><td>1 875 pi²</td></tr>
+      <tr><td>Méthode de relevé</td><td>Mesure sur plan et vérification au site ; précision estimée ± 5 %.</td></tr>
+      <tr><td>Facteur de perte estimatif</td><td>12 % — à confirmer par l’entrepreneur selon la géométrie et la méthode retenue.</td></tr>
+      <tr><td>Quantité budgétaire</td><td>2 100 pi²</td></tr>
+      <tr><td>Base de coûts</td><td>Version septembre 2026 — région Montréal / Rive-Sud.</td></tr>
+      <tr><td>Fourchette</td><td>22 000 $ à 28 000 $</td></tr>
+      <tr><td>Contingence</td><td>Incluse selon le niveau de définition de la portée.</td></tr>
+      <tr><td>Niveau de confiance</td><td>Moyen.</td></tr>
+      <tr><td>Exclusions</td><td>Réparations structurales non visibles ; amiante ; modifications de ventilation non définies.</td></tr>
+      <tr><td>Dépendances</td><td>À coordonner avec le remplacement des gouttières et la réfection des solins de cheminée.</td></tr>
+      <tr><td>Profession requise</td><td>À déterminer si les constats révèlent une problématique hors remplacement standard.</td></tr>
+      <tr><td>Traçabilité</td><td>Identifiant de constat, auteur, horodatage, version de méthodologie.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Annexe B — Exemple de normalisation d’une soumission</h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:36mm">Variable</th><th style="width:34mm">Référence BatiFlow</th><th style="width:30mm">Soumission</th><th>Analyse</th></tr></thead>
+    <tbody>
+      <tr><td>Surface nette</td><td>1 875 pi²</td><td>2 300 pi²</td><td>Écart brut de + 22,7 % par rapport au relevé.</td></tr>
+      <tr><td>Perte attendue</td><td>12 % <span class="hyp">Hyp.</span></td><td>Non précisée</td><td>Demander la justification du facteur appliqué.</td></tr>
+      <tr><td>Quantité à 12 % de perte</td><td>2 100 pi²</td><td>2 300 pi²</td><td>200 pi² demeurent à expliquer.</td></tr>
+      <tr><td>Solins</td><td>Inclus au bordereau</td><td>Exclus</td><td>À ajouter au coût comparable.</td></tr>
+      <tr><td>Disposition des matériaux</td><td>Incluse au bordereau</td><td>Non mentionnée</td><td>Clarification requise : incluse ou en sus ?</td></tr>
+      <tr><td>Garantie de main-d’œuvre</td><td>10 ans demandés</td><td>5 ans</td><td>Offre non équivalente ; valoriser l’écart.</td></tr>
+      <tr><td>Délai d’exécution</td><td>Non contraint</td><td>10 semaines</td><td>Sans incidence de coût comparable ; à signaler au client.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout">
+    <div class="c-label">Formulation type d’une demande de clarification</div>
+    <p>« Notre relevé établit une surface nette de 1 875 pi². Votre soumission utilise 2 300 pi², soit un écart de 22,7 %. En appliquant un facteur de perte de 12 %, la quantité attendue serait de 2 100 pi². Pouvez-vous préciser la méthode de calcul retenue et les éléments qui expliquent la différence résiduelle ? »</p>
+  </div>
+
+  <h2>Annexe C — Lexique commercial : formulations à éviter et à privilégier</h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:48%">À éviter</th><th>À privilégier</th></tr></thead>
+    <tbody>
+      <tr><td>« Prix garanti des travaux »</td><td>« Enveloppe budgétaire fondée sur les données et hypothèses indiquées. »</td></tr>
+      <tr><td>« Devis technique » / « devis pour soumission »</td><td>« Bordereau de consultation » / « portée commerciale » / « quantités de référence ».</td></tr>
+      <tr><td>« L’entrepreneur C gonfle ses quantités »</td><td>« La quantité déclarée présente un écart de 22,7 % par rapport au relevé ; clarification requise. »</td></tr>
+      <tr><td>« BatiFlow certifie la solution »</td><td>« La solution technique doit être validée par le professionnel requis lorsque applicable. »</td></tr>
+      <tr><td>« Estimation de Classe C »</td><td>« Plan d’investissement — analyse budgétaire », sauf méthodologie Classe C formellement satisfaite [12].</td></tr>
+      <tr><td>« Rapport d’inspection premium »</td><td>« Mandat distinct de planification budgétaire », conformément à l’article 20 [1].</td></tr>
+      <tr><td>« Nous surveillons vos travaux »</td><td>« Nous comparons les offres reçues sur une base commune. »</td></tr>
+      <tr><td>« Nous vous recommandons cet entrepreneur »</td><td>« Voici les qualifications à rechercher pour ce type de travaux. » [8]</td></tr>
+      <tr><td>« Coût final : 25 000 $ »</td><td>« Fourchette de 22 000 $ à 28 000 $, niveau de confiance moyen, exclusions indiquées. »</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Annexe D — Questions à soumettre à l’avocat</h2>
+  <ol>
+    <li>Le bordereau de consultation proposé peut-il être requalifié en document professionnel réservé au sens de la Loi sur les architectes [5, 6] ou de la Loi sur les ingénieurs [7] ? À partir de quel degré de prescription ?</li>
+    <li>La normalisation des soumissions, vendue plusieurs semaines après l’inspection, demeure-t-elle un « service supplémentaire » au sens de l’article 20 [1] ? Quelles obligations de forme en découlent ?</li>
+    <li>Le Plan d’investissement et la normalisation constituent-ils un ou deux services supplémentaires distincts ?</li>
+    <li>Quelles mentions obligatoires les contrats B et C doivent-ils comporter lorsque le client est un consommateur, y compris en matière de délai de résolution ?</li>
+    <li>Dans quelle mesure une clause limitant la responsabilité sur l’exactitude de l’estimation est-elle opposable au regard de l’article 2100 du Code civil [11] ?</li>
+    <li>Quelle formulation d’avertissement est à la fois efficace juridiquement et compatible avec l’obligation de prudence et de diligence ?</li>
+    <li>Une source d’affaires provenant d’un courtier immobilier crée-t-elle une apparence de conflit devant être divulguée par écrit au sens de l’article 18 [9] ?</li>
+    <li>Le fait de transmettre des questions de clarification à un entrepreneur pour le compte du client crée-t-il un mandat de représentation, et avec quelles conséquences ?</li>
+    <li>La proposition d’une allocation budgétaire provisoire sur un poste nécessitant une expertise d’ingénieur est-elle admissible, et sous quelle formulation ?</li>
+    <li>Quelle durée de conservation du journal d’audit est recommandée au regard des délais de prescription applicables ?</li>
+    <li>L’appellation « Plan d’investissement de la propriété » présente-t-elle un risque de confusion avec une activité de conseil financier réglementée ?</li>
+    <li>Une cession de la méthodologie sous licence à d’autres titulaires d’inspection (section 4.10) transfère-t-elle une part de responsabilité à BatiFlow, et comment la circonscrire ?</li>
+  </ol>
+
+  <h2>Annexe E — Questions à soumettre à l’assureur</h2>
+  <ol>
+    <li>La police actuelle couvre-t-elle nommément l’estimation budgétaire de travaux de construction réalisée à partir de relevés ?</li>
+    <li>Les métrés et la quantification de postes de travaux sont-ils couverts, y compris en cas d’erreur de mesure ?</li>
+    <li>L’analyse comparative de soumissions et la production d’un coût comparable sont-elles couvertes ?</li>
+    <li>La formulation de demandes de clarification adressées à des entrepreneurs pour le compte d’un client est-elle couverte ?</li>
+    <li>Existe-t-il une exclusion relative aux « conseils financiers » ou aux « prévisions économiques » susceptible de s’appliquer au Plan d’investissement ?</li>
+    <li>Quelle est l’incidence, sur la couverture, de l’usage d’un outil automatisé ou d’intelligence artificielle dans la production du livrable ?</li>
+    <li>La couverture s’étend-elle aux livrables réémis ou mis à jour ultérieurement à partir d’une base de coûts actualisée ?</li>
+    <li>Quelles pratiques documentaires l’assureur exige-t-il pour maintenir la couverture — journal d’audit, versionnage, mentions au livrable ?</li>
+    <li>Quelle serait la surprime associée à l’ajout de ces activités, et selon quel volume d’affaires ?</li>
+    <li>La couverture serait-elle affectée par une cession de la méthodologie sous licence à des tiers ?</li>
+  </ol>
+</section>
+
+<section id="ax2">
+  <div class="part-head">
+    <span class="part-label">Annexes</span>
+    <h1>Annexe F — Glossaire technique et financier</h1>
+  </div>
+  <dl class="glossary">
+    <dt>Acte réservé</dt><dd>Activité professionnelle que la loi réserve aux membres d’un ordre professionnel. L’exécuter sans droit constitue une infraction, indépendamment de la qualité du travail réalisé.</dd>
+    <dt>Bordereau de quantités et de prix</dt><dd>Document listant les postes de travaux et leurs quantités de référence, sur lequel chaque entrepreneur inscrit ses prix. Il rend les offres comparables sans prescrire de méthode d’exécution.</dd>
+    <dt>BNQ 3009-500</dt><dd>Norme québécoise encadrant les pratiques d’inspection d’un bâtiment d’habitation en vue d’une transaction immobilière [2].</dd>
+    <dt>CAPEX</dt><dd>Dépense d’investissement. Dans le contexte du Plan d’investissement : le capital à engager pour maintenir ou améliorer la propriété, réparti par horizon.</dd>
+    <dt>Classe d’estimation (D, C, B, A)</dt><dd>Échelle liant la précision attendue d’une estimation à la maturité de la conception et des documents disponibles [12]. Une classe C correspond à la phase concept, avec une précision indicative de 15 % à 20 %.</dd>
+    <dt>Contingence</dt><dd>Provision destinée à absorber les imprévus liés au niveau de définition de la portée. Elle n’est pas une marge de sécurité arbitraire mais une fonction de l’incertitude documentée.</dd>
+    <dt>Coût comparable</dt><dd>Prix d’une soumission recalculé pour porter sur une portée identique à celle des autres offres, après ajout des exclusions et valorisation des écarts de garantie.</dd>
+    <dt>E&amp;O (erreurs et omissions)</dt><dd>Assurance de responsabilité professionnelle couvrant les fautes commises dans la prestation de services intellectuels.</dd>
+    <dt>Facteur de perte</dt><dd>Pourcentage ajouté à la quantité nette pour tenir compte des coupes, chutes et recouvrements propres à une méthode d’exécution.</dd>
+    <dt>Niveau de confiance</dt><dd>Qualification explicite de la fiabilité d’une estimation, fonction de la qualité des données de relevé et de la maturité de la portée.</dd>
+    <dt>Normalisation</dt><dd>Opération consistant à ramener des offres hétérogènes à une base commune de quantités, d’inclusions et de garanties, afin de les rendre effectivement comparables.</dd>
+    <dt>Quantité nette / quantité budgétaire</dt><dd>La quantité nette est la mesure physique relevée ; la quantité budgétaire y ajoute le facteur de perte retenu pour l’estimation.</dd>
+    <dt>Routage professionnel</dt><dd>Mécanisme par lequel le système oriente une portée vers un professionnel habilité lorsqu’elle franchit la frontière d’un acte réservé.</dd>
+    <dt>Taux d’attache</dt><dd>Proportion des clients ayant acheté le Plan d’investissement qui souscrivent ensuite à la normalisation des soumissions.</dd>
+    <dt>Uniformat II</dt><dd>Classification normalisée des éléments d’un bâtiment, utilisée comme structure de décomposition des coûts dans les référentiels d’estimation [12].</dd>
+  </dl>
+
+  <h2>Annexe G — Sources juridiques et institutionnelles</h2>
+  <ol class="sources">
+    <li>Légis Québec. <em>Règlement sur l’encadrement des inspecteurs en bâtiments d’habitation</em>, art. 20 — contrat distinct pour un service supplémentaire.<span class="s-url">legisquebec.gouv.qc.ca/fr/version/rc/B-1.1,%20r.%203.1?code=se%3A20</span></li>
+    <li>Bureau de normalisation du Québec. <em>BNQ 3009-500 — Bâtiment d’habitation : pratiques pour l’inspection en vue d’une transaction immobilière</em>. Objet et portée de la norme.<span class="s-url">bnq.qc.ca/fr/normalisation/construction/inspection-d-un-batiment-d-habitation.html</span></li>
+    <li>Légis Québec. <em>Règlement sur l’encadrement des inspecteurs en bâtiments d’habitation</em> — texte complet. Obligations réglementaires de l’inspecteur.<span class="s-url">legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%203.1</span></li>
+    <li>Gouvernement du Québec. <em>Estimateurs / estimatrices en construction</em>. Description officielle des tâches d’estimation et d’analyse de soumissions.<span class="s-url">quebec.ca/emploi/informer-metier-profession/explorer-metiers-professions/22303-estimateurs-estimatrices-en-construction</span></li>
+    <li>Légis Québec. <em>Loi sur les architectes</em>, art. 16 — activités professionnelles réservées.<span class="s-url">legisquebec.gouv.qc.ca/fr/version/lc/A-21?code=se%3A16</span></li>
+    <li>Ordre des architectes du Québec. <em>Activités réservées</em> — interprétation pratique des plans, devis et documents pour soumission.<span class="s-url">oaq.com/application-loi-architectes/activites-reservees/</span></li>
+    <li>Légis Québec. <em>Loi sur les ingénieurs</em>, art. 1.1 à 3 — exercice de l’ingénierie et activités réservées.<span class="s-url">legisquebec.gouv.qc.ca/fr/document/lc/i-9</span></li>
+    <li>Légis Québec. <em>Règlement sur l’encadrement des inspecteurs</em>, art. 19 — expertise technique et interdiction de recommander une entreprise particulière.<span class="s-url">legisquebec.gouv.qc.ca/fr/version/rc/B-1.1,%20r.%203.1?code=se%3A19</span></li>
+    <li>Légis Québec. <em>Règlement sur l’encadrement des inspecteurs</em>, art. 18 — conflits d’intérêts, loyauté et divulgation.<span class="s-url">legisquebec.gouv.qc.ca/fr/version/rc/B-1.1,%20r.%203.1?code=se%3A18</span></li>
+    <li>Régie du bâtiment du Québec. <em>Exigences d’assurance des inspecteurs</em> — couverture RC générale et responsabilité professionnelle E&amp;O.<span class="s-url">rbq.gouv.qc.ca/fileadmin/medias/pdf/Publications/francais/modele-certificat-assurance-inspecteurs.pdf</span></li>
+    <li>Légis Québec. <em>Code civil du Québec</em>, art. 2100 — prudence, diligence, intérêt du client et règles de l’art.<span class="s-url">legisquebec.gouv.qc.ca/fr/showversion/cs/CCQ-1991?code=se%3A2100</span></li>
+    <li>Secrétariat du Conseil du trésor du Québec. <em>Guide des services d’ingénierie — volet Bâtiment</em>, annexe A. Classes d’estimation D/C/B/A, précision, contingence et Uniformat II.<span class="s-url">tresor.gouv.qc.ca/fileadmin/PDF/faire_affaire_avec_etat/cadre_normatif/guide_services_ingenieurie_batiment.pdf</span></li>
+    <li>APCIQ. <em>Ventes résidentielles : le Québec enregistre sa troisième meilleure année en 2025</em> — 97 214 ventes résidentielles en 2025.<span class="s-url">apciq.ca/ventes-residentielles-le-quebec-enregistre-sa-troisieme-meilleure-annee-en-2025/</span></li>
+    <li>APCIQ. <em>Le marché immobilier québécois confirme un rééquilibrage graduel au 2<sup>e</sup> trimestre 2026</em> — 27 296 ventes au T2 2026.<span class="s-url">apciq.ca/stats-2e-trimestre-2026/</span></li>
+  </ol>
+  <p class="t-note">Les sources ci-dessus ont été retenues du document de référence initial. Leur validité et leur version en vigueur doivent être confirmées par l’avocat mandaté en phase 0.</p>
+
+  <h2>Annexe H — Liste de vérification pré-lancement</h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:8mm">#</th><th style="width:52mm">Élément</th><th>Critère de conformité</th><th style="width:20mm">Statut</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Avis juridique écrit</td><td>Trois contrats, terminologie des livrables et frontières d’actes réservés validés ; réponses aux douze questions de l’annexe D.</td><td><span class="pill p-navy">À faire</span></td></tr>
+      <tr><td>2</td><td>Confirmation écrite E&amp;O</td><td>Lettre de l’assureur nommant les activités de la section 2.7 ; réponses aux dix questions de l’annexe E.</td><td><span class="pill p-navy">À faire</span></td></tr>
+      <tr><td>3</td><td>Méthodologie de coûts versionnée</td><td>Version 1.0 approuvée, datée, régionalisée, avec sources documentées et procédure de révision.</td><td><span class="pill p-navy">À faire</span></td></tr>
+      <tr><td>4</td><td>Règles de routage professionnel</td><td>Contrôle en six points implémenté et bloquant dans l’outil ; matrice de la section 2.10 codée.</td><td><span class="pill p-navy">À faire</span></td></tr>
+      <tr><td>5</td><td>Pilote contrôlé sur dossiers historiques</td><td>20 dossiers testés ; écart médian ≤ 20 % ; causes d’écart identifiées et corrigées.</td><td><span class="pill p-navy">À faire</span></td></tr>
+      <tr><td>6</td><td>Validation de la communication marketing</td><td>Collatéral, site et scripts conformes aux garde-fous de la section 5.7 et au lexique de l’annexe C.</td><td><span class="pill p-navy">À faire</span></td></tr>
+      <tr><td>7</td><td>Journal d’audit BatiFlow</td><td>Conservation automatique des sources, hypothèses, versions et auteurs ; non modifiable rétroactivement.</td><td><span class="pill p-navy">À faire</span></td></tr>
+      <tr><td>8</td><td>Politique d’indépendance</td><td>Interdiction de rémunération d’entrepreneur inscrite aux contrats et à la politique interne ; registre de refus en place.</td><td><span class="pill p-navy">À faire</span></td></tr>
+      <tr><td>9</td><td>Gouvernance instituée</td><td>Comité produit et risque constitué, mandat écrit, cadence et seuils d’escalade définis.</td><td><span class="pill p-navy">À faire</span></td></tr>
+      <tr><td>10</td><td>Tableau de bord opérationnel</td><td>Dix indicateurs de la partie IX instrumentés, avec cibles, seuils d’alerte et propriétaires.</td><td><span class="pill p-navy">À faire</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout-dark">
+    <div class="c-label">Mot de la fin</div>
+    <p>Le projet est réalisable, et son risque financier est borné. Sa réussite ne dépendra ni de l’idée, qui est solide, ni du marché, qui est suffisamment profond. Elle dépendra de la <strong>discipline d’exécution</strong> : séparer ce que le droit exige de séparer, chiffrer ce qui peut être chiffré, refuser ce qui relève d’un autre, et documenter tout ce qui est affirmé.</p>
+  </div>
+
+  <div class="endmark">Fin du document</div>
+</section>
+</main>
+</div>
+
+<footer class="doc-foot"><div>
+  <span>BatiFlow — dossier de décision, version 2.0 du 12 septembre 2026.</span>
+  <span>Document de travail confidentiel. Ne constitue pas un avis juridique ni une confirmation de couverture d’assurance.</span>
+</div></footer>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+  var map = {};
+  links.forEach(function (a) {
+    var el = document.getElementById(a.getAttribute('href').slice(1));
+    if (el) map[el.id] = a;
+  });
+  var seen = {};
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { seen[e.target.id] = e.isIntersecting ? e.intersectionRatio : 0; });
+    var best = null, top = -1;
+    Object.keys(seen).forEach(function (k) { if (seen[k] > top) { top = seen[k]; best = k; } });
+    links.forEach(function (a) { a.classList.remove('on'); });
+    if (best && map[best] && top > 0) map[best].classList.add('on');
+  }, { rootMargin: '-80px 0px -55% 0px', threshold: [0, 0.02, 0.2, 0.6] });
+  Object.keys(map).forEach(function (id) { io.observe(document.getElementById(id)); });
+})();
+</script>
