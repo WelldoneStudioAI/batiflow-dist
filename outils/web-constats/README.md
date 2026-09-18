@@ -39,6 +39,19 @@ chiffrier .xlsx  →  [ web app : lecture, contrôle, correction ]  →  dossier
    Le manifeste seul ou le CSV seul sont aussi disponibles, et les trois formats
    restent copiables dans le presse-papiers.
 
+## Remonter un dossier à partir du manifeste seul
+
+`monter-dossier.py` reconstruit l'archive quand on n'a exporté que `bsi.json` et que
+les photos sont restées sur le poste :
+
+```bash
+python3 monter-dossier.py bsi.json --photos ~/Photos/110 --nom "Extérieur"
+```
+
+Il rapproche chaque photo par son nom (casse et extension indifférentes), met à jour
+le décompte, écrit le CSV, le rapport et le LISEZMOI, et signale les fichiers
+introuvables. Le manifeste n'est pas réécrit sur le fond.
+
 ## Le dossier exporté
 
 Format `batiflow.bsi.dossier` v1 — décrit champ par champ dans
