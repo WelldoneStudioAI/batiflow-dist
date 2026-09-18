@@ -401,7 +401,8 @@
       <input type="search" id="recherche" placeholder="Rechercher un constat" aria-label="Rechercher un constat">
     </span>
     <span class="segmente" role="group" aria-label="Filtrer par">
-      <button id="f-categorie" aria-pressed="true">Catégorie</button>
+      <button id="f-composante" aria-pressed="true">Composante</button>
+      <button id="f-batiment" aria-pressed="false">Bâtiment</button>
       <button id="f-priorite" aria-pressed="false">Priorité</button>
     </span>
     <span id="jetons" style="display:flex;gap:7px;flex-wrap:wrap"></span>
@@ -1013,7 +1014,7 @@ const etat = {
   feuilles: [], feuille: null, ligne: 0, mappage: null, constats: [],
   rapport: null, selection: null, recherche: "", filtres: new Set(),
   tri: "chiffrier", exclus: new Set(), nomFichier: "", estExemple: false,
-  axe: "categorie", rue: "",
+  axe: "composante", rue: "",
 };
 
 function construire() {
@@ -1166,10 +1167,7 @@ const retenus = () => etat.constats.filter((c) => !etat.exclus.has(c.id));
 function visibles() {
   const terme = cle(etat.recherche);
   let liste = etat.constats.filter((constat) => {
-    if (etat.filtres.size) {
-      const cle = etat.axe === "categorie" ? (constat.categorie || "Sans catégorie") : classeDe(constat).cle;
-      if (!etat.filtres.has(cle)) return false;
-    }
+    if (etat.filtres.size && !etat.filtres.has(cleAxe(constat))) return false;
     if (!terme) return true;
     const corpus = [constat.titre, constat.description, constat.recommandation,
                     constat.localisation, constat.categorie].filter(Boolean).join(" ");
@@ -1182,24 +1180,52 @@ function visibles() {
   return liste;
 }
 
-/** Les classes présentes, selon l'axe de filtre choisi. */
+/** Le bâtiment d'un constat, tel qu'écrit au chiffrier. */
+function batimentDe(constat) {
+  const a = constat.autres || {};
+  return (a["Bâtiment"] || a["Batiment"] || a["Bâtiment (Master)"] || a["Immeuble"] || "").trim();
+}
+
+/** « EN-0101 Revêtement extérieur » → « Revêtement extérieur » : le code FECHAM reste
+    dans la fiche et dans l'export, mais n'encombre pas les filtres. */
+function composanteDe(constat) {
+  return String(constat.categorie || "").replace(/^[A-Za-z]{1,3}[-–]?\d{2,4}\s+/, "").trim();
+}
+
+/** La clé de regroupement de l'axe courant, pour un constat. */
+function cleAxe(constat) {
+  if (etat.axe === "priorite") return classeDe(constat).cle;
+  if (etat.axe === "batiment") return batimentDe(constat) || "Sans bâtiment";
+  return composanteDe(constat) || "Sans composante";
+}
+
+/** Les valeurs présentes sur l'axe choisi, avec leur compte. */
 function axes() {
-  if (etat.axe === "categorie") {
-    const compte = new Map();
-    for (const constat of retenus()) {
-      const nom = constat.categorie || "Sans catégorie";
-      compte.set(nom, (compte.get(nom) || 0) + 1);
-    }
-    return [...compte.entries()]
-      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "fr"))
-      .map(([nom, n]) => ({ cle: nom, libelle: nom, couleur: "var(--tres-doux)", n }));
+  if (etat.axe === "priorite") {
+    return repartition().map(({ classe, n }) =>
+      ({ cle: classe.cle, libelle: classe.nom, couleur: classe.couleur, n }));
   }
-  return repartition().map(({ classe, n }) => ({ cle: classe.cle, libelle: classe.nom, couleur: classe.couleur, n }));
+  const compte = new Map();
+  for (const constat of retenus()) {
+    const cle = cleAxe(constat);
+    compte.set(cle, (compte.get(cle) || 0) + 1);
+  }
+  const liste = [...compte.entries()].map(([cle, n]) => ({
+    cle, n, couleur: "var(--tres-doux)",
+    libelle: etat.axe === "batiment" ? adresse(cle) : cle,
+  }));
+  if (etat.axe === "batiment") {
+    // Les bâtiments se lisent dans l'ordre des numéros civiques.
+    const numero = (x) => { const m = x.cle.match(/\d+/); return m ? parseInt(m[0], 10) : 1e9; };
+    return liste.sort((a, b) => numero(a) - numero(b) || a.cle.localeCompare(b.cle, "fr"));
+  }
+  return liste.sort((a, b) => b.n - a.n || a.cle.localeCompare(b.cle, "fr"));
 }
 
 function rendreJetons() {
-  $("#f-categorie").setAttribute("aria-pressed", etat.axe === "categorie");
-  $("#f-priorite").setAttribute("aria-pressed", etat.axe === "priorite");
+  for (const [id, axe] of [["#f-composante", "composante"], ["#f-batiment", "batiment"], ["#f-priorite", "priorite"]]) {
+    $(id).setAttribute("aria-pressed", etat.axe === axe);
+  }
   $("#jetons").innerHTML = axes().map((a) => `
     <button class="jeton" data-cle="${ech(a.cle)}" aria-pressed="${etat.filtres.has(a.cle)}">
       ${etat.axe === "priorite" ? `<span class="pastille" style="background:${a.couleur}"></span>` : ""}
@@ -1271,20 +1297,31 @@ function adresse(batiment) {
   return /^[0-9][0-9\s,\-–\/]*$/.test(noyau.trim()) ? `${texte}, ${etat.rue}` : texte;
 }
 
-/** Le nom de rue est déduit des valeurs de la colonne « Bâtiment » :
-    « 100-110 Place Du Collège » donne « Place Du Collège », qui complète les « 100 » secs. */
-function deduireRue(constats) {
+/** Le nom de rue est cherché dans TOUT le classeur, pas seulement dans la feuille lue :
+    une cellule « 100-110 Place Du Collège » d'une feuille annexe suffit à nommer la rue
+    des « 100 » secs de la feuille des constats. */
+function deduireRue(feuilles) {
   const compte = new Map();
-  for (const constat of constats) {
-    const brut = constat.autres["Bâtiment"] || constat.autres["Batiment"] || "";
-    const reste = String(brut).replace(/^[0-9]+([-–\/ ]+[0-9]+)*\s*/, "").trim();
-    // Un nom de rue ne contient pas de numéro et ne commence pas par une conjonction :
-    // « et 110 » n'est pas une rue, « Place Du Collège » en est une.
-    if (reste.length >= 4 && /[a-zA-Zà-ÿ]/.test(reste) && !/[0-9]/.test(reste)
-        && !/^(et|and|a|à|au|aux|ou|tous|toutes)\b/i.test(reste)) {
-      compte.set(reste, (compte.get(reste) || 0) + 1);
+  const retenir = (reste) => {
+    const propre = reste.trim().replace(/[.,;]+$/, "");
+    // Un nom de rue ne porte pas de chiffre et ne commence pas par une conjonction.
+    if (propre.length < 5 || propre.length > 40) return;
+    if (/[0-9]/.test(propre) || !/[a-zA-Zà-ÿ]/.test(propre)) return;
+    if (/^(et|and|a|à|au|aux|ou|tous|toutes|les|des|du|de)\b/i.test(propre)) return;
+    compte.set(propre, (compte.get(propre) || 0) + 1);
+  };
+
+  for (const feuille of feuilles) {
+    for (const ligne of feuille.lignes) {
+      for (const cellule of ligne) {
+        const texte = String(cellule || "").trim();
+        if (!texte || texte.length > 60) continue;
+        const m = texte.match(/^[0-9]+([-–\/ ]+[0-9]+)*\s+(.+)$/);
+        if (m) retenir(m[2]);
+      }
     }
   }
+
   const gagnant = [...compte.entries()].sort((a, b) => b[1] - a[1])[0];
   return gagnant ? gagnant[0] : "";
 }
@@ -2007,7 +2044,7 @@ async function charger(source, nom, estExemple = false) {
       return;
     }
     construire();
-    etat.rue = deduireRue(etat.constats);
+    etat.rue = deduireRue(feuilles);
     rendreTout();
     $("#corps").dataset.vue = "liste";
 
@@ -2057,7 +2094,7 @@ for (const bouton of document.querySelectorAll("[data-fermer]")) {
 }
 
 $("#recherche").addEventListener("input", (e) => { etat.recherche = e.target.value; rendreListe(); });
-for (const [id, axe] of [["#f-categorie", "categorie"], ["#f-priorite", "priorite"]]) {
+for (const [id, axe] of [["#f-composante", "composante"], ["#f-batiment", "batiment"], ["#f-priorite", "priorite"]]) {
   $(id).onclick = () => { etat.axe = axe; etat.filtres = new Set(); rendreJetons(); rendreListe(); };
 }
 $("#tri").addEventListener("change", (e) => { etat.tri = e.target.value; rendreListe(); });
