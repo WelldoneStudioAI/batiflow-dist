@@ -7,6 +7,16 @@ terrain. **Aucun lien avec BatiFlow** — donc aucun risque de régression sur l
   visible par vous, et par les personnes à qui vous la partagez depuis la page).
 - **Source** : `app.html`, un seul fichier, sans dépendance ni compilation.
 
+## À quoi elle sert
+
+C'est le **pont entre un chiffrier Excel et BatiFlow** : vous téléversez le chiffrier,
+vous vérifiez à l'écran, et vous exportez un **dossier BatiFlow** prêt à ouvrir dans
+l'app — manifeste, photos jointes, copie CSV et rapport de lecture.
+
+```
+chiffrier .xlsx  →  [ web app : lecture, contrôle, correction ]  →  dossier-bsi.zip  →  BatiFlow
+```
+
 ## Ce qu'elle fait
 
 1. Vous déposez un `.xlsx`, `.xlsm` ou `.csv` (ou vous ouvrez l'exemple qui s'affiche
@@ -17,7 +27,18 @@ terrain. **Aucun lien avec BatiFlow** — donc aucun risque de régression sur l
 3. Recherche plein texte, filtres par classe de priorité, tri, exclusion ligne à ligne.
 4. **Dossier de photos…** : vous désignez le dossier, les photos du chiffrier sont
    retrouvées par leur nom (casse et extension indifférentes) et s'affichent.
-5. **Exporter** : CSV, JSON ou rapport de lecture copiés dans le presse-papiers.
+5. **Exporter vers BatiFlow** : le dossier `.zip` est enregistré sur votre poste —
+   `bsi.json` (le manifeste que BatiFlow lit), `photos/`, `constats.csv`, `rapport.txt`.
+   Le manifeste seul ou le CSV seul sont aussi disponibles, et les trois formats
+   restent copiables dans le presse-papiers.
+
+## Le dossier exporté
+
+Format `batiflow.bsi.dossier` v1 — décrit champ par champ dans
+[`FORMAT-DOSSIER.md`](FORMAT-DOSSIER.md). Côté BatiFlow, le lecteur Swift est écrit :
+`LecteurDossierBatiFlow.lire(archive:extrairePhotosVers:)` rend le manifeste et les
+constats prêts à insérer. C'est un ajout au projet, pas une modification du BSI
+existant.
 
 ## Confidentialité
 

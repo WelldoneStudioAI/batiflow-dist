@@ -243,6 +243,19 @@
   ul.avis li { display:flex; gap:8px; padding:6px 0; border-top:1px solid var(--trait); font-size:12.5px; }
   ul.avis svg { flex:none; margin-top:2px; color:var(--alerte); }
   .vide-doux { color:var(--encre-douce); font-size:12.5px; padding:26px 0; text-align:center; }
+  .choix-export {
+    display:grid; gap:10px; grid-template-columns:1fr; margin-bottom:4px;
+  }
+  .carte-export {
+    display:grid; gap:3px; text-align:left; padding:12px 14px; border-radius:10px;
+    border:1px solid var(--trait-fort); background:var(--surface-2);
+  }
+  .carte-export.principale { border-color:var(--accent); background:var(--accent-doux); }
+  .carte-export b { font-size:13px; }
+  .carte-export span { font-size:11.5px; color:var(--encre-douce); }
+  .carte-export:hover { border-color:var(--accent); }
+  .etat-export { font-size:12px; color:var(--encre-douce); min-height:18px; margin-top:10px; }
+  .etat-export[data-ton="erreur"] { color:var(--alerte); }
 
   @media (max-width: 820px) {
     .corps { grid-template-columns:1fr; }
@@ -263,7 +276,7 @@
     <button class="btn" id="b-photos">Dossier de photos…</button>
     <button class="btn" id="b-colonnes">Colonnes</button>
     <button class="btn" id="b-rapport">Rapport</button>
-    <button class="btn btn-fort" id="b-exporter">Exporter</button>
+    <button class="btn btn-fort" id="b-exporter">Exporter vers BatiFlow</button>
   </header>
 
   <div class="ruban" id="ruban" hidden>
@@ -339,7 +352,8 @@
 </dialog>
 
 <dialog id="dlg-export">
-  <div class="panneau-tete"><h3>Exporter les constats</h3><p>Le contenu est copié dans le presse-papiers : collez-le dans Excel, Numbers ou un courriel.</p></div>
+  <div class="panneau-tete"><h3>Exporter vers BatiFlow</h3>
+    <p>Le dossier contient les constats, les photos et le manifeste que BatiFlow lit pour ouvrir le BSI.</p></div>
   <div class="panneau-corps" id="corps-export"></div>
   <div class="panneau-pied"><button class="btn btn-fort" data-fermer>Fermer</button></div>
 </dialog>
@@ -919,7 +933,9 @@ function construire() {
       recommandation: cellule("recommandation"), quantite, unite: cellule("unite"),
       prixUnitaire, coutChiffrier, coutCalcule, ecart,
       cout: coutChiffrier != null ? coutChiffrier : coutCalcule,
-      classe, codeBrut: brutPriorite, categorie: cellule("categorie"),
+      classe, codeBrut: brutPriorite,
+      priorite: classe && CLASSES_CODE.includes(classe) ? classe.cle : null,
+      categorie: cellule("categorie"),
       localisation: cellule("localisation"), photos, autres,
     });
   }
@@ -1252,20 +1268,322 @@ async function copier(texte, bouton) {
   setTimeout(() => { bouton.textContent = ancien; }, 1800);
 }
 
+/* -------------------------------------------------------------------------
+   Écriture d'un ZIP (entrées stockées, sans compression) : le dossier BatiFlow.
+   ------------------------------------------------------------------------- */
+
+const TABLE_CRC = (() => {
+  const table = new Uint32Array(256);
+  for (let i = 0; i < 256; i++) {
+    let valeur = i;
+    for (let k = 0; k < 8; k++) valeur = valeur & 1 ? 0xedb88320 ^ (valeur >>> 1) : valeur >>> 1;
+    table[i] = valeur >>> 0;
+  }
+  return table;
+})();
+
+function crc32(octets) {
+  let crc = 0xffffffff;
+  for (let i = 0; i < octets.length; i++) crc = TABLE_CRC[(crc ^ octets[i]) & 0xff] ^ (crc >>> 8);
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function horodatageDos(date = new Date()) {
+  const heure = (date.getHours() << 11) | (date.getMinutes() << 5) | (date.getSeconds() >> 1);
+  const jour = ((date.getFullYear() - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate();
+  return { heure: heure & 0xffff, jour: jour & 0xffff };
+}
+
+/** `entrees` : [{ nom, donnees: Uint8Array }] → Blob zip. */
+function ecrireZip(entrees) {
+  const encodeur = new TextEncoder();
+  const { heure, jour } = horodatageDos();
+  const morceaux = [];
+  const repertoire = [];
+  let position = 0;
+
+  for (const entree of entrees) {
+    const nom = encodeur.encode(entree.nom);
+    const donnees = entree.donnees;
+    const somme = crc32(donnees);
+
+    const enteteLocal = new DataView(new ArrayBuffer(30));
+    enteteLocal.setUint32(0, 0x04034b50, true);
+    enteteLocal.setUint16(4, 20, true);
+    enteteLocal.setUint16(6, 0x0800, true);      // noms de fichiers en UTF-8
+    enteteLocal.setUint16(8, 0, true);           // stocké, sans compression
+    enteteLocal.setUint16(10, heure, true);
+    enteteLocal.setUint16(12, jour, true);
+    enteteLocal.setUint32(14, somme, true);
+    enteteLocal.setUint32(18, donnees.length, true);
+    enteteLocal.setUint32(22, donnees.length, true);
+    enteteLocal.setUint16(26, nom.length, true);
+    enteteLocal.setUint16(28, 0, true);
+    morceaux.push(new Uint8Array(enteteLocal.buffer), nom, donnees);
+
+    const central = new DataView(new ArrayBuffer(46));
+    central.setUint32(0, 0x02014b50, true);
+    central.setUint16(4, 20, true);
+    central.setUint16(6, 20, true);
+    central.setUint16(8, 0x0800, true);
+    central.setUint16(10, 0, true);
+    central.setUint16(12, heure, true);
+    central.setUint16(14, jour, true);
+    central.setUint32(16, somme, true);
+    central.setUint32(20, donnees.length, true);
+    central.setUint32(24, donnees.length, true);
+    central.setUint16(28, nom.length, true);
+    central.setUint32(42, position, true);
+    repertoire.push(new Uint8Array(central.buffer), nom);
+
+    position += 30 + nom.length + donnees.length;
+  }
+
+  const tailleRepertoire = repertoire.reduce((n, m) => n + m.length, 0);
+  const fin = new DataView(new ArrayBuffer(22));
+  fin.setUint32(0, 0x06054b50, true);
+  fin.setUint16(8, entrees.length, true);
+  fin.setUint16(10, entrees.length, true);
+  fin.setUint32(12, tailleRepertoire, true);
+  fin.setUint32(16, position, true);
+
+  return new Blob([...morceaux, ...repertoire, new Uint8Array(fin.buffer)], { type: "application/zip" });
+}
+
+/* -------------------------------------------------------------------------
+   Le dossier BatiFlow : manifeste + photos + copies lisibles
+   ------------------------------------------------------------------------- */
+
+const VERSION_FORMAT = 1;
+const nomSain = (nom) => String(nom).normalize("NFC").replace(/[\\/:*?"<>|]/g, "_").slice(0, 120);
+
+function nomDossier() {
+  const base = (etat.nomFichier || "constats").replace(/\.[^.]+$/, "");
+  return nomSain(base) || "constats";
+}
+
+/** Rassemble le dossier. `progres` reçoit un texte d'avancement. */
+async function assemblerDossier(progres = () => {}) {
+  const liste = retenus();
+  const entrees = [];
+  const nomsUtilises = new Map();
+  let photosIncluses = 0;
+
+  progres("Préparation des photos…");
+  const constatsJson = [];
+  for (const constat of liste) {
+    const classe = classeDe(constat);
+    const photos = [];
+    for (const photo of constat.photos) {
+      if (photo.type === "fichier") {
+        let nom = nomSain(photo.fichier.name);
+        const compte = (nomsUtilises.get(nom) || 0) + 1;
+        nomsUtilises.set(nom, compte);
+        if (compte > 1) {
+          const point = nom.lastIndexOf(".");
+          nom = point > 0 ? nom.slice(0, point) + "-" + compte + nom.slice(point) : nom + "-" + compte;
+        }
+        const chemin = "photos/" + nom;
+        entrees.push({ nom: chemin, donnees: new Uint8Array(await photo.fichier.arrayBuffer()) });
+        photosIncluses++;
+        photos.push({ statut: "incluse", fichier: chemin, nomOrigine: photo.fichier.name });
+      } else if (photo.type === "url") {
+        photos.push({ statut: "distante", url: photo.url });
+      } else {
+        photos.push({ statut: "introuvable", nomOrigine: photo.nom });
+      }
+    }
+    constatsJson.push({
+      id: constat.id,
+      ligneSource: constat.ligne,
+      titre: constat.titre,
+      description: constat.description,
+      recommandation: constat.recommandation,
+      priorite: constat.priorite
+        ? { code: constat.priorite, libelle: classe.nom, precision: classe.detail, rang: classe.rang }
+        : null,
+      graviteTexte: constat.priorite ? null : (constat.classe ? constat.classe.nom : null),
+      cotationOrigine: constat.codeBrut,
+      quantite: constat.quantite,
+      unite: constat.unite,
+      prixUnitaire: constat.prixUnitaire,
+      coutChiffrier: constat.coutChiffrier,
+      coutCalcule: constat.coutCalcule,
+      coutRetenu: constat.cout,
+      ecartDeCout: !!constat.ecart,
+      categorie: constat.categorie,
+      localisation: constat.localisation,
+      photos,
+      autresColonnes: constat.autres,
+    });
+  }
+
+  progres("Écriture du manifeste…");
+  const manifeste = {
+    format: "batiflow.bsi.dossier",
+    version: VERSION_FORMAT,
+    genereLe: new Date().toISOString(),
+    genereAvec: "Constats du chiffrier (web)",
+    source: {
+      fichier: etat.nomFichier,
+      feuille: etat.rapport.feuille,
+      lignesLues: etat.rapport.lues,
+      lignesIgnorees: etat.rapport.ignorees,
+    },
+    dossier: {
+      nom: nomDossier(),
+      nombreConstats: liste.length,
+      totalRetenu: liste.reduce((t, c) => t + (c.cout ?? 0), 0),
+      devise: "CAD",
+      photosIncluses,
+    },
+    priorites: CLASSES_CODE.map((c) => ({ code: c.cle, libelle: c.nom, precision: c.detail, rang: c.rang })),
+    constats: constatsJson,
+    lectureAutomatique: etat.rapport.ajustements,
+    avertissements: etat.rapport.avertissements,
+  };
+
+  const encodeur = new TextEncoder();
+  entrees.unshift({ nom: "bsi.json", donnees: encodeur.encode(JSON.stringify(manifeste, null, 2)) });
+  entrees.push({ nom: "constats.csv", donnees: encodeur.encode(versCsv()) });
+  entrees.push({ nom: "rapport.txt", donnees: encodeur.encode(texteRapport()) });
+  entrees.push({ nom: "LISEZMOI.md", donnees: encodeur.encode(lisezMoi(manifeste)) });
+
+  progres("Assemblage du dossier…");
+  return { blob: ecrireZip(entrees), manifeste };
+}
+
+function lisezMoi(m) {
+  const total = m.dossier.totalRetenu.toLocaleString("fr-CA", { style: "currency", currency: "CAD" });
+  return [
+    "# Dossier BSI — " + m.dossier.nom,
+    "",
+    "Produit le " + new Date(m.genereLe).toLocaleString("fr-CA") + " à partir de `" + m.source.fichier + "`",
+    "(feuille « " + m.source.feuille + " ») par l'outil « Constats du chiffrier ».",
+    "",
+    "## Contenu",
+    "",
+    "| Fichier | Rôle |",
+    "|---------|------|",
+    "| `bsi.json` | Le manifeste : c'est ce que BatiFlow lit. Format `" + m.format + "`, version " + m.version + ". |",
+    "| `photos/` | Les " + m.dossier.photosIncluses + " photo(s) retrouvées sur le poste, référencées par `constats[].photos[].fichier`. |",
+    "| `constats.csv` | Les mêmes constats en tableau, pour Excel ou Numbers. |",
+    "| `rapport.txt` | Le rapport de lecture : lignes lues, décisions automatiques, avertissements. |",
+    "",
+    "## Chiffres",
+    "",
+    "- " + m.dossier.nombreConstats + " constats retenus, " + total + " au total.",
+    "- " + m.source.lignesLues + " lignes lues, " + m.source.lignesIgnorees + " ligne(s) vide(s) écartée(s).",
+    "- " + m.avertissements.length + " avertissement(s) — voir `rapport.txt`.",
+    "",
+    "## Priorités",
+    "",
+    "Le code du rapport fait foi ; il n'est jamais traduit en degré de gravité.",
+    "",
+    m.priorites.map((p) => "- `" + p.code + "` — " + p.libelle + " (" + p.precision + ")").join("\n"),
+    "",
+    "## Coûts",
+    "",
+    "`coutRetenu` est le montant qui fait foi : celui du chiffrier quand la colonne existe,",
+    "sinon quantité × prix unitaire. Quand les deux existent et diffèrent, `ecartDeCout` vaut",
+    "`true` et les deux montants restent dans le manifeste (`coutChiffrier`, `coutCalcule`).",
+    "",
+  ].join("\n");
+}
+
+/* -------------------------------------------------------------------------
+   Remise du fichier au poste
+   ------------------------------------------------------------------------- */
+
+let sauvegarde = null;
+(async () => {
+  try { sauvegarde = (await window.claude?.use?.("downloads")) ?? null; }
+  catch { sauvegarde = null; }
+})();
+
+async function remettre(nomFichier, donnees, dire) {
+  if (sauvegarde) {
+    try {
+      await sauvegarde.save({ filename: nomFichier, data: donnees });
+      dire("Enregistré : " + nomFichier);
+    } catch (erreur) {
+      const code = (erreur && erreur.code) || "inconnu";
+      if (code === "declined") dire("Enregistrement annulé.");
+      else dire("Enregistrement refusé (" + code + ").", "erreur");
+    }
+    return;
+  }
+  // Page ouverte hors de claude.ai : téléchargement classique.
+  const blob = donnees instanceof Blob ? donnees : new Blob([donnees]);
+  const url = URL.createObjectURL(blob);
+  const lien = document.createElement("a");
+  lien.href = url;
+  lien.download = nomFichier;
+  document.body.appendChild(lien);
+  lien.click();
+  lien.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  dire("Fichier remis au navigateur : " + nomFichier);
+}
+
 function ouvrirExport() {
   const liste = retenus();
   const somme = liste.reduce((t, c) => t + (c.cout ?? 0), 0);
-  $("#corps-export").innerHTML = `
-    <p style="margin:0 0 14px;color:var(--encre-douce)">
-      ${nombreFr(liste.length)} constat${liste.length > 1 ? "s" : ""} retenu${liste.length > 1 ? "s" : ""},
-      ${argent(somme)} au total.</p>
-    <div style="display:flex;gap:9px;flex-wrap:wrap">
-      <button class="btn" id="x-csv">Copier en CSV</button>
-      <button class="btn" id="x-json">Copier en JSON</button>
-      <button class="btn" id="x-rapport">Copier le rapport</button>
-    </div>
-    <div class="encadre"><h4>Colonnes exportées</h4>
-      <p style="margin:0">${COLONNES_EXPORT.map(([n]) => ech(n)).join(" · ")}</p></div>`;
+  const jointes = liste.reduce((n, c) => n + c.photos.filter((p) => p.type === "fichier").length, 0);
+  const manquantes = liste.reduce((n, c) => n + c.photos.filter((p) => p.type !== "fichier").length, 0);
+
+  $("#corps-export").innerHTML =
+    '<p style="margin:0 0 14px;color:var(--encre-douce)">' +
+      nombreFr(liste.length) + " constat" + (liste.length > 1 ? "s" : "") + " retenu" + (liste.length > 1 ? "s" : "") +
+      ", " + argent(somme) + " au total, " + nombreFr(jointes) + " photo" + (jointes > 1 ? "s" : "") + " à joindre" +
+      (manquantes ? " (" + nombreFr(manquantes) + " non trouvée" + (manquantes > 1 ? "s" : "") + " sur ce poste)" : "") +
+    ".</p>" +
+    '<div class="choix-export">' +
+      '<button class="carte-export principale" id="x-dossier"><b>Dossier BatiFlow (.zip)</b>' +
+        "<span>Le manifeste <code>bsi.json</code>, les photos, le CSV et le rapport — à ouvrir dans BatiFlow.</span></button>" +
+      '<button class="carte-export" id="x-manifeste"><b>Manifeste seul (bsi.json)</b>' +
+        "<span>Les constats sans les photos, quand elles sont déjà au mandat.</span></button>" +
+      '<button class="carte-export" id="x-csv-fichier"><b>Tableau (constats.csv)</b>' +
+        "<span>Pour Excel ou Numbers, sans passer par BatiFlow.</span></button>" +
+    "</div>" +
+    '<p class="etat-export" id="etat-export"></p>' +
+    '<div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:6px">' +
+      '<button class="btn" id="x-csv">Copier le CSV</button>' +
+      '<button class="btn" id="x-json">Copier le JSON</button>' +
+      '<button class="btn" id="x-rapport">Copier le rapport</button>' +
+    "</div>" +
+    '<div class="encadre"><h4>Ce que BatiFlow reçoit</h4><p style="margin:0">Format <code>batiflow.bsi.dossier</code> v' +
+      VERSION_FORMAT + " : priorité (code du rapport), titre, description, recommandation, quantité, unité, " +
+      "prix unitaire, coût retenu et coût du chiffrier, catégorie, localisation, photos jointes, colonnes " +
+      "d'origine, avertissements de lecture.</p></div>";
+
+  const dire = (texte, ton) => {
+    const zone = $("#etat-export");
+    zone.textContent = texte;
+    if (ton) zone.dataset.ton = ton; else delete zone.dataset.ton;
+  };
+
+  $("#x-dossier").onclick = async () => {
+    dire("Préparation…");
+    try {
+      const { blob } = await assemblerDossier(dire);
+      await remettre(nomDossier() + "-bsi.zip", blob, dire);
+    } catch (erreur) {
+      console.error(erreur);
+      dire("Assemblage impossible : " + (erreur.message || erreur), "erreur");
+    }
+  };
+  $("#x-manifeste").onclick = async () => {
+    dire("Écriture du manifeste…");
+    try {
+      const { manifeste } = await assemblerDossier(() => {});
+      await remettre(nomDossier() + "-bsi.json", JSON.stringify(manifeste, null, 2), dire);
+    } catch (erreur) {
+      console.error(erreur);
+      dire("Écriture impossible : " + (erreur.message || erreur), "erreur");
+    }
+  };
+  $("#x-csv-fichier").onclick = () => remettre(nomDossier() + "-constats.csv", "﻿" + versCsv(), dire);
   $("#x-csv").onclick = (e) => copier(versCsv(), e.currentTarget);
   $("#x-json").onclick = (e) => copier(versJson(), e.currentTarget);
   $("#x-rapport").onclick = (e) => copier(texteRapport(), e.currentTarget);
@@ -1387,7 +1705,8 @@ function octetsDepuisBase64(base64) {
   return octets.buffer;
 }
 
-window.__charger = charger;   // utilisé pour la vérification hors ligne
+window.__charger = charger;            // vérification hors ligne
+window.__assembler = assemblerDossier;  // vérification hors ligne du dossier exporté
 
 (async () => {
   if (!("DecompressionStream" in window)) {
