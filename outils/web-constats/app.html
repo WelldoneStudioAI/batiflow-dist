@@ -153,11 +153,14 @@
   .bloc h4 { margin:0 0 4px; font-size:11px; font-weight:600; color:var(--doux); }
   .bloc p { margin:0; font-size:13px; line-height:1.5; }
   .chiffres {
-    display:grid; grid-template-columns:repeat(3, 1fr);
+    display:grid; grid-template-columns:1fr auto 1fr auto 1fr; align-items:center;
     background:var(--zone); border-radius:var(--r); padding:12px 0 10px; margin:18px 0 0;
   }
   .chiffres > div { text-align:center; padding:0 8px; }
-  .chiffres > div + div { border-left:1px solid var(--trait); }
+  .chiffres .op {
+    font-size:15px; font-weight:500; color:var(--doux); padding:0 2px; align-self:center;
+    transform:translateY(5px);
+  }
   .chiffres small { display:block; font-size:10.5px; color:var(--doux); margin-bottom:2px; }
   .chiffres b { font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; }
   .note-ecart {
@@ -871,7 +874,42 @@ function detecter(entetes, donnees) {
     if (meilleur >= 0) { prendre("priorite", meilleur); ajustements.push(`priorité déduite des valeurs de « ${nomColonne(meilleur)} »`); }
   }
 
-  if (colonnes.quantite != null && colonnes.unite == null) {       // 8 — unité à droite de la quantité
+  // 8 — colonnes de photos trouvées par leurs valeurs : beaucoup de chiffriers
+  //     nomment ces colonnes autrement que « Photo » (« Visuel 2 », « IMG », « Annexe B »).
+  const ressembleAUnePhoto = (v) => /^https?:\/\//i.test(v) || EXT_IMAGE.test(v.trim());
+  entetes.forEach((_, j) => {
+    if (prises.has(j)) return;
+    if (part(j, ressembleAUnePhoto) < 0.7) return;
+    if (colonnes.photo == null) { prendre("photo", j); }
+    else { photosSup.push(j); prises.add(j); }
+    ajustements.push(`« ${nomColonne(j)} » lue comme colonne de photos`);
+  });
+
+  // 9 — description : quand la colonne de titre est courte (un vrai libellé) et qu'une
+  //     autre colonne porte le texte du constat, c'est elle la description.
+  //     Si le titre est déjà un paragraphe, on ne touche à rien : il sera scindé plus tard.
+  const moyenneDe = (j) => {
+    const v = valeurs(j);
+    return v.length ? v.reduce((n, x) => n + x.length, 0) / v.length : 0;
+  };
+  if (colonnes.description == null && colonnes.titre != null && moyenneDe(colonnes.titre) < 60) {
+    let meilleur = -1, longueur = 80;
+    entetes.forEach((_, j) => {
+      if (prises.has(j)) return;
+      const v = valeurs(j);
+      if (v.length < Math.max(3, donnees.length * 0.3)) return;
+      // Une colonne qui répète la même phrase partout est une règle, pas un constat.
+      if (new Set(v).size < v.length * 0.5) return;
+      const moyenne = moyenneDe(j);
+      if (moyenne > longueur) { meilleur = j; longueur = moyenne; }
+    });
+    if (meilleur >= 0) {
+      prendre("description", meilleur);
+      ajustements.push(`« ${nomColonne(meilleur)} » lue comme texte du constat`);
+    }
+  }
+
+  if (colonnes.quantite != null && colonnes.unite == null) {       // 10 — unité à droite de la quantité
     const i = colonnes.quantite + 1;
     const v = i < entetes.length && !prises.has(i) ? valeurs(i) : [];
     if (v.length && v.every((x) => x.length <= 6) && part(i, (x) => /[a-zA-ZÀ-ɏ]/.test(x)) >= 0.8) {
@@ -927,10 +965,18 @@ function indexerDossier(fichiers) {
 
 function resoudrePhotos(brut) {
   let segments = String(brut).split(/[\n\r;|]+/).map((s) => s.trim()).filter(Boolean);
-  if (segments.length === 1 && segments[0].includes(",")) {
-    const morceaux = segments[0].split(",").map((s) => s.trim()).filter(Boolean);
-    if (morceaux.length > 1 && morceaux.every((m) => /^https?:/i.test(m) || EXT_IMAGE.test(m))) segments = morceaux;
+  // Une cellule peut porter plusieurs fichiers séparés par une virgule, une tabulation
+  // ou une simple espace. On ne recoupe que si chaque morceau est bien un lien ou un fichier.
+  if (segments.length === 1 && /[,\t ]/.test(segments[0])) {
+    for (const separateur of [/\s*,\s*/, /\t+/, /\s+/]) {
+      const morceaux = segments[0].split(separateur).map((m) => m.trim()).filter(Boolean);
+      if (morceaux.length > 1 && morceaux.every((m) => /^https?:/i.test(m) || EXT_IMAGE.test(m))) {
+        segments = morceaux;
+        break;
+      }
+    }
   }
+  segments = [...new Set(segments)];
   return segments.map((segment) => {
     if (/^https?:\/\//i.test(segment)) return { type: "url", url: segment, nom: segment };
     const nom = segment.split(/[\\/]/).pop();
@@ -947,7 +993,7 @@ const etat = {
   feuilles: [], feuille: null, ligne: 0, mappage: null, constats: [],
   rapport: null, selection: null, recherche: "", filtres: new Set(),
   tri: "chiffrier", exclus: new Set(), nomFichier: "", estExemple: false,
-  axe: "categorie",
+  axe: "categorie", rue: "",
 };
 
 function construire() {
@@ -1182,6 +1228,30 @@ function rendreListe() {
 
 const courant = () => etat.constats.find((c) => c.id === etat.selection);
 
+/** « 100 » → « 100, Place du Collège ». Un libellé déjà écrit en toutes lettres
+    (« Tous les bâtiments ») est laissé tel quel. */
+function adresse(batiment) {
+  const texte = String(batiment ?? "").trim();
+  if (!texte) return "";
+  if (!etat.rue) return texte;
+  return /^[0-9]+([-–\/ ]+[0-9]+)*$/.test(texte) ? `${texte}, ${etat.rue}` : texte;
+}
+
+/** Le nom de rue est déduit des valeurs de la colonne « Bâtiment » :
+    « 100-110 Place Du Collège » donne « Place Du Collège », qui complète les « 100 » secs. */
+function deduireRue(constats) {
+  const compte = new Map();
+  for (const constat of constats) {
+    const brut = constat.autres["Bâtiment"] || constat.autres["Batiment"] || "";
+    const reste = String(brut).replace(/^[0-9]+([-–\/ ]+[0-9]+)*\s*/, "").trim();
+    if (reste.length >= 4 && /[a-zA-Zà-ÿ]/.test(reste) && !/^tous/i.test(reste)) {
+      compte.set(reste, (compte.get(reste) || 0) + 1);
+    }
+  }
+  const gagnant = [...compte.entries()].sort((a, b) => b[1] - a[1])[0];
+  return gagnant ? gagnant[0] : "";
+}
+
 function modifier(constat, champ, valeur) {
   constat[champ] = valeur;
   constat.modifie = true;
@@ -1213,7 +1283,8 @@ function rendreFiche() {
   const zone = $("#fiche");
   if (!constat) { zone.innerHTML = `<p class="vide-doux">Choisissez un constat dans la liste.</p>`; return; }
   const classe = classeDe(constat);
-  const batiment = constat.autres["Bâtiment"] || constat.autres["Batiment"] || constat.localisation || "";
+  const batiment = adresse(constat.autres["Bâtiment"] || constat.autres["Batiment"] || "")
+                   || constat.localisation || "";
 
   const vignettes = constat.photos.map((photo, rang) => {
     const corps = photo.type === "absente"
@@ -1258,13 +1329,15 @@ function rendreFiche() {
       </div>
 
       <div class="chiffres">
-        <div><small>Quantité</small>
+        <div><small>Quantité${constat.unite ? " (" + ech(constat.unite) + ")" : ""}</small>
           <b><input class="champ-nombre" data-nombre="quantite" value="${ech(nombreFr(constat.quantite))}"
                     inputmode="decimal" aria-label="Quantité"></b></div>
+        <span class="op" aria-hidden="true">×</span>
         <div><small>Prix unitaire</small>
           <b><input class="champ-nombre" data-nombre="prixUnitaire"
                     value="${constat.prixUnitaire == null ? "" : ech(argent(constat.prixUnitaire))}"
                     inputmode="decimal" placeholder="—" aria-label="Prix unitaire"></b></div>
+        <span class="op" aria-hidden="true">=</span>
         <div><small>${constat.coutChiffrier != null ? "Coût (chiffrier)" : "Coût"}</small>
           <b><input class="champ-nombre" data-nombre="cout"
                     value="${constat.cout == null ? "" : ech(argent(constat.cout))}"
@@ -1418,6 +1491,14 @@ function ouvrirColonnes() {
       </select>
     </div>`).join("")
     + `<div class="rangee-champ" style="margin-top:8px">
+         <label for="rue">Adresse du mandat</label>
+         <input type="text" id="rue" value="${ech(etat.rue)}" placeholder="Place du Collège"
+                style="flex:1 1 180px;border:1px solid var(--trait-fort);border-radius:6px;
+                       background:var(--surface);color:inherit;font:inherit;font-size:12px;padding:4px 8px">
+       </div>
+       <p style="margin:2px 0 10px;font-size:11px;color:var(--doux)">
+         Complète les numéros de bâtiment dans le bandeau : « 100 » devient « 100, Place du Collège ».</p>
+       <div class="rangee-champ">
          <label for="inverse" style="width:auto">Échelle inversée (1 = le plus grave)</label>
          <input type="checkbox" id="inverse" ${etat.mappage.echelleInversee ? "checked" : ""}>
        </div>`
@@ -1441,6 +1522,7 @@ $("#b-appliquer").onclick = () => {
   }
   etat.mappage.colonnes = colonnes;
   etat.mappage.echelleInversee = $("#inverse").checked;
+  etat.rue = $("#rue").value.trim();
   memoire.ecrire(etat.mappage);
   construire();
   rendreTout();
@@ -1888,6 +1970,7 @@ async function charger(source, nom, estExemple = false) {
       return;
     }
     construire();
+    etat.rue = deduireRue(etat.constats);
     rendreTout();
     $("#corps").dataset.vue = "liste";
 
