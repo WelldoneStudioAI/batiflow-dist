@@ -163,6 +163,10 @@ public struct ManifesteDossier: Decodable, Sendable {
         public let ecartDeCout: Bool?
         public let categorie: String?
         public let localisation: String?
+        /// Texte affiché à droite du bandeau dans le rapport (« NC », « SU »…).
+        public let statut: String?
+        /// Vrai si l'utilisateur a retouché la ligne dans l'outil web avant l'export.
+        public let modifieDansLOutil: Bool?
         public let photos: [Photo]
         public let autresColonnes: [String: String]?
     }

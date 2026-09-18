@@ -24,10 +24,16 @@ chiffrier .xlsx  →  [ web app : lecture, contrôle, correction ]  →  dossier
 2. L'outil choisit la feuille de constats, reconnaît les colonnes, valide ses choix
    sur les valeurs, et affiche : liste à gauche, fiche à droite — photo, titre,
    étiquette de priorité, description, recommandation, quantité × prix = coût.
-3. Recherche plein texte, filtres par classe de priorité, tri, exclusion ligne à ligne.
-4. **Dossier de photos…** : vous désignez le dossier, les photos du chiffrier sont
+3. Recherche plein texte, filtre **par catégorie ou par priorité**, tri, exclusion
+   ligne à ligne.
+4. **La fiche est l'aperçu du rendu BatiFlow, éditable en un clic** : bandeau
+   priorité + bâtiment + statut, titre, description, localisation, encart de
+   recommandation, bande de photos, puis quantité × prix = coût. Chaque champ se
+   corrige sur place ; les photos s'ajoutent par glisser-déposer et se retirent d'un
+   clic. Tout ce qui est corrigé part dans le dossier exporté.
+5. **Dossier de photos…** : vous désignez le dossier, les photos du chiffrier sont
    retrouvées par leur nom (casse et extension indifférentes) et s'affichent.
-5. **Exporter vers BatiFlow** : le dossier `.zip` est enregistré sur votre poste —
+6. **Exporter vers BatiFlow** : le dossier `.zip` est enregistré sur votre poste —
    `bsi.json` (le manifeste que BatiFlow lit), `photos/`, `constats.csv`, `rapport.txt`.
    Le manifeste seul ou le CSV seul sont aussi disponibles, et les trois formats
    restent copiables dans le presse-papiers.
