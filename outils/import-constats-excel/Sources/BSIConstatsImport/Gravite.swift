@@ -45,10 +45,35 @@ public enum Gravite: Int, CaseIterable, Comparable, Hashable, Sendable {
         }
     }
 
+    /// Codes de priorité utilisés dans les rapports BSI (légende du rapport, p. 8) :
+    /// `U` urgent · `CT` court terme (1 an) · `MT` moyen terme (4 ans) ·
+    /// `LT` long terme (9 ans) · `LT+` long terme (10 ans et +) ·
+    /// `EX` avis d'un expert recommandé · `CO` entretien ou amélioration suggéré.
+    ///
+    /// Deux correspondances relèvent du jugement et sont volontairement explicites ici :
+    /// `EX` est traité comme majeur (une expertise à commander n'attend pas) et `LT+`
+    /// comme mineur (même horizon que `LT`, plus lointain). Le code d'origine reste
+    /// conservé dans `ConstatImporte.graviteSource` et affiché sur la fiche.
+    public static func depuisCodePriorite(_ brut: String) -> Gravite? {
+        let code = brut.uppercased().filter { $0.isLetter || $0 == "+" }
+        switch code {
+        case "U": return .critique
+        case "CT", "EX": return .majeure
+        case "MT": return .moderee
+        case "LT", "LT+": return .mineure
+        case "CO": return .observation
+        default: return nil
+        }
+    }
+
     /// Interprète une valeur de chiffrier. L'ordre d'examen est fixe (du plus grave
     /// au moins grave), donc le résultat est reproductible.
     /// - Parameter echelleInversee: `true` si, dans le chiffrier, 1 est le plus grave.
     public static func depuis(_ brut: String, echelleInversee: Bool = false) -> Gravite? {
+        // 0. Code de priorité BSI (« CT », « LT+ »…), avant toute normalisation :
+        //    le « + » de « LT+ » ne survit pas au nettoyage des clés.
+        if let parCode = depuisCodePriorite(brut) { return parCode }
+
         let cle = NormalisationTexte.cle(brut)
         guard !cle.isEmpty else { return nil }
         let ordre = Gravite.allCases.reversed()

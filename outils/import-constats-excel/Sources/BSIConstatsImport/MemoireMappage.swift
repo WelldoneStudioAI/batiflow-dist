@@ -18,6 +18,8 @@ public struct MemoireMappage {
         defaults.set(contenu, forKey: prefixe + mappage.signature)
         defaults.set(mappage.echelleGraviteInversee,
                      forKey: prefixe + mappage.signature + ".inverse")
+        defaults.set(mappage.colonnesPhotosSupplementaires,
+                     forKey: prefixe + mappage.signature + ".photos")
     }
 
     public func appliquerSiConnu(_ mappage: MappageColonnes) -> MappageColonnes {
@@ -32,6 +34,11 @@ public struct MemoireMappage {
             }
         }
         resultat.echelleGraviteInversee = defaults.bool(forKey: prefixe + mappage.signature + ".inverse")
+        if let photos = defaults.array(forKey: prefixe + mappage.signature + ".photos") as? [Int] {
+            resultat.colonnesPhotosSupplementaires = photos.filter(mappage.entetes.indices.contains)
+        }
+        // Les décisions automatiques de la lecture en cours restent valables.
+        resultat.ajustements = mappage.ajustements
         return resultat.colonnes.isEmpty ? mappage : resultat
     }
 }

@@ -51,6 +51,79 @@ EXEMPLE = [
 HYPERLIENS_EXEMPLE = {"G6": "https://exemple.ca/photos/ventilateur.jpg"}
 
 
+# ---------------------------------------------------------------------------------
+# Jeu d'essai « rapport BSI » : reproduit la structure d'un vrai chiffrier de mandat
+# (colonnes de provenance, code de priorité, quantité + unité, coût total qui ne
+# correspond pas toujours à quantité × prix unitaire, deux colonnes de photos,
+# lignes vides au milieu, ligne sans texte de constat). Contenu entièrement fictif.
+# ---------------------------------------------------------------------------------
+
+ENTETES_RAPPORT = ["#", "Page PDF", "Classe", "Règle appliquée", "Section", "Sous-section",
+                   "Composante", "Bâtiment", "Nº", "Constat", "Localisation",
+                   "Recommandation", "Budget (note)", "Code", "Qtes", "",
+                   "Cout unitaire", "Coût ($)", "Forme de la ligne", "Photo 1", "Photo 2"]
+
+TEXTE_LONG = (
+    "La margelle existante est endommagée ou mal installée, ou encore sa capacité de "
+    "drainage est réduite par l'accumulation de débris, ce qui favorise l'infiltration "
+    "d'eau vers le mur de fondation et accélère la dégradation du crépi."
+)
+
+LIGNES_RAPPORT = [
+    ["1", "24", "EXTÉRIEUR", "Nº = EXT", "Composantes structurales", "Fondation",
+     "Mur de fondation", "Tous les bâtiments", "EXT", TEXTE_LONG,
+     "façade avant", "Réparer ou remplacer la margelle.", "650$/margelle", "U",
+     26, "u.", 650, 13000, "constat", "IMG_0001.jpeg", "IMG_0002.jpeg"],
+    ["2", "25", "EXTÉRIEUR", "Nº = EXT", "Composantes structurales", "Fondation",
+     "Mur de fondation", "100", "EXT", "Présence d'une fissure dans le mur de fondation.",
+     "", "Réparation par un entrepreneur spécialisé.", "", "CT",
+     2, "u.", 1250, 2500, "constat", "", ""],
+    ["3", "55", "EXTÉRIEUR", "Nº = EXT", "Enveloppe du bâtiment", "Toiture",
+     "Revêtement de toiture", "200", "EXT", "Les bardeaux d'asphalte sont en fin de vie utile.",
+     "Mansardes - 3 façades", "Prévoir le remplacement du revêtement.",
+     "Budget: 12$/pi2 (retrait, pose)", "MT", 1680, "pi2", 12, 20160, "constat", "", ""],
+    ["4", "32", "EXTÉRIEUR", "Nº = EXT", "Composantes structurales", "Fondation",
+     "Mur de fondation", "70-80", "EXT", "", "",
+     "Prévoir la réparation des fissures par un entrepreneur spécialisé.", "", "CT",
+     2, "u.", 1250, 2500, "constat", "", ""],
+    ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+    ["5", "61", "EXTÉRIEUR", "Nº = EXT", "Aménagement extérieur", "Stationnement",
+     "Revêtement de surface", "Tous les bâtiments", "EXT",
+     "Le pavage du stationnement présente des fissures et un affaissement localisé.",
+     "stationnement arrière", "Réfection partielle du pavage.", "", "LT+",
+     "", "", "", 4800, "constat", "", ""],
+    ["6", "70", "EXTÉRIEUR", "Nº = EXT", "Services du bâtiment", "Ventilation",
+     "Ventilateur de toit", "110", "EXT", "Le ventilateur de toit est bruyant au démarrage.",
+     "toiture", "Entretien annuel à prévoir.", "", "CO",
+     1, "u.", 900, 900, "constat", "", ""],
+    ["7", "88", "EXTÉRIEUR", "Nº = EXT", "Composantes structurales", "Balcons",
+     "Garde-corps", "100-110", "EXT",
+     "L'ancrage des garde-corps ne peut être vérifié sans ouverture des finis.",
+     "balcons arrière", "Faire valider l'ancrage par un ingénieur.", "", "EX",
+     1, "u.", "", "", "sans-mot-constat", "", ""],
+]
+
+LISEZ_MOI = [
+    ["Immeuble fictif — rapport BSI 2020 — constats extérieurs (jeu d'essai)"],
+    ["Contenu : 7 constats, structure identique à un vrai chiffrier de mandat."],
+    [""],
+    ["PRIORITÉS (légende du rapport, p. 8)"],
+    ["U — Urgent"],
+    ["CT — Court terme (d'ici 1 an)"],
+    ["MT — Moyen terme (d'ici 4 ans)"],
+    ["LT — Long terme (d'ici 9 ans)"],
+    ["LT+ — Long terme (10 ans et +)"],
+    ["EX — Avis d'un expert recommandé"],
+    ["CO — Entretien ou amélioration suggéré"],
+]
+
+PAR_COMPOSANTE = [
+    ["Composantes structurales", "Mur de fondation", "3", "18000"],
+    ["Enveloppe du bâtiment", "Revêtement de toiture", "1", "20160"],
+    ["Aménagement extérieur", "Revêtement de surface", "1", "4800"],
+    ["Services du bâtiment", "Ventilateur de toit", "1", "900"],
+]
+
 def colonne(index):
     lettres, index = "", index + 1
     while index:
@@ -59,11 +132,16 @@ def colonne(index):
     return lettres
 
 
-def construire(chemin, lignes, hyperliens=None, nom_feuille="Constats"):
-    hyperliens = hyperliens or {}
-    table = [ENTETES] + lignes
+def construire(chemin, lignes, hyperliens=None, nom_feuille="Constats", entetes=None):
+    """Classeur à une feuille (gabarit et exemple simple)."""
+    return construire_multi(chemin, [(nom_feuille, (entetes or ENTETES), lignes, hyperliens or {})])
 
-    # Table des chaînes partagées.
+
+def construire_multi(chemin, feuilles):
+    """Classeur à plusieurs feuilles : (nom, entetes, lignes, hyperliens)."""
+    parties_feuilles, parties_rels, xml_feuilles = [], [], []
+
+    # Table des chaînes partagées, commune à tout le classeur.
     chaines, index_chaines = [], {}
     def cle_chaine(valeur):
         if valeur not in index_chaines:
@@ -71,43 +149,40 @@ def construire(chemin, lignes, hyperliens=None, nom_feuille="Constats"):
             chaines.append(valeur)
         return index_chaines[valeur]
 
-    xml_lignes = []
-    for numero, ligne in enumerate(table, start=1):
-        cellules = []
-        for index, valeur in enumerate(ligne):
-            reference = f"{colonne(index)}{numero}"
-            if valeur is None or valeur == "":
-                continue
-            if isinstance(valeur, (int, float)):
-                cellules.append(f'<c r="{reference}"><v>{valeur}</v></c>')
-            else:
-                cellules.append(f'<c r="{reference}" t="s"><v>{cle_chaine(str(valeur))}</v></c>')
-        xml_lignes.append(f'<row r="{numero}">{"".join(cellules)}</row>')
+    for numero_feuille, (nom_feuille, entetes, lignes, hyperliens) in enumerate(feuilles, start=1):
+        table = [entetes] + lignes
+        xml_lignes = []
+        for numero, ligne in enumerate(table, start=1):
+            cellules = []
+            for index, valeur in enumerate(ligne):
+                reference = f"{colonne(index)}{numero}"
+                if valeur is None or valeur == "":
+                    continue
+                if isinstance(valeur, (int, float)):
+                    cellules.append(f'<c r="{reference}"><v>{valeur}</v></c>')
+                else:
+                    cellules.append(f'<c r="{reference}" t="s"><v>{cle_chaine(str(valeur))}</v></c>')
+            xml_lignes.append(f'<row r="{numero}">{"".join(cellules)}</row>')
 
-    bloc_liens, relations_feuille = "", []
-    if hyperliens:
-        morceaux = []
-        for position, (reference, cible) in enumerate(hyperliens.items(), start=1):
-            identifiant = f"rIdL{position}"
-            morceaux.append(f'<hyperlink ref="{reference}" r:id="{identifiant}"/>')
-            relations_feuille.append(
-                f'<Relationship Id="{identifiant}" '
-                'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" '
-                f'Target="{html.escape(cible)}" TargetMode="External"/>')
-        bloc_liens = f'<hyperlinks>{"".join(morceaux)}</hyperlinks>'
+        bloc_liens, relations_feuille = "", []
+        if hyperliens:
+            morceaux = []
+            for position, (reference, cible) in enumerate(hyperliens.items(), start=1):
+                identifiant = f"rIdL{position}"
+                morceaux.append(f'<hyperlink ref="{reference}" r:id="{identifiant}"/>')
+                relations_feuille.append(
+                    f'<Relationship Id="{identifiant}" '
+                    'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" '
+                    f'Target="{html.escape(cible)}" TargetMode="External"/>')
+            bloc_liens = f'<hyperlinks>{"".join(morceaux)}</hyperlinks>'
 
-    sheet = (
-        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
-        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-        '<cols>'
-        '<col min="1" max="1" width="38" customWidth="1"/>'
-        '<col min="2" max="3" width="46" customWidth="1"/>'
-        '<col min="4" max="6" width="14" customWidth="1"/>'
-        '<col min="7" max="9" width="26" customWidth="1"/>'
-        '</cols>'
-        f'<sheetData>{"".join(xml_lignes)}</sheetData>{bloc_liens}</worksheet>'
-    )
+        xml_feuilles.append((
+            numero_feuille, nom_feuille,
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
+            'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+            f'<sheetData>{"".join(xml_lignes)}</sheetData>{bloc_liens}</worksheet>',
+            relations_feuille))
 
     shared = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
@@ -120,18 +195,23 @@ def construire(chemin, lignes, hyperliens=None, nom_feuille="Constats"):
     workbook = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
         '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
-        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-        f'<sheets><sheet name="{nom_feuille}" sheetId="1" r:id="rId1"/></sheets></workbook>'
+        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'
+        + "".join(f'<sheet name="{html.escape(n)}" sheetId="{i}" r:id="rId{i}"/>'
+                  for i, n, _, _ in xml_feuilles)
+        + '</sheets></workbook>'
     )
 
+    nb = len(xml_feuilles)
     content_types = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
         '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
         '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
         '<Default Extension="xml" ContentType="application/xml"/>'
         '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
-        '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
-        '<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>'
+        + "".join(f'<Override PartName="/xl/worksheets/sheet{i}.xml" '
+                  'ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+                  for i in range(1, nb+1))
+        + '<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>'
         '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
         '</Types>'
     )
@@ -147,13 +227,13 @@ def construire(chemin, lignes, hyperliens=None, nom_feuille="Constats"):
     workbook_rels = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
         '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-        '<Relationship Id="rId1" '
-        'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" '
-        'Target="worksheets/sheet1.xml"/>'
-        '<Relationship Id="rId2" '
+        + "".join(f'<Relationship Id="rId{i}" '
+                  'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" '
+                  f'Target="worksheets/sheet{i}.xml"/>' for i in range(1, nb+1))
+        + f'<Relationship Id="rId{nb+1}" '
         'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" '
         'Target="sharedStrings.xml"/>'
-        '<Relationship Id="rId3" '
+        f'<Relationship Id="rId{nb+2}" '
         'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" '
         'Target="styles.xml"/></Relationships>'
     )
@@ -177,13 +257,14 @@ def construire(chemin, lignes, hyperliens=None, nom_feuille="Constats"):
         archive.writestr("xl/_rels/workbook.xml.rels", workbook_rels)
         archive.writestr("xl/styles.xml", styles)
         archive.writestr("xl/sharedStrings.xml", shared)
-        archive.writestr("xl/worksheets/sheet1.xml", sheet)
-        if relations_feuille:
-            archive.writestr(
-                "xl/worksheets/_rels/sheet1.xml.rels",
-                '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-                '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-                + "".join(relations_feuille) + "</Relationships>")
+        for i, _, sheet, relations_feuille in xml_feuilles:
+            archive.writestr(f"xl/worksheets/sheet{i}.xml", sheet)
+            if relations_feuille:
+                archive.writestr(
+                    f"xl/worksheets/_rels/sheet{i}.xml.rels",
+                    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+                    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+                    + "".join(relations_feuille) + "</Relationships>")
     print("écrit :", chemin.relative_to(RACINE))
 
 
@@ -204,3 +285,9 @@ if __name__ == "__main__":
                EXEMPLE, HYPERLIENS_EXEMPLE)
     csv_exemple(RACINE / "Gabarit" / "exemple-constats.csv")
     csv_exemple(RACINE / "Tests" / "BSIConstatsImportTests" / "Fixtures" / "exemple-constats.csv")
+    construire_multi(
+        RACINE / "Tests" / "BSIConstatsImportTests" / "Fixtures" / "exemple-rapport-bsi.xlsx",
+        [("Lisez-moi", ["Lisez-moi"], LISEZ_MOI, {}),
+         ("Extérieur", ENTETES_RAPPORT, LIGNES_RAPPORT, {}),
+         ("Par composante", ["Section", "Composante", "Constats", "Coût ($)"],
+          PAR_COMPOSANTE, {})])

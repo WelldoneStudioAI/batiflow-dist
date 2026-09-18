@@ -65,6 +65,18 @@ public enum ValueParsing {
         return max(1, valeur)
     }
 
+    /// Vrai si la cellule ne contient qu'un montant : chiffres, séparateurs, devise,
+    /// espaces. « 13000 » et « 1 234,56 $ » oui ; « 650$/margelle » non (des lettres),
+    /// « à valider » non. Sert à distinguer une colonne de montants d'une note de budget.
+    public static func estMontantPur(_ brut: String) -> Bool {
+        let texte = brut.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !texte.isEmpty, texte.contains(where: \.isNumber) else { return false }
+        let permis = CharacterSet(charactersIn: "0123456789 ,.$-()")
+            .union(espaces)
+            .union(CharacterSet(charactersIn: "\u{20AC}\u{00A2}"))   // € ¢
+        return texte.unicodeScalars.allSatisfy { permis.contains($0) }
+    }
+
     /// Retire les espaces (y compris insécables) en tête et en queue.
     public static func degarni(_ brut: String) -> String {
         brut.trimmingCharacters(in: espaces.union(.whitespacesAndNewlines))

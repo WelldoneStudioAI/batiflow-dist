@@ -39,6 +39,29 @@ public struct FeuilleMappage: View {
                            isOn: $brouillon.echelleGraviteInversee)
                         .padding(.top, 6)
                         .frame(maxWidth: .infinity, alignment: .leading)
+
+                    if !brouillon.colonnesPhotosSupplementaires.isEmpty {
+                        let noms = brouillon.colonnesPhotosSupplementaires
+                            .map { $0 < entetes.count && !entetes[$0].isEmpty
+                                   ? entetes[$0] : "colonne \($0 + 1)" }
+                            .joined(separator: ", ")
+                        Label("Photos supplémentaires lues : \(noms)", systemImage: "photo.on.rectangle")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+
+                    if !brouillon.ajustements.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Label("Déduit des valeurs", systemImage: "wand.and.stars")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                            ForEach(brouillon.ajustements, id: \.self) { ajustement in
+                                Text("• " + ajustement).font(.caption).foregroundStyle(.secondary)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                 }
                 .padding(20)
             }

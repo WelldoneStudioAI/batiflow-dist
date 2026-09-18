@@ -16,6 +16,9 @@ public struct RapportImport: Sendable {
     public var constatsRetenus: Int = 0
     public var lignesIgnorees: Int = 0
     public var avertissements: [AvertissementImport] = []
+    /// Décisions prises automatiquement en regardant les valeurs (colonne de coût total
+    /// reconnue, gravité déduite d'une colonne de codes, unité devinée…).
+    public var ajustements: [String] = []
 
     public var aDesAvertissements: Bool { !avertissements.isEmpty }
 
@@ -29,6 +32,11 @@ public struct RapportImport: Sendable {
             "Lignes vides ignorées : \(lignesIgnorees)",
             "Avertissements : \(avertissements.count)"
         ]
+        if !ajustements.isEmpty {
+            lignes.append("")
+            lignes.append("Lecture automatique :")
+            lignes.append(contentsOf: ajustements.map { "- " + $0 })
+        }
         if !avertissements.isEmpty {
             lignes.append("")
             lignes.append(contentsOf: avertissements.map(\.texte))
@@ -92,11 +100,14 @@ public enum ImportateurConstats {
         let entetes = meilleureLigne < feuille.lignes.count ? feuille.lignes[meilleureLigne] : []
         guard !entetes.isEmpty else { throw ErreurImport.aucuneDonnee }
 
+        // Les passes de validation par les valeurs ont besoin des lignes de données.
+        let donnees = Array(feuille.lignes.dropFirst(meilleureLigne + 1))
         return PreparationImport(url: url,
                                  feuilles: feuilles,
                                  indexFeuilleChoisie: meilleurIndex,
                                  ligneEntetes: meilleureLigne,
-                                 mappage: MappageColonnes.detecter(entetes: entetes))
+                                 mappage: MappageColonnes.detecter(entetes: entetes,
+                                                                   donnees: donnees))
     }
 
     static func lireFeuilles(url: URL) throws -> [FeuilleBrute] {
@@ -144,6 +155,7 @@ public enum ImportateurConstats {
         let feuille = preparation.feuille
         var rapport = RapportImport()
         rapport.nomFeuille = feuille.nom
+        rapport.ajustements = mappage.ajustements
         var constats: [ConstatImporte] = []
 
         let premiereLigne = preparation.ligneEntetes + 1
@@ -153,26 +165,43 @@ public enum ImportateurConstats {
             rapport.lignesLues += 1
             let numeroExcel = index + 1
 
-            func cellule(_ champ: ChampConstat, hyperlien: Bool = false) -> String? {
+            func cellule(_ champ: ChampConstat) -> String? {
                 guard let colonne = mappage.colonnes[champ] else { return nil }
-                let brut = feuille.valeur(ligne: index, colonne: colonne, prefererHyperlien: hyperlien)
-                return NormalisationTexte.valeurAffichable(brut)
+                return NormalisationTexte.valeurAffichable(feuille.valeur(ligne: index, colonne: colonne))
             }
 
-            let titre = cellule(.titre)
-            let description = cellule(.description)
-            guard titre != nil || description != nil else {
+            // Les liens de photos peuvent venir de plusieurs colonnes (« Photo 1 »,
+            // « Photo 2 ») et le lien réel prime sur le texte affiché dans la cellule.
+            let liensPhotos = mappage.toutesLesColonnesPhotos.compactMap { colonne in
+                NormalisationTexte.valeurAffichable(
+                    feuille.valeur(ligne: index, colonne: colonne, prefererHyperlien: true))
+            }
+
+            let champsLus = ChampConstat.allCases.compactMap(cellule)
+            guard !champsLus.isEmpty || !liensPhotos.isEmpty else {
                 rapport.lignesIgnorees += 1
                 continue
             }
 
-            // Une ligne sans titre mais avec description reste importable :
-            // on promeut la première phrase de la description en titre.
-            var titreFinal = titre ?? ""
-            if titreFinal.isEmpty, let description {
-                titreFinal = premierePhrase(description)
-                rapport.avertissements.append(
-                    .init(ligne: numeroExcel, message: "titre absent, déduit de la description"))
+            // Titre et description. Un chiffrier n'a souvent qu'une seule colonne de texte :
+            // le paragraphe complet devient la description et son amorce devient le titre,
+            // comme sur le terrain où le titre est une étiquette courte.
+            var titre = cellule(.titre)
+            var description = cellule(.description)
+            if let texte = titre, description == nil, texte.count > 110 {
+                description = texte
+                titre = NormalisationTexte.amorce(texte)
+            }
+            if titre == nil {
+                if let source = description ?? cellule(.recommandation) {
+                    titre = NormalisationTexte.amorce(source)
+                    rapport.avertissements.append(
+                        .init(ligne: numeroExcel, message: "titre absent, déduit du texte de la ligne"))
+                } else {
+                    titre = "Constat sans titre (ligne \(numeroExcel))"
+                    rapport.avertissements.append(
+                        .init(ligne: numeroExcel, message: "aucun texte de constat sur cette ligne"))
+                }
             }
 
             var occurrence = 1
@@ -181,21 +210,38 @@ public enum ImportateurConstats {
                     occurrence = valeur
                 } else {
                     rapport.avertissements.append(
-                        .init(ligne: numeroExcel, message: "occurrence illisible « \(brut) », ramenée à 1"))
+                        .init(ligne: numeroExcel, message: "quantité illisible « \(brut) », ramenée à 1"))
                 }
             }
 
-            var prix: Decimal?
+            var prixUnitaire: Decimal?
             if let brut = cellule(.prixUnitaire) {
-                prix = ValueParsing.montant(brut)
-                if prix == nil {
+                prixUnitaire = ValueParsing.montant(brut)
+                if prixUnitaire == nil {
                     rapport.avertissements.append(
-                        .init(ligne: numeroExcel, message: "prix illisible « \(brut) »"))
+                        .init(ligne: numeroExcel, message: "prix unitaire illisible « \(brut) »"))
                 }
+            }
+
+            var prixTotalChiffrier: Decimal?
+            if let brut = cellule(.prixTotal) {
+                prixTotalChiffrier = ValueParsing.montant(brut)
+                if prixTotalChiffrier == nil {
+                    rapport.avertissements.append(
+                        .init(ligne: numeroExcel, message: "coût total illisible « \(brut) »"))
+                }
+            }
+            if let total = prixTotalChiffrier, let unitaire = prixUnitaire,
+               total != unitaire * Decimal(occurrence) {
+                rapport.avertissements.append(.init(
+                    ligne: numeroExcel,
+                    message: "le coût du chiffrier (\(total)) diffère de \(occurrence) × \(unitaire) ; "
+                           + "c'est celui du chiffrier qui est retenu"))
             }
 
             var gravite: Gravite?
-            if let brut = cellule(.gravite) {
+            let graviteSource = cellule(.gravite)
+            if let brut = graviteSource {
                 gravite = Gravite.depuis(brut, echelleInversee: mappage.echelleGraviteInversee)
                 if gravite == nil {
                     rapport.avertissements.append(
@@ -204,34 +250,38 @@ public enum ImportateurConstats {
             }
 
             var photos: [ReferencePhoto] = []
-            if let brut = cellule(.photo, hyperlien: true) {
-                photos = resolveurPhotos.resoudre(brut)
-                for photo in photos {
-                    if case .introuvable(let lien) = photo {
+            for lien in liensPhotos {
+                let resolues = resolveurPhotos.resoudre(lien)
+                for photo in resolues {
+                    if case .introuvable(let brut) = photo {
                         rapport.avertissements.append(
-                            .init(ligne: numeroExcel, message: "photo introuvable « \(lien) »"))
+                            .init(ligne: numeroExcel, message: "photo introuvable « \(brut) »"))
                     }
                 }
+                photos.append(contentsOf: resolues)
             }
 
             var supplementaires: [String: String] = [:]
             for colonne in mappage.colonnesNonMappees {
-                let entete = colonne < mappage.entetes.count ? mappage.entetes[colonne] : "Colonne \(colonne + 1)"
+                let entete = colonne < mappage.entetes.count ? mappage.entetes[colonne] : ""
+                guard !entete.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
                 if let valeur = NormalisationTexte.valeurAffichable(
-                    feuille.valeur(ligne: index, colonne: colonne)),
-                   !entete.trimmingCharacters(in: .whitespaces).isEmpty {
+                    feuille.valeur(ligne: index, colonne: colonne)) {
                     supplementaires[entete] = valeur
                 }
             }
 
             constats.append(ConstatImporte(
                 ligneSource: numeroExcel,
-                titre: titreFinal,
+                titre: titre ?? "Constat sans titre",
                 description: description,
                 recommandation: cellule(.recommandation),
                 occurrence: occurrence,
-                prixUnitaire: prix,
+                unite: cellule(.unite),
+                prixUnitaire: prixUnitaire,
+                prixTotalChiffrier: prixTotalChiffrier,
                 gravite: gravite,
+                graviteSource: graviteSource,
                 localisation: cellule(.localisation),
                 categorie: cellule(.categorie),
                 photos: photos,
@@ -243,9 +293,4 @@ public enum ImportateurConstats {
         return (constats, rapport)
     }
 
-    private static func premierePhrase(_ texte: String) -> String {
-        let coupure = texte.firstIndex(where: { $0 == "." || $0 == "\n" })
-        let extrait = coupure.map { String(texte[texte.startIndex..<$0]) } ?? texte
-        return String(extrait.prefix(120))
-    }
 }

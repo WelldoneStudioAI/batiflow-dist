@@ -11,8 +11,16 @@ public struct ConstatImporte: Identifiable, Hashable, Sendable {
     public var description: String?
     public var recommandation: String?
     public var occurrence: Int
+    /// Unité de la quantité telle qu'écrite au chiffrier (« u. », « pi2 », « pi lin »).
+    public var unite: String?
     public var prixUnitaire: Decimal?
+    /// Coût total lu directement dans le chiffrier, quand la colonne existe. Il fait foi :
+    /// dans un vrai rapport, il n'est pas toujours égal à quantité × prix unitaire.
+    public var prixTotalChiffrier: Decimal?
     public var gravite: Gravite?
+    /// Valeur brute de la colonne de gravité (« CT », « Majeur », « 4 »), conservée pour
+    /// que l'inspecteur reconnaisse sa propre cotation sur la fiche.
+    public var graviteSource: String?
     public var localisation: String?
     public var categorie: String?
     public var photos: [ReferencePhoto]
@@ -27,8 +35,11 @@ public struct ConstatImporte: Identifiable, Hashable, Sendable {
         description: String? = nil,
         recommandation: String? = nil,
         occurrence: Int = 1,
+        unite: String? = nil,
         prixUnitaire: Decimal? = nil,
+        prixTotalChiffrier: Decimal? = nil,
         gravite: Gravite? = nil,
+        graviteSource: String? = nil,
         localisation: String? = nil,
         categorie: String? = nil,
         photos: [ReferencePhoto] = [],
@@ -40,18 +51,39 @@ public struct ConstatImporte: Identifiable, Hashable, Sendable {
         self.description = description
         self.recommandation = recommandation
         self.occurrence = max(1, occurrence)
+        self.unite = unite
         self.prixUnitaire = prixUnitaire
+        self.prixTotalChiffrier = prixTotalChiffrier
         self.gravite = gravite
+        self.graviteSource = graviteSource
         self.localisation = localisation
         self.categorie = categorie
         self.photos = photos
         self.champsSupplementaires = champsSupplementaires
     }
 
-    /// Prix unitaire × occurrence. `nil` si aucun prix n'a pu être lu.
-    public var prixTotal: Decimal? {
+    /// Prix unitaire × occurrence, tel que l'outil le recalcule.
+    public var prixTotalCalcule: Decimal? {
         guard let prixUnitaire else { return nil }
         return prixUnitaire * Decimal(occurrence)
+    }
+
+    /// Coût retenu : celui du chiffrier s'il existe, sinon le produit recalculé.
+    public var prixTotal: Decimal? {
+        prixTotalChiffrier ?? prixTotalCalcule
+    }
+
+    /// Vrai quand le chiffrier annonce un total différent de quantité × prix unitaire.
+    public var totalDivergent: Bool {
+        guard let chiffrier = prixTotalChiffrier, let calcule = prixTotalCalcule else { return false }
+        return chiffrier != calcule
+    }
+
+    /// Quantité telle qu'affichée sur la fiche : « 1 680 pi2 », « 26 u. », « 2 ».
+    public var quantiteAffichable: String {
+        let nombre = occurrence.formatted(.number.locale(Locale(identifier: "fr_CA")))
+        guard let unite, !unite.isEmpty else { return nombre }
+        return "\(nombre) \(unite)"
     }
 }
 

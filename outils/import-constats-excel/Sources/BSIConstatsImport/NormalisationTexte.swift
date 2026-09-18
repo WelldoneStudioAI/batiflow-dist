@@ -30,4 +30,24 @@ public enum NormalisationTexte {
             .trimmingCharacters(in: .whitespacesAndNewlines)
         return propre.isEmpty ? nil : propre
     }
+
+    /// Titre court tiré d'un texte long : première phrase si elle tient dans la limite,
+    /// sinon coupure au dernier mot entier suivie d'une ellipse.
+    public static func amorce(_ texte: String, limite: Int = 110) -> String {
+        let propre = texte.trimmingCharacters(in: .whitespacesAndNewlines)
+        let finPhrase = propre.firstIndex { $0 == "." || $0 == "!" || $0 == "?" || $0 == "\n" }
+        if let finPhrase {
+            let phrase = String(propre[propre.startIndex..<finPhrase])
+                .trimmingCharacters(in: .whitespaces)
+            if !phrase.isEmpty, phrase.count <= limite { return phrase }
+        }
+        guard propre.count > limite else { return propre }
+
+        let tronque = String(propre.prefix(limite))
+        if let dernierEspace = tronque.lastIndex(of: " "), tronque.distance(
+            from: tronque.startIndex, to: dernierEspace) > limite / 2 {
+            return String(tronque[tronque.startIndex..<dernierEspace]) + "…"
+        }
+        return tronque + "…"
+    }
 }

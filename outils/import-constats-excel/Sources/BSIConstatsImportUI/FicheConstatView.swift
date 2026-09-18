@@ -59,7 +59,16 @@ public struct FicheConstatView: View {
                     .font(.title2.weight(.semibold))
                     .textSelection(.enabled)
                 Spacer(minLength: 8)
-                BadgeGravite(gravite: constat.gravite)
+                VStack(alignment: .trailing, spacing: 3) {
+                    BadgeGravite(gravite: constat.gravite)
+                    // Cotation d'origine (« CT », « U », « 4 ») : l'inspecteur reconnaît la sienne.
+                    if let source = constat.graviteSource,
+                       NormalisationTexte.cle(source) != NormalisationTexte.cle(constat.gravite?.libelle ?? "") {
+                        Text("chiffrier : \(source)")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
             HStack(spacing: 10) {
                 if let categorie = constat.categorie {
@@ -86,12 +95,26 @@ public struct FicheConstatView: View {
     }
 
     private var blocChiffre: some View {
-        HStack(spacing: 0) {
-            colonneChiffre("Occurrence", valeur: "\(constat.occurrence)")
-            Divider().frame(height: 34)
-            colonneChiffre("Prix unitaire", valeur: FormatageMontant.texte(constat.prixUnitaire))
-            Divider().frame(height: 34)
-            colonneChiffre("Total", valeur: FormatageMontant.texte(constat.prixTotal), accent: true)
+        VStack(spacing: 6) {
+            HStack(spacing: 0) {
+                colonneChiffre("Quantité", valeur: constat.quantiteAffichable)
+                Divider().frame(height: 34)
+                colonneChiffre("Prix unitaire", valeur: FormatageMontant.texte(constat.prixUnitaire))
+                Divider().frame(height: 34)
+                colonneChiffre(constat.prixTotalChiffrier != nil ? "Total (chiffrier)" : "Total",
+                               valeur: FormatageMontant.texte(constat.prixTotal), accent: true)
+            }
+            if constat.totalDivergent {
+                Label("Le chiffrier annonce \(FormatageMontant.texte(constat.prixTotalChiffrier)) "
+                      + "alors que \(constat.quantiteAffichable) × "
+                      + "\(FormatageMontant.texte(constat.prixUnitaire)) donne "
+                      + "\(FormatageMontant.texte(constat.prixTotalCalcule)). Le montant du chiffrier est retenu.",
+                      systemImage: "exclamationmark.triangle")
+                    .font(.caption2)
+                    .foregroundStyle(.orange)
+                    .multilineTextAlignment(.leading)
+                    .padding(.horizontal, 10)
+            }
         }
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity)

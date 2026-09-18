@@ -32,6 +32,21 @@ public struct VueRapportImport: View {
             }
             .padding(20)
 
+            if !rapport.ajustements.isEmpty {
+                Divider()
+                VStack(alignment: .leading, spacing: 5) {
+                    Label("Lecture automatique", systemImage: "wand.and.stars")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    ForEach(rapport.ajustements, id: \.self) { ajustement in
+                        Text("• " + ajustement).font(.caption)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+            }
+
             Divider()
 
             if rapport.avertissements.isEmpty {

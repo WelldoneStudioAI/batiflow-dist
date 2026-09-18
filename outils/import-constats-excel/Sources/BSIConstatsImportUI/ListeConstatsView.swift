@@ -58,7 +58,7 @@ struct LigneConstat: View {
                 HStack(spacing: 8) {
                     BadgeGravite(gravite: constat.gravite, compact: true)
                     if constat.occurrence > 1 {
-                        etiquetteCompacte("×\(constat.occurrence)", symbole: "number")
+                        etiquetteCompacte("×\(constat.quantiteAffichable)", symbole: "number")
                     }
                     if constat.prixTotal != nil {
                         etiquetteCompacte(FormatageMontant.texte(constat.prixTotal),

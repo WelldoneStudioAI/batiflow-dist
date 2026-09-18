@@ -69,7 +69,7 @@ outils/import-constats-excel/
 └── Gabarit/
     ├── gabarit-constats-bsi.xlsx            gabarit à remettre aux collaborateurs
     ├── exemple-constats.csv                 exemple volontairement irrégulier
-    └── generer-gabarit.py                   régénère gabarit, exemple et fixtures
+    └── generer-gabarit.py                   régénère gabarit, exemples et jeux d'essai
 ```
 
 ## Intégration dans BatiFlow (4 étapes)
@@ -178,16 +178,60 @@ python3 Gabarit/generer-gabarit.py
 cd outils/import-constats-excel && swift test
 ```
 
-Couvert : montants québécois et anglo-saxons, occurrences textuelles, échelle de
-gravité (y compris inversée), détection des en-têtes approchants, CSV avec
-guillemets et retours de ligne, lecture XLSX (références de cellules, feuille,
-hyperliens), résolution de photos par nom insensible à la casse, et un import de
-bout en bout sur un chiffrier volontairement irrégulier (titre manquant, prix
-« à valider », ligne vide, gravité numérique, photo en hyperlien) qui doit
-produire 4 constats, 1 ligne ignorée et 3 avertissements.
+Couvert : montants québécois et anglo-saxons, quantités textuelles, échelle de
+gravité (y compris inversée et codes de priorité BSI), détection des en-têtes
+approchants, rejet des synonymes génériques, CSV avec guillemets et retours de ligne,
+lecture XLSX (références de cellules, feuilles multiples, hyperliens), résolution de
+photos par nom insensible à la casse, et deux imports de bout en bout :
+
+- un chiffrier volontairement irrégulier (titre manquant, prix « à valider », ligne
+  vide, gravité numérique, photo en hyperlien) → 4 constats, 1 ligne ignorée,
+  3 avertissements ;
+- un chiffrier calqué sur un vrai rapport de mandat (3 feuilles, colonnes de
+  provenance, code de priorité, quantité + unité sans en-tête, coût total divergent,
+  deux colonnes de photos) → 7 constats, 1 ligne ignorée, total 43 860 $ pris du
+  chiffrier et non recalculé.
+
+## Éprouvé sur un vrai chiffrier de mandat
+
+Testé sur un chiffrier de mandat réel — rapport BSI 2020, constats extérieurs d'un
+ensemble résidentiel (3 feuilles, 21 colonnes, 139 lignes). Le fichier appartient au
+client : il **n'est pas dans le dépôt**, et ce dépôt de distribution étant public,
+son nom n'y figure pas non plus. Un jeu d'essai anonymisé qui reproduit exactement sa structure est versionné
+à la place (`Tests/…/Fixtures/exemple-rapport-bsi.xlsx`).
+
+Résultat sur le vrai fichier :
+
+| Mesure                     | Valeur                                                      |
+|----------------------------|-------------------------------------------------------------|
+| Feuille choisie            | « Extérieur » (et non « Lisez-moi » ni « Par composante »)   |
+| Constats lus               | 130 sur 139 lignes — 9 lignes vides écartées                 |
+| Gravités reconnues         | 130 / 130, depuis la colonne `Code` (U, CT, MT, LT, LT+, EX, CO) |
+| Total retenu               | 2 886 715 $ — au cent près la somme de la colonne `Coût ($)` |
+| Colonnes déduites          | quantité `Qtes`, unité (`u.`, `pi2`) malgré un en-tête vide  |
+| Avertissements             | 19 : 11 écarts de coût, 7 photos absentes du disque, 1 titre déduit |
+
+Ce test a révélé trois défauts, tous corrigés :
+
+1. **Le coût était recalculé** (quantité × prix unitaire) au lieu d'être lu. Sur ce
+   chiffrier, 11 lignes ont un coût négocié différent du produit : l'outil annonçait
+   2 840 490 $ au lieu de 2 886 715 $. Le coût du chiffrier fait maintenant foi, et
+   l'écart est signalé plutôt que corrigé en silence.
+2. **Une ligne sans texte de constat mais avec une recommandation était écartée**
+   silencieusement. Elle est maintenant importée, titre déduit, avertissement à l'appui.
+3. **`Budget (note)` était pris pour une description** (le mot « note » dans l'en-tête)
+   et faillait passer pour une colonne de montants (`650$/margelle`). Les synonymes
+   génériques et la validation par les valeurs règlent les deux cas.
+
+Au passage : reconnaissance des codes de priorité BSI, deuxième colonne de photos,
+colonne d'unité sans en-tête, et découpage d'un paragraphe de constat en titre court
++ description — les textes de ce rapport font 109 caractères en médiane, 836 au plus.
 
 ## Limites connues
 
+- `EX` (avis d'expert) et `LT+` (long terme 10 ans et +) sont rattachés à une gravité
+  par jugement — respectivement majeure et mineure. À confirmer avec l'auteur du
+  rapport ; le code d'origine reste affiché sur chaque fiche.
 - Les images **incorporées** dans les cellules (objets flottants Excel) ne sont pas
   extraites — seulement les liens et les fichiers. Extensible en v2 via
   `xl/media/` + `drawing1.xml`.
