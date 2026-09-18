@@ -554,9 +554,13 @@ function classer(brut, echelleInversee = false) {
   const texte = String(brut ?? "").trim();
   if (!texte) return null;
 
-  const code = texte.toUpperCase().replace(/[^A-Z+]/g, "");
-  const parCode = CLASSES_CODE.find((c) => c.cle === code);
-  if (parCode) return parCode;
+  // Une cellule peut porter plusieurs codes (« MT / U ») : on retient le plus pressant,
+  // et la cellule d'origine reste affichée sous l'étiquette.
+  const codes = texte.toUpperCase().split(/[^A-Z+]+/).filter(Boolean)
+    .map((c) => CLASSES_CODE.find((x) => x.cle === c))
+    .filter(Boolean)
+    .sort((a, b) => a.rang - b.rang);
+  if (codes.length) return codes[0];
 
   const k = cle(texte);
   if (!k) return null;
@@ -776,8 +780,12 @@ function lireCsv(texte) {
 const CHAMPS = [
   { id: "titre", nom: "Titre", requis: true,
     mots: ["titre","constat","constats","sommaire","objet","element","intitule","title","finding","summary","item"] },
+  // « Constat » vient après « Titre » dans la liste : quand les deux colonnes existent,
+  // le titre prend « Titre » et la description prend « Constat ». Un chiffrier qui n'a
+  // que « Constat » le donne au titre, puis le paragraphe est scindé à la lecture.
   { id: "description", nom: "Description",
-    mots: ["description","observation","observations","constatation","constatations","detail","details","note","notes","commentaire","commentaires","problematique"] },
+    mots: ["description","constat","constats","observation","observations","constatation",
+           "constatations","detail","details","commentaire","commentaires","problematique"] },
   { id: "recommandation", nom: "Recommandation",
     mots: ["recommandation","recommandations","recommendation","correctif","correctifs","action","actions","action corrective","travaux","intervention","solution"] },
   { id: "quantite", nom: "Quantité",
@@ -845,10 +853,15 @@ function detecter(entetes, donnees) {
 
   for (const id of ["prixUnitaire", "coutTotal"]) {               // 5 — un prix doit être numérique
     const i = colonnes[id];
-    if (i != null && part(i, estMontantPur) < 0.5) {
+    if (i == null) continue;
+    const remplies = valeurs(i).length;
+    if (remplies && part(i, estMontantPur) >= 0.5) continue;
+    // Une colonne vide (une formule sans résultat enregistré, par exemple) est simplement
+    // rendue aux colonnes libres, sans avertissement.
+    if (remplies) {
       ajustements.push(`« ${nomColonne(i)} » écartée du champ ${CHAMPS.find((c) => c.id === id).nom} : valeurs non numériques`);
-      delete colonnes[id]; prises.delete(i);
     }
+    delete colonnes[id]; prises.delete(i);
   }
   if (colonnes.prixUnitaire != null && colonnes.coutTotal == null) {  // 6 — coût total résiduel
     const i = cles.findIndex((k, j) => {
@@ -877,13 +890,20 @@ function detecter(entetes, donnees) {
   // 8 — colonnes de photos trouvées par leurs valeurs : beaucoup de chiffriers
   //     nomment ces colonnes autrement que « Photo » (« Visuel 2 », « IMG », « Annexe B »).
   const ressembleAUnePhoto = (v) => /^https?:\/\//i.test(v) || EXT_IMAGE.test(v.trim());
+  const trouveesParValeur = [];
   entetes.forEach((_, j) => {
     if (prises.has(j)) return;
     if (part(j, ressembleAUnePhoto) < 0.7) return;
     if (colonnes.photo == null) { prendre("photo", j); }
     else { photosSup.push(j); prises.add(j); }
-    ajustements.push(`« ${nomColonne(j)} » lue comme colonne de photos`);
+    trouveesParValeur.push(nomColonne(j));
   });
+  if (trouveesParValeur.length === 1) {
+    ajustements.push(`« ${trouveesParValeur[0]} » lue comme colonne de photos`);
+  } else if (trouveesParValeur.length > 1) {
+    ajustements.push(`${trouveesParValeur.length} colonnes lues comme colonnes de photos `
+                   + `(${trouveesParValeur[0]} … ${trouveesParValeur[trouveesParValeur.length - 1]})`);
+  }
 
   // 9 — description : quand la colonne de titre est courte (un vrai libellé) et qu'une
   //     autre colonne porte le texte du constat, c'est elle la description.
@@ -1060,7 +1080,19 @@ function construire() {
     const classe = brutPriorite ? classer(brutPriorite, mappage.echelleInversee) : null;
     if (brutPriorite && !classe) avertir(`priorité non reconnue « ${brutPriorite} »`);
 
-    const photos = liens.flatMap(resoudrePhotos);
+    // Le même fichier revient souvent dans deux colonnes (« Photos » et « Lien photo 1 »),
+    // parfois avec un chemin devant : on ne garde qu'un exemplaire par nom de fichier.
+    const photos = [];
+    const vues = new Set();
+    for (const lien of liens) {
+      for (const photo of resoudrePhotos(lien)) {
+        const base = String(photo.nom || "").split(/[\\/]/).pop().toLowerCase();
+        const empreinte = photo.type === "url" ? String(photo.url).toLowerCase() : base;
+        if (!empreinte || vues.has(empreinte)) continue;
+        vues.add(empreinte);
+        photos.push(photo);
+      }
+    }
     for (const photo of photos) if (photo.type === "absente") avertir(`photo introuvable « ${photo.nom} »`);
 
     const autres = {};
@@ -1232,9 +1264,11 @@ const courant = () => etat.constats.find((c) => c.id === etat.selection);
     (« Tous les bâtiments ») est laissé tel quel. */
 function adresse(batiment) {
   const texte = String(batiment ?? "").trim();
-  if (!texte) return "";
-  if (!etat.rue) return texte;
-  return /^[0-9]+([-–\/ ]+[0-9]+)*$/.test(texte) ? `${texte}, ${etat.rue}` : texte;
+  if (!texte || !etat.rue) return texte;
+  // « 100 », « 100-110 », « 100 et 110 » sont des numéros civiques : ils prennent la rue.
+  // « Tous les bâtiments » n'en est pas un et reste tel quel.
+  const noyau = texte.replace(/\b(et|and|a|à|au|aux|&)\b/gi, " ");
+  return /^[0-9][0-9\s,\-–\/]*$/.test(noyau.trim()) ? `${texte}, ${etat.rue}` : texte;
 }
 
 /** Le nom de rue est déduit des valeurs de la colonne « Bâtiment » :
@@ -1244,7 +1278,10 @@ function deduireRue(constats) {
   for (const constat of constats) {
     const brut = constat.autres["Bâtiment"] || constat.autres["Batiment"] || "";
     const reste = String(brut).replace(/^[0-9]+([-–\/ ]+[0-9]+)*\s*/, "").trim();
-    if (reste.length >= 4 && /[a-zA-Zà-ÿ]/.test(reste) && !/^tous/i.test(reste)) {
+    // Un nom de rue ne contient pas de numéro et ne commence pas par une conjonction :
+    // « et 110 » n'est pas une rue, « Place Du Collège » en est une.
+    if (reste.length >= 4 && /[a-zA-Zà-ÿ]/.test(reste) && !/[0-9]/.test(reste)
+        && !/^(et|and|a|à|au|aux|ou|tous|toutes)\b/i.test(reste)) {
       compte.set(reste, (compte.get(reste) || 0) + 1);
     }
   }
