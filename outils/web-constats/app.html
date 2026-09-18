@@ -1,0 +1,1407 @@
+<title>Constats du chiffrier</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+  :root {
+    --papier:#eceff1; --surface:#ffffff; --surface-2:#f6f8f9;
+    --encre:#111820; --encre-douce:#5a666e; --encre-pale:#8b959c;
+    --trait:#dae0e3; --trait-fort:#c3cbcf;
+    --accent:#0f5f7e; --accent-doux:#e2eef3; --accent-encre:#0d4d66;
+    --alerte:#9c5511; --alerte-doux:#fbf0e3;
+    --u:#b3342a; --ct:#bc6018; --mt:#87680a; --lt:#277866; --ltp:#3a6a97;
+    --ex:#68499b; --co:#657178;
+    --ombre:0 1px 2px rgba(16,28,36,.06), 0 8px 24px rgba(16,28,36,.06);
+    --r:10px;
+    --ui:"Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --prose:"Source Serif 4", Georgia, "Times New Roman", serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --papier:#0e1215; --surface:#161b1f; --surface-2:#1c2227;
+      --encre:#e7ebed; --encre-douce:#9ba7ae; --encre-pale:#6d787f;
+      --trait:#283036; --trait-fort:#3a444a;
+      --accent:#63b4d3; --accent-doux:#10303d; --accent-encre:#9ad2e8;
+      --alerte:#dfa261; --alerte-doux:#2c2114;
+      --u:#e4695d; --ct:#e08b46; --mt:#c8a63c; --lt:#46ac94; --ltp:#6f9fcb;
+      --ex:#a68ad8; --co:#8b959c;
+      --ombre:0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --papier:#0e1215; --surface:#161b1f; --surface-2:#1c2227;
+    --encre:#e7ebed; --encre-douce:#9ba7ae; --encre-pale:#6d787f;
+    --trait:#283036; --trait-fort:#3a444a;
+    --accent:#63b4d3; --accent-doux:#10303d; --accent-encre:#9ad2e8;
+    --alerte:#dfa261; --alerte-doux:#2c2114;
+    --u:#e4695d; --ct:#e08b46; --mt:#c8a63c; --lt:#46ac94; --ltp:#6f9fcb;
+    --ex:#a68ad8; --co:#8b959c;
+    --ombre:0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.35);
+  }
+  * { box-sizing:border-box; }
+  [hidden] { display:none !important; }
+  html, body { height:100%; }
+  body {
+    margin:0; background:var(--papier); color:var(--encre);
+    font-family:var(--ui); font-size:13.5px; line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app { height:100%; display:flex; flex-direction:column; }
+  button { font:inherit; color:inherit; cursor:pointer; }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:4px; }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important; } }
+
+  /* ---------- barre du haut ---------- */
+  .barre {
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    padding:10px 16px; padding-top:calc(10px + env(safe-area-inset-top, 0px));
+    background:var(--surface); border-bottom:1px solid var(--trait);
+  }
+  .marque { display:flex; align-items:baseline; gap:9px; margin-right:auto; min-width:0; }
+  .marque b { font-size:14px; font-weight:700; letter-spacing:-.01em; white-space:nowrap; }
+  .marque span {
+    font-size:11.5px; color:var(--encre-douce); overflow:hidden;
+    text-overflow:ellipsis; white-space:nowrap; max-width:46vw;
+  }
+  .btn {
+    display:inline-flex; align-items:center; gap:6px; padding:5px 11px;
+    border:1px solid var(--trait-fort); border-radius:7px; background:var(--surface);
+    font-size:12.5px; font-weight:500; white-space:nowrap;
+  }
+  .btn:hover { background:var(--surface-2); border-color:var(--encre-pale); }
+  .btn[data-alerte="oui"] { color:var(--alerte); border-color:color-mix(in srgb, var(--alerte) 45%, transparent); background:var(--alerte-doux); }
+  .btn-fort { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+  .btn-fort:hover { background:var(--accent-encre); border-color:var(--accent-encre); }
+  :root[data-theme="dark"] .btn-fort, :root:not([data-theme="light"]) .btn-fort { color:#08171d; }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .btn-fort { color:#fff; } }
+
+  /* ---------- filtres ---------- */
+  .filtres {
+    display:flex; align-items:center; gap:7px; flex-wrap:wrap;
+    padding:9px 16px; background:var(--surface-2); border-bottom:1px solid var(--trait);
+  }
+  .champ-recherche {
+    display:flex; align-items:center; gap:7px; background:var(--surface);
+    border:1px solid var(--trait-fort); border-radius:7px; padding:4px 10px;
+    flex:1 1 210px; min-width:170px; max-width:340px;
+  }
+  .champ-recherche input { border:0; background:none; font:inherit; color:inherit; width:100%; outline:none; }
+  .champ-recherche svg { flex:none; color:var(--encre-pale); }
+  .jeton {
+    display:inline-flex; align-items:center; gap:6px; padding:3px 10px 3px 8px;
+    border:1px solid var(--trait-fort); border-radius:999px; background:var(--surface);
+    font-size:12px; color:var(--encre-douce); font-variant-numeric:tabular-nums;
+  }
+  .jeton .pastille { width:8px; height:8px; border-radius:50%; flex:none; }
+  .jeton[aria-pressed="true"] { color:var(--encre); border-color:currentColor; background:var(--accent-doux); }
+  .jeton b { font-weight:600; }
+  select.tri {
+    border:1px solid var(--trait-fort); border-radius:7px; background:var(--surface);
+    color:inherit; font:inherit; font-size:12px; padding:4px 8px; margin-left:auto;
+  }
+
+  /* ---------- corps ---------- */
+  .corps { flex:1; min-height:0; display:grid; grid-template-columns:minmax(300px, 380px) 1fr; }
+  .colonne-liste { border-right:1px solid var(--trait); overflow-y:auto; background:var(--surface); }
+  .fiche-zone { overflow-y:auto; background:var(--papier); }
+
+  .rangee {
+    display:grid; grid-template-columns:3px 1fr; gap:11px; width:100%;
+    padding:10px 14px; border-bottom:1px solid var(--trait);
+    text-align:left; cursor:pointer;
+  }
+  .rangee:hover { background:var(--surface-2); }
+  .rangee[aria-current="true"] { background:var(--accent-doux); }
+  .rangee .stripe { border-radius:999px; }
+  .rangee h3 {
+    margin:0 0 3px; font-size:13px; font-weight:600; letter-spacing:-.005em;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .rangee p {
+    margin:0 0 6px; font-family:var(--prose); font-size:12.5px; color:var(--encre-douce);
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .meta { display:flex; align-items:center; gap:9px; flex-wrap:wrap; font-size:11.5px; color:var(--encre-douce); }
+  .meta .chiffre { font-variant-numeric:tabular-nums; }
+  .etiquette-classe {
+    display:inline-flex; align-items:center; gap:5px; padding:1px 8px 1px 6px; border-radius:999px;
+    font-size:11px; font-weight:600; letter-spacing:.01em;
+  }
+  .etiquette-classe .pastille { width:6px; height:6px; border-radius:50%; }
+  .exclu { opacity:.45; }
+
+  /* ---------- fiche ---------- */
+  .fiche { max-width:720px; margin:0 auto; padding:22px 20px 40px; }
+  .retour { display:none; }
+  .photos { display:grid; gap:10px; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); margin-bottom:20px; }
+  .photo, .photo-absente {
+    border-radius:var(--r); border:1px solid var(--trait); overflow:hidden; background:var(--surface-2);
+  }
+  .photo img { display:block; width:100%; height:200px; object-fit:cover; }
+  .photo figcaption, .photo-absente span { display:block; font-size:11px; color:var(--encre-douce); padding:6px 10px; word-break:break-all; }
+  .photo-absente { display:grid; place-items:center; gap:4px; height:150px; text-align:center; padding:0 16px; }
+  .photo-absente strong { font-size:12px; }
+  .photo-absente svg { color:var(--encre-pale); }
+
+  .tete { display:flex; align-items:flex-start; gap:14px; margin-bottom:10px; }
+  .tete h2 { margin:0; font-size:20px; line-height:1.25; font-weight:600; letter-spacing:-.015em; text-wrap:balance; }
+  .tete .classe-bloc { margin-left:auto; text-align:right; display:grid; gap:4px; justify-items:end; flex:none; }
+  .code-brut { font-size:11px; color:var(--encre-pale); font-variant-numeric:tabular-nums; }
+  .etiquettes { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:20px; }
+  .etiquettes span {
+    font-size:11.5px; color:var(--encre-douce); background:var(--surface);
+    border:1px solid var(--trait); border-radius:999px; padding:3px 10px;
+  }
+  .bloc { margin-bottom:18px; }
+  .bloc h4 {
+    margin:0 0 5px; font-size:10.5px; font-weight:600; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--encre-pale);
+  }
+  .bloc p { margin:0; font-family:var(--prose); font-size:15px; line-height:1.55; max-width:62ch; }
+  .chiffres {
+    display:grid; grid-template-columns:repeat(3, 1fr); background:var(--surface);
+    border:1px solid var(--trait); border-radius:var(--r); overflow:hidden; margin:20px 0 6px;
+  }
+  .chiffres > div { padding:12px 10px; text-align:center; }
+  .chiffres > div + div { border-left:1px solid var(--trait); }
+  .chiffres small { display:block; font-size:10.5px; color:var(--encre-pale); margin-bottom:3px;
+                    text-transform:uppercase; letter-spacing:.05em; }
+  .chiffres b { font-size:16px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .note-ecart {
+    display:flex; gap:7px; align-items:flex-start; font-size:12px; color:var(--alerte);
+    background:var(--alerte-doux); border-radius:8px; padding:8px 10px; margin-bottom:20px;
+  }
+  .note-ecart svg { flex:none; margin-top:1px; }
+  dl.autres { display:grid; grid-template-columns:auto 1fr; gap:4px 16px; margin:0; font-size:12.5px; }
+  dl.autres dt { color:var(--encre-douce); }
+  dl.autres dd { margin:0; }
+  .pied-fiche {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    margin-top:24px; padding-top:14px; border-top:1px solid var(--trait);
+    font-size:12px; color:var(--encre-douce);
+  }
+  .pied-fiche label { display:flex; align-items:center; gap:6px; margin-left:auto; cursor:pointer; }
+
+  /* ---------- pied de page ---------- */
+  .pied {
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    padding:10px 16px; padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px));
+    background:var(--surface); border-top:1px solid var(--trait);
+  }
+  .pied .compte { font-weight:600; font-variant-numeric:tabular-nums; }
+  .pied .repartition { display:flex; gap:10px; flex-wrap:wrap; }
+  .pied .repartition span { display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--encre-douce); font-variant-numeric:tabular-nums; }
+  .pied .repartition i { width:8px; height:8px; border-radius:50%; }
+  .pied .somme { margin-left:auto; text-align:right; }
+  .pied .somme small { display:block; font-size:10.5px; color:var(--encre-pale); text-transform:uppercase; letter-spacing:.05em; }
+  .pied .somme b { font-size:15px; font-variant-numeric:tabular-nums; }
+
+  /* ---------- accueil ---------- */
+  .accueil { flex:1; display:grid; place-items:center; padding:24px 16px; }
+  .accueil-carte { max-width:560px; text-align:center; }
+  .accueil h1 { font-size:22px; margin:0 0 8px; letter-spacing:-.02em; }
+  .accueil p { margin:0 auto 18px; color:var(--encre-douce); max-width:46ch; font-size:14px; }
+  .zone-depot {
+    border:1.5px dashed var(--trait-fort); border-radius:14px; padding:30px 22px;
+    background:var(--surface); display:grid; gap:12px; justify-items:center;
+  }
+  .zone-depot.survol { border-color:var(--accent); background:var(--accent-doux); }
+  .accueil ul { text-align:left; margin:22px auto 0; padding-left:18px; color:var(--encre-douce); font-size:12.5px; max-width:44ch; }
+  .accueil li { margin-bottom:4px; }
+
+  .ruban {
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    padding:7px 16px; background:var(--accent-doux); color:var(--accent-encre);
+    border-bottom:1px solid var(--trait); font-size:12px;
+  }
+  .ruban button { background:none; border:0; text-decoration:underline; padding:0; font-size:12px; font-weight:600; }
+
+  /* ---------- panneaux ---------- */
+  dialog {
+    border:1px solid var(--trait-fort); border-radius:14px; padding:0; max-width:min(92vw, 640px);
+    width:100%; background:var(--surface); color:var(--encre); box-shadow:var(--ombre);
+  }
+  dialog::backdrop { background:rgba(8,14,18,.45); }
+  .panneau-tete { padding:18px 20px 12px; border-bottom:1px solid var(--trait); }
+  .panneau-tete h3 { margin:0 0 3px; font-size:15px; }
+  .panneau-tete p { margin:0; font-size:12px; color:var(--encre-douce); }
+  .panneau-corps { padding:16px 20px; max-height:min(58vh, 480px); overflow-y:auto; }
+  .panneau-pied { display:flex; gap:9px; justify-content:flex-end; flex-wrap:wrap; padding:12px 20px; border-top:1px solid var(--trait); }
+  .rangee-champ { display:flex; align-items:center; gap:10px; padding:5px 0; flex-wrap:wrap; }
+  .rangee-champ > label { width:150px; font-size:12.5px; flex:none; }
+  .rangee-champ em { font-style:normal; color:var(--encre-pale); font-size:10.5px; }
+  .rangee-champ select {
+    flex:1 1 180px; border:1px solid var(--trait-fort); border-radius:7px;
+    background:var(--surface-2); color:inherit; font:inherit; font-size:12.5px; padding:4px 8px;
+  }
+  .encadre { background:var(--surface-2); border-radius:9px; padding:11px 13px; margin-top:14px; font-size:12px; }
+  .encadre h4 { margin:0 0 5px; font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--encre-pale); }
+  .encadre ul { margin:0; padding-left:16px; }
+  .stats { display:flex; gap:24px; flex-wrap:wrap; margin-bottom:6px; }
+  .stats b { display:block; font-size:19px; font-variant-numeric:tabular-nums; }
+  .stats small { font-size:10.5px; color:var(--encre-pale); text-transform:uppercase; letter-spacing:.05em; }
+  ul.avis { list-style:none; margin:14px 0 0; padding:0; }
+  ul.avis li { display:flex; gap:8px; padding:6px 0; border-top:1px solid var(--trait); font-size:12.5px; }
+  ul.avis svg { flex:none; margin-top:2px; color:var(--alerte); }
+  .vide-doux { color:var(--encre-douce); font-size:12.5px; padding:26px 0; text-align:center; }
+
+  @media (max-width: 820px) {
+    .corps { grid-template-columns:1fr; }
+    .colonne-liste { border-right:0; }
+    .corps[data-vue="fiche"] .colonne-liste { display:none; }
+    .corps[data-vue="liste"] .fiche-zone { display:none; }
+    .retour { display:inline-flex; margin-bottom:14px; }
+    .marque span { max-width:100%; }
+    .tete { flex-direction:column; gap:8px; }
+    .tete .classe-bloc { margin-left:0; justify-items:start; text-align:left; }
+  }
+</style>
+
+<div class="app">
+  <header class="barre">
+    <span class="marque"><b>Constats du chiffrier</b><span id="nom-fichier">aucun fichier</span></span>
+    <button class="btn" id="b-ouvrir">Ouvrir un chiffrier…</button>
+    <button class="btn" id="b-photos">Dossier de photos…</button>
+    <button class="btn" id="b-colonnes">Colonnes</button>
+    <button class="btn" id="b-rapport">Rapport</button>
+    <button class="btn btn-fort" id="b-exporter">Exporter</button>
+  </header>
+
+  <div class="ruban" id="ruban" hidden>
+    <span id="ruban-texte"></span>
+    <button id="ruban-action">Ouvrir mon chiffrier</button>
+  </div>
+
+  <section class="accueil" id="accueil" hidden>
+    <div class="accueil-carte">
+      <h1>Vos constats, comme sur le terrain</h1>
+      <p>Déposez un chiffrier de constats. Il est lu dans votre navigateur : aucun fichier, aucune photo, aucun montant n'est envoyé ailleurs.</p>
+      <div class="zone-depot" id="zone-depot">
+        <button class="btn btn-fort" id="b-ouvrir-2">Choisir un chiffrier…</button>
+        <span style="font-size:12px;color:var(--encre-douce)">ou glissez un fichier .xlsx, .xlsm, .csv ici</span>
+      </div>
+      <ul>
+        <li>Colonnes reconnues automatiquement, en français comme en anglais.</li>
+        <li>Codes de priorité BSI lus tels quels : U, CT, MT, LT, LT+, EX, CO.</li>
+        <li>Le coût du chiffrier fait foi ; tout écart avec quantité × prix est signalé.</li>
+        <li>Photos retrouvées par nom dans le dossier que vous désignez.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="filtres" id="filtres" hidden>
+    <span class="champ-recherche">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5 14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <input type="search" id="recherche" placeholder="Rechercher un constat" aria-label="Rechercher un constat">
+    </span>
+    <span id="jetons" class="filtres-jetons" style="display:flex;gap:7px;flex-wrap:wrap"></span>
+    <select class="tri" id="tri" aria-label="Trier les constats">
+      <option value="chiffrier">Ordre du chiffrier</option>
+      <option value="priorite">Priorité</option>
+      <option value="cout">Coût décroissant</option>
+      <option value="titre">Titre</option>
+    </select>
+  </div>
+
+  <div class="corps" id="corps" data-vue="liste" hidden>
+    <div class="colonne-liste" id="liste" role="listbox" aria-label="Constats"></div>
+    <div class="fiche-zone"><div class="fiche" id="fiche"></div></div>
+  </div>
+
+  <footer class="pied" id="pied" hidden>
+    <span class="compte" id="compte"></span>
+    <span class="repartition" id="repartition"></span>
+    <span class="somme"><small>Total retenu</small><b id="somme">—</b></span>
+  </footer>
+</div>
+
+<input type="file" id="entree-fichier" accept=".xlsx,.xlsm,.csv,.tsv,.txt" hidden>
+<input type="file" id="entree-dossier" webkitdirectory directory multiple hidden>
+
+<dialog id="dlg-colonnes">
+  <div class="panneau-tete">
+    <h3>Colonnes du chiffrier</h3>
+    <p>Ce que l'outil a reconnu. Vos corrections sont retenues pour les prochains chiffriers au même format.</p>
+  </div>
+  <div class="panneau-corps" id="corps-colonnes"></div>
+  <div class="panneau-pied">
+    <button class="btn" data-fermer>Fermer</button>
+    <button class="btn btn-fort" id="b-appliquer">Appliquer</button>
+  </div>
+</dialog>
+
+<dialog id="dlg-rapport">
+  <div class="panneau-tete"><h3>Rapport de lecture</h3><p id="rapport-sous-titre"></p></div>
+  <div class="panneau-corps" id="corps-rapport"></div>
+  <div class="panneau-pied">
+    <button class="btn" id="b-copier-rapport">Copier le rapport</button>
+    <button class="btn btn-fort" data-fermer>Fermer</button>
+  </div>
+</dialog>
+
+<dialog id="dlg-export">
+  <div class="panneau-tete"><h3>Exporter les constats</h3><p>Le contenu est copié dans le presse-papiers : collez-le dans Excel, Numbers ou un courriel.</p></div>
+  <div class="panneau-corps" id="corps-export"></div>
+  <div class="panneau-pied"><button class="btn btn-fort" data-fermer>Fermer</button></div>
+</dialog>
+
+<script id="exemple-b64" type="application/octet-stream">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</script>
+<script>
+"use strict";
+
+/* =========================================================================
+   1. Normalisation et lecture des valeurs
+   ========================================================================= */
+
+const cle = (t) => (t ?? "")
+  .normalize("NFD").replace(/[̀-ͯ]/g, "")
+  .replace(/[^0-9a-zA-Z]+/g, " ").trim().toLowerCase();
+
+const propre = (t) => {
+  if (t == null) return null;
+  const v = String(t).replace(/_x000D_/g, "").replace(/\r\n?/g, "\n").trim();
+  return v === "" ? null : v;
+};
+
+/** « 1 234,56 $ », « $1,234.56 », « (1 200,00) » → nombre. Sinon null. */
+function montant(brut) {
+  let t = String(brut ?? "").trim();
+  if (!t) return null;
+  let negatif = t.startsWith("-");
+  if (t.startsWith("(") && t.endsWith(")")) { negatif = true; t = t.slice(1, -1); }
+  let ch = t.replace(/[^0-9.,]/g, "");
+  if (!/[0-9]/.test(ch)) return null;
+  const dernier = Math.max(ch.lastIndexOf(","), ch.lastIndexOf("."));
+  if (dernier >= 0) {
+    const decimales = ch.length - dernier - 1;
+    ch = (decimales > 0 && decimales <= 2)
+      ? ch.slice(0, dernier).replace(/[^0-9]/g, "") + "." + ch.slice(dernier + 1)
+      : ch.replace(/[^0-9]/g, "");
+  }
+  const valeur = parseFloat(ch);
+  if (!isFinite(valeur)) return null;
+  return negatif ? -valeur : valeur;
+}
+
+/** Vrai si la cellule ne contient qu'un montant : « 13000 » oui, « 650$/margelle » non. */
+const estMontantPur = (t) => {
+  const v = String(t ?? "").trim();
+  return v !== "" && /[0-9]/.test(v) && !/[a-zA-ZÀ-ɏ]/.test(v);
+};
+
+const premierEntier = (t) => {
+  const m = String(t ?? "").match(/\d+/);
+  return m ? parseInt(m[0], 10) : null;
+};
+
+/** Titre court tiré d'un texte long : première phrase, sinon coupure au mot entier. */
+function amorce(texte, limite = 110) {
+  const t = String(texte ?? "").trim();
+  const fin = t.search(/[.!?\n]/);
+  if (fin > 0 && fin <= limite) return t.slice(0, fin).trim();
+  if (t.length <= limite) return t;
+  const tronque = t.slice(0, limite);
+  const espace = tronque.lastIndexOf(" ");
+  return (espace > limite / 2 ? tronque.slice(0, espace) : tronque) + "…";
+}
+
+const nombreFr = (n) => new Intl.NumberFormat("fr-CA").format(n);
+const argent = (n) => n == null ? "—"
+  : new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD" }).format(n);
+
+/* =========================================================================
+   2. Classement : le code de priorité fait foi
+   ========================================================================= */
+
+const CLASSES_CODE = [
+  { cle: "U",   nom: "Urgent",       detail: "Urgent",                           couleur: "var(--u)",   rang: 1 },
+  { cle: "CT",  nom: "Court terme",  detail: "D'ici 1 an",                       couleur: "var(--ct)",  rang: 2 },
+  { cle: "MT",  nom: "Moyen terme",  detail: "D'ici 4 ans",                      couleur: "var(--mt)",  rang: 3 },
+  { cle: "LT",  nom: "Long terme",   detail: "D'ici 9 ans",                      couleur: "var(--lt)",  rang: 4 },
+  { cle: "LT+", nom: "Long terme +", detail: "10 ans et plus",                   couleur: "var(--ltp)", rang: 5 },
+  { cle: "EX",  nom: "Expertise",    detail: "Avis d'un expert recommandé",      couleur: "var(--ex)",  rang: 6 },
+  { cle: "CO",  nom: "Entretien",    detail: "Entretien ou amélioration suggéré", couleur: "var(--co)", rang: 7 },
+];
+
+/** Échelle de repli, pour un chiffrier qui n'a pas de code mais une gravité écrite. */
+const ECHELLE = [
+  { cle: "critique",    nom: "Critique",    couleur: "var(--u)",   rang: 1, niveau: 5,
+    mots: ["critique","urgent","urgente","urgence","securite","danger","immediat","immediate","critical","tres grave","a","p1"] },
+  { cle: "majeure",     nom: "Majeure",     couleur: "var(--ct)",  rang: 2, niveau: 4,
+    mots: ["majeur","majeure","eleve","elevee","haute","haut","high","important","importante","prioritaire","grave","b","p2"] },
+  { cle: "moderee",     nom: "Modérée",     couleur: "var(--mt)",  rang: 3, niveau: 3,
+    mots: ["modere","moderee","moyen","moyenne","medium","moderate","a surveiller","surveiller","c","p3"] },
+  { cle: "mineure",     nom: "Mineure",     couleur: "var(--lt)",  rang: 4, niveau: 2,
+    mots: ["mineur","mineure","faible","bas","basse","low","minor","leger","legere","d","p4"] },
+  { cle: "observation", nom: "Observation", couleur: "var(--co)",  rang: 5, niveau: 1,
+    mots: ["observation","informatif","information","info","note","pour information","aucune","aucun","na","rien","conforme","e","p5"] },
+];
+
+/** Interprète la cellule de priorité. Le code BSI est lu avant toute normalisation :
+    le « + » de « LT+ » ne survivrait pas au nettoyage. */
+function classer(brut, echelleInversee = false) {
+  const texte = String(brut ?? "").trim();
+  if (!texte) return null;
+
+  const code = texte.toUpperCase().replace(/[^A-Z+]/g, "");
+  const parCode = CLASSES_CODE.find((c) => c.cle === code);
+  if (parCode) return parCode;
+
+  const k = cle(texte);
+  if (!k) return null;
+  const parMot = ECHELLE.find((c) => c.mots.includes(k));
+  if (parMot) return parMot;
+
+  const n = premierEntier(k);
+  if (n !== null && n >= 1 && n <= 5) {
+    const niveau = echelleInversee ? 6 - n : n;
+    return ECHELLE.find((c) => c.niveau === niveau) ?? null;
+  }
+  const parPrefixe = ECHELLE.find((c) =>
+    c.mots.some((m) => m.length >= 4 && (k.startsWith(m) || m.startsWith(k))));
+  return parPrefixe ?? null;
+}
+
+/* =========================================================================
+   3. Lecture des fichiers — tout se passe dans le navigateur
+   ========================================================================= */
+
+const lireEntier = (vue, pos, octets) => {
+  let valeur = 0;
+  for (let i = octets - 1; i >= 0; i--) valeur = valeur * 256 + vue.getUint8(pos + i);
+  return valeur;
+};
+
+async function degonfler(octets) {
+  const flux = new Blob([octets]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+  return new Uint8Array(await new Response(flux).arrayBuffer());
+}
+
+/** Lecteur ZIP minimal : répertoire central, entrées « stored » et « deflate ». */
+async function lireArchive(tampon) {
+  const octets = new Uint8Array(tampon);
+  const vue = new DataView(tampon);
+  let eocd = -1;
+  for (let i = octets.length - 22; i >= Math.max(0, octets.length - 65557); i--) {
+    if (vue.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error("Ce fichier n'est pas un classeur lisible.");
+
+  const nombre = lireEntier(vue, eocd + 10, 2);
+  let curseur = lireEntier(vue, eocd + 16, 4);
+  const entrees = new Map();
+  const decodeur = new TextDecoder("utf-8");
+
+  for (let i = 0; i < nombre; i++) {
+    if (vue.getUint32(curseur, true) !== 0x02014b50) break;
+    const methode = lireEntier(vue, curseur + 10, 2);
+    const tailleCompressee = lireEntier(vue, curseur + 20, 4);
+    const longueurNom = lireEntier(vue, curseur + 28, 2);
+    const longueurExtra = lireEntier(vue, curseur + 30, 2);
+    const longueurCommentaire = lireEntier(vue, curseur + 32, 2);
+    const offsetLocal = lireEntier(vue, curseur + 42, 4);
+    const nom = decodeur.decode(octets.subarray(curseur + 46, curseur + 46 + longueurNom));
+    entrees.set(nom, { methode, tailleCompressee, offsetLocal });
+    curseur += 46 + longueurNom + longueurExtra + longueurCommentaire;
+  }
+
+  return {
+    a: (nom) => entrees.has(nom),
+    texte: async (nom) => {
+      const e = entrees.get(nom);
+      if (!e) return null;
+      const nl = lireEntier(vue, e.offsetLocal + 26, 2);
+      const xl = lireEntier(vue, e.offsetLocal + 28, 2);
+      const debut = e.offsetLocal + 30 + nl + xl;
+      const charge = octets.subarray(debut, debut + e.tailleCompressee);
+      if (e.methode === 0) return decodeur.decode(charge);
+      if (e.methode === 8) return decodeur.decode(await degonfler(charge));
+      throw new Error("Compression non prise en charge dans le classeur.");
+    },
+  };
+}
+
+const indexColonne = (ref) => {
+  let n = 0;
+  for (const c of ref.toUpperCase()) {
+    const code = c.charCodeAt(0);
+    if (code < 65 || code > 90) break;
+    n = n * 26 + (code - 64);
+  }
+  return Math.max(0, n - 1);
+};
+const indexLigne = (ref) => {
+  const m = ref.match(/\d+/);
+  return m ? parseInt(m[0], 10) - 1 : null;
+};
+
+function analyserXml(texte) {
+  const doc = new DOMParser().parseFromString(texte, "application/xml");
+  if (doc.querySelector("parsererror")) throw new Error("Contenu du classeur illisible.");
+  return doc;
+}
+
+async function lireXlsx(tampon) {
+  const zip = await lireArchive(tampon);
+
+  let chaines = [];
+  const xmlChaines = await zip.texte("xl/sharedStrings.xml");
+  if (xmlChaines) {
+    chaines = [...analyserXml(xmlChaines).getElementsByTagName("si")].map((si) =>
+      [...si.getElementsByTagName("t")].map((t) => t.textContent).join(""));
+  }
+
+  const classeur = analyserXml(await zip.texte("xl/workbook.xml"));
+  const relsClasseur = new Map();
+  const xmlRels = await zip.texte("xl/_rels/workbook.xml.rels");
+  if (xmlRels) {
+    for (const r of analyserXml(xmlRels).getElementsByTagName("Relationship")) {
+      relsClasseur.set(r.getAttribute("Id"), r.getAttribute("Target"));
+    }
+  }
+
+  const feuilles = [];
+  const declarees = [...classeur.getElementsByTagName("sheet")]
+    .filter((s) => !s.getAttribute("state") || s.getAttribute("state") === "visible");
+
+  for (const [rang, declaration] of declarees.entries()) {
+    const cible = relsClasseur.get(declaration.getAttribute("r:id")) || `worksheets/sheet${rang + 1}.xml`;
+    const chemin = cible.startsWith("/") ? cible.slice(1) : "xl/" + cible.replace(/^\.\.\//, "");
+    const xml = await zip.texte(chemin);
+    if (!xml) continue;
+
+    const relsFeuille = new Map();
+    const dossier = chemin.slice(0, chemin.lastIndexOf("/"));
+    const fichier = chemin.slice(chemin.lastIndexOf("/") + 1);
+    const xmlRelsFeuille = await zip.texte(`${dossier}/_rels/${fichier}.rels`);
+    if (xmlRelsFeuille) {
+      for (const r of analyserXml(xmlRelsFeuille).getElementsByTagName("Relationship")) {
+        relsFeuille.set(r.getAttribute("Id"), r.getAttribute("Target"));
+      }
+    }
+
+    const doc = analyserXml(xml);
+    const cellules = new Map();
+    let maxLigne = -1, maxColonne = -1;
+
+    for (const c of doc.getElementsByTagName("c")) {
+      const ref = c.getAttribute("r") || "";
+      const li = indexLigne(ref), co = indexColonne(ref);
+      if (li == null) continue;
+      const type = c.getAttribute("t") || "n";
+      let valeur = null;
+      if (type === "inlineStr") {
+        valeur = [...c.getElementsByTagName("t")].map((t) => t.textContent).join("");
+      } else {
+        const v = c.getElementsByTagName("v")[0];
+        if (!v) continue;
+        if (type === "s") valeur = chaines[parseInt(v.textContent, 10)] ?? "";
+        else if (type === "e") valeur = "";
+        else if (type === "b") valeur = v.textContent === "1" ? "vrai" : "faux";
+        else valeur = v.textContent;
+      }
+      valeur = (valeur ?? "").trim();
+      if (!valeur) continue;
+      cellules.set(li + ":" + co, valeur);
+      if (li > maxLigne) maxLigne = li;
+      if (co > maxColonne) maxColonne = co;
+    }
+
+    const hyperliens = new Map();
+    for (const h of doc.getElementsByTagName("hyperlink")) {
+      const ref = (h.getAttribute("ref") || "").split(":")[0];
+      const li = indexLigne(ref);
+      if (li == null) continue;
+      const cibleLien = relsFeuille.get(h.getAttribute("r:id")) || h.getAttribute("location") || h.getAttribute("display");
+      if (cibleLien) hyperliens.set(li + ":" + indexColonne(ref), cibleLien);
+    }
+
+    const lignes = [];
+    for (let li = 0; li <= maxLigne; li++) {
+      const ligne = [];
+      for (let co = 0; co <= maxColonne; co++) ligne.push(cellules.get(li + ":" + co) ?? "");
+      lignes.push(ligne);
+    }
+    feuilles.push({ nom: declaration.getAttribute("name") || `Feuille ${rang + 1}`, lignes, hyperliens });
+  }
+
+  if (!feuilles.length) throw new Error("Aucune feuille lisible dans ce classeur.");
+  return feuilles;
+}
+
+function lireCsv(texte) {
+  if (texte.charCodeAt(0) === 0xfeff) texte = texte.slice(1);
+  const echantillon = texte.slice(0, 4096);
+  let separateur = ",", meilleur = 0;
+  for (const candidat of [";", ",", "\t", "|"]) {
+    const compte = echantillon.split(candidat).length - 1;
+    if (compte > meilleur) { meilleur = compte; separateur = candidat; }
+  }
+
+  const lignes = [];
+  let ligne = [], champ = "", guillemets = false;
+  for (let i = 0; i < texte.length; i++) {
+    const c = texte[i];
+    if (guillemets) {
+      if (c === '"') {
+        if (texte[i + 1] === '"') { champ += '"'; i++; } else guillemets = false;
+      } else champ += c;
+    } else if (c === '"' && champ === "") guillemets = true;
+    else if (c === separateur) { ligne.push(champ); champ = ""; }
+    else if (c === "\n" || c === "\r") {
+      if (c === "\r" && texte[i + 1] === "\n") i++;
+      ligne.push(champ); champ = ""; lignes.push(ligne); ligne = [];
+    } else champ += c;
+  }
+  if (champ !== "" || ligne.length) { ligne.push(champ); lignes.push(ligne); }
+  while (lignes.length && lignes[lignes.length - 1].every((c) => !c.trim())) lignes.pop();
+  return [{ nom: "Constats", lignes, hyperliens: new Map() }];
+}
+
+/* =========================================================================
+   4. Détection des colonnes
+   ========================================================================= */
+
+const CHAMPS = [
+  { id: "titre", nom: "Titre", requis: true,
+    mots: ["titre","constat","constats","sommaire","objet","element","intitule","title","finding","summary","item"] },
+  { id: "description", nom: "Description",
+    mots: ["description","observation","observations","constatation","constatations","detail","details","note","notes","commentaire","commentaires","problematique"] },
+  { id: "recommandation", nom: "Recommandation",
+    mots: ["recommandation","recommandations","recommendation","correctif","correctifs","action","actions","action corrective","travaux","intervention","solution"] },
+  { id: "quantite", nom: "Quantité",
+    mots: ["occurrence","occurrences","quantite","quantites","qte","qtes","nombre","nb","nbre","count","quantity","qty"] },
+  { id: "unite", nom: "Unité",
+    mots: ["unite","unites","u","mesure","um"] },
+  { id: "prixUnitaire", nom: "Prix unitaire",
+    mots: ["prix unitaire","cout unitaire","prix","cout","montant","estimation","estime","budget","price","cost","valeur"] },
+  { id: "coutTotal", nom: "Coût total",
+    mots: ["cout total","prix total","total","montant total","sous total","cout global"] },
+  { id: "priorite", nom: "Priorité",
+    mots: ["priorite","priorites","code","gravite","severite","criticite","niveau","urgence","horizon","severity","priority","risque","cote"] },
+  { id: "photo", nom: "Photo",
+    mots: ["photo","photos","image","images","lien photo","url photo","lien","url","piece jointe","annexe","media","fichier","visuel"] },
+  { id: "localisation", nom: "Localisation",
+    mots: ["localisation","local","emplacement","zone","piece","etage","secteur","lieu","location","aire"] },
+  { id: "categorie", nom: "Catégorie",
+    mots: ["categorie","composante","composantes","systeme","lot","discipline","composant","famille","category","corps de metier"] },
+];
+
+/** Trop génériques pour compter comme simple mot présent : « Budget (note) » n'est pas une description. */
+const MOTS_FAIBLES = new Set(["note","notes","detail","details","lien","url","fichier","media","lot","u","code","cote","niveau","total","mesure","horizon"]);
+const MOTS_PRIX = new Set(["prix","cout","montant","budget","cost","price","valeur"]);
+
+function detecter(entetes, donnees) {
+  const cles = entetes.map(cle);
+  const colonnes = {};
+  const prises = new Set();
+  const ajustements = [];
+  const prendre = (id, i) => { colonnes[id] = i; prises.add(i); };
+
+  for (const champ of CHAMPS) {                                   // 1 — égalité stricte
+    if (colonnes[champ.id] != null) continue;
+    const i = cles.findIndex((k, j) => !prises.has(j) && champ.mots.includes(k));
+    if (i >= 0) prendre(champ.id, i);
+  }
+  for (const champ of CHAMPS) {                                   // 2 — début d'en-tête
+    if (colonnes[champ.id] != null) continue;
+    const i = cles.findIndex((k, j) => !prises.has(j) && champ.mots.some((m) => k.startsWith(m + " ")));
+    if (i >= 0) prendre(champ.id, i);
+  }
+  for (const champ of CHAMPS) {                                   // 3 — mot entier, hors mots faibles
+    if (colonnes[champ.id] != null) continue;
+    const i = cles.findIndex((k, j) => {
+      if (prises.has(j)) return false;
+      const mots = new Set(k.split(" "));
+      return champ.mots.some((m) => !MOTS_FAIBLES.has(m) && mots.has(m));
+    });
+    if (i >= 0) prendre(champ.id, i);
+  }
+
+  const photosSup = [];                                           // 4 — « Photo 2 », « Image 3 »
+  if (colonnes.photo != null) {
+    cles.forEach((k, j) => {
+      if (prises.has(j)) return;
+      if (["photo","photos","image","images"].some((m) => k === m || k.startsWith(m + " "))) {
+        photosSup.push(j); prises.add(j);
+      }
+    });
+  }
+
+  const valeurs = (i) => donnees.map((l) => (l[i] ?? "").trim()).filter(Boolean);
+  const part = (i, test) => { const v = valeurs(i); return v.length ? v.filter(test).length / v.length : 0; };
+  const nomColonne = (i) => (entetes[i] || "").trim() || `colonne ${i + 1}`;
+
+  for (const id of ["prixUnitaire", "coutTotal"]) {               // 5 — un prix doit être numérique
+    const i = colonnes[id];
+    if (i != null && part(i, estMontantPur) < 0.5) {
+      ajustements.push(`« ${nomColonne(i)} » écartée du champ ${CHAMPS.find((c) => c.id === id).nom} : valeurs non numériques`);
+      delete colonnes[id]; prises.delete(i);
+    }
+  }
+  if (colonnes.prixUnitaire != null && colonnes.coutTotal == null) {  // 6 — coût total résiduel
+    const i = cles.findIndex((k, j) => {
+      if (prises.has(j) || k.includes("unitaire") || k.includes("unit")) return false;
+      const mots = new Set(k.split(" "));
+      return [...mots].some((m) => MOTS_PRIX.has(m)) && part(j, estMontantPur) >= 0.7;
+    });
+    if (i >= 0) { prendre("coutTotal", i); ajustements.push(`« ${nomColonne(i)} » lue comme coût total du chiffrier`); }
+  }
+
+  const estPriorite = (v) => classer(v) !== null;                  // 7 — priorité validée par les valeurs
+  if (colonnes.priorite != null && part(colonnes.priorite, estPriorite) < 0.5) {
+    ajustements.push(`« ${nomColonne(colonnes.priorite)} » écartée du champ Priorité : valeurs non interprétables`);
+    prises.delete(colonnes.priorite); delete colonnes.priorite;
+  }
+  if (colonnes.priorite == null) {
+    let meilleur = -1, score = 0.7;
+    entetes.forEach((_, j) => {
+      if (prises.has(j)) return;
+      const p = part(j, estPriorite);
+      if (p > score) { meilleur = j; score = p; }
+    });
+    if (meilleur >= 0) { prendre("priorite", meilleur); ajustements.push(`priorité déduite des valeurs de « ${nomColonne(meilleur)} »`); }
+  }
+
+  if (colonnes.quantite != null && colonnes.unite == null) {       // 8 — unité à droite de la quantité
+    const i = colonnes.quantite + 1;
+    const v = i < entetes.length && !prises.has(i) ? valeurs(i) : [];
+    if (v.length && v.every((x) => x.length <= 6) && part(i, (x) => /[a-zA-ZÀ-ɏ]/.test(x)) >= 0.8) {
+      prendre("unite", i); ajustements.push(`unité déduite de « ${nomColonne(i)} »`);
+    }
+  }
+
+  return { colonnes, photosSup, ajustements, entetes,
+           signature: cles.join("|"), echelleInversee: false };
+}
+
+/** Ligne d'en-têtes la plus plausible, et nombre de champs reconnus. */
+function ligneEntetes(feuille) {
+  let meilleure = 0, score = 0;
+  feuille.lignes.slice(0, 25).forEach((ligne, i) => {
+    if (!ligne.some((c) => c.trim())) return;
+    const n = Object.keys(detecter(ligne, []).colonnes).length;
+    if (n > score) { score = n; meilleure = i; }
+  });
+  return { ligne: meilleure, score };
+}
+
+function choisirFeuille(feuilles) {
+  let choix = { feuille: feuilles[0], ligne: 0, pondere: -1 };
+  for (const feuille of feuilles) {
+    const { ligne, score } = ligneEntetes(feuille);
+    const densite = feuille.lignes.reduce((n, l) => n + l.filter((c) => c.trim()).length, 0);
+    const pondere = score * 1000 + Math.min(densite, 999);
+    if (pondere > choix.pondere) choix = { feuille, ligne, pondere };
+  }
+  return choix;
+}
+
+/* =========================================================================
+   5. Photos : retrouvées dans le dossier que vous désignez
+   ========================================================================= */
+
+const indexPhotos = new Map();
+const cleFichier = (nom) => cle(nom).replace(/ /g, "");
+const EXT_IMAGE = /\.(jpe?g|png|heic|heif|gif|tiff?|webp|bmp|pdf)$/i;
+
+function indexerDossier(fichiers) {
+  indexPhotos.clear();
+  for (const f of fichiers) {
+    if (!EXT_IMAGE.test(f.name)) continue;
+    const complet = cleFichier(f.name);
+    const seul = cleFichier(f.name.replace(/\.[^.]+$/, ""));
+    if (!indexPhotos.has(complet)) indexPhotos.set(complet, f);
+    if (!indexPhotos.has(seul)) indexPhotos.set(seul, f);
+  }
+  return indexPhotos.size;
+}
+
+function resoudrePhotos(brut) {
+  let segments = String(brut).split(/[\n\r;|]+/).map((s) => s.trim()).filter(Boolean);
+  if (segments.length === 1 && segments[0].includes(",")) {
+    const morceaux = segments[0].split(",").map((s) => s.trim()).filter(Boolean);
+    if (morceaux.length > 1 && morceaux.every((m) => /^https?:/i.test(m) || EXT_IMAGE.test(m))) segments = morceaux;
+  }
+  return segments.map((segment) => {
+    if (/^https?:\/\//i.test(segment)) return { type: "url", url: segment, nom: segment };
+    const nom = segment.split(/[\\/]/).pop();
+    const fichier = indexPhotos.get(cleFichier(nom)) || indexPhotos.get(cleFichier(nom.replace(/\.[^.]+$/, "")));
+    return fichier ? { type: "fichier", fichier, nom: fichier.name } : { type: "absente", nom: segment };
+  });
+}
+
+/* =========================================================================
+   6. Construction des constats
+   ========================================================================= */
+
+const etat = {
+  feuilles: [], feuille: null, ligne: 0, mappage: null, constats: [],
+  rapport: null, selection: null, recherche: "", filtres: new Set(),
+  tri: "chiffrier", exclus: new Set(), nomFichier: "", estExemple: false,
+};
+
+function construire() {
+  const { feuille, ligne: le, mappage } = etat;
+  const cols = mappage.colonnes;
+  const constats = [];
+  const avertissements = [];
+  let lues = 0, ignorees = 0;
+
+  for (let i = le + 1; i < feuille.lignes.length; i++) {
+    lues++;
+    const numero = i + 1;
+    const rangee = feuille.lignes[i];
+    const cellule = (id) => (cols[id] == null ? null : propre(rangee[cols[id]]));
+    const avertir = (message) => avertissements.push({ ligne: numero, message });
+
+    const liens = [cols.photo, ...mappage.photosSup]
+      .filter((c) => c != null)
+      .map((c) => propre(feuille.hyperliens.get(i + ":" + c) || rangee[c]))
+      .filter(Boolean);
+
+    const remplis = CHAMPS.map((c) => cellule(c.id)).filter(Boolean);
+    if (!remplis.length && !liens.length) { ignorees++; continue; }
+
+    let titre = cellule("titre");
+    let description = cellule("description");
+    if (titre && !description && titre.length > 110) { description = titre; titre = amorce(titre); }
+    if (!titre) {
+      const source = description || cellule("recommandation");
+      if (source) { titre = amorce(source); avertir("titre absent, déduit du texte de la ligne"); }
+      else { titre = `Constat sans titre (ligne ${numero})`; avertir("aucun texte de constat sur cette ligne"); }
+    }
+
+    let quantite = 1;
+    const brutQuantite = cellule("quantite");
+    if (brutQuantite) {
+      const n = premierEntier(brutQuantite);
+      if (n) quantite = Math.max(1, n);
+      else avertir(`quantité illisible « ${brutQuantite} », ramenée à 1`);
+    }
+
+    let prixUnitaire = null;
+    const brutPrix = cellule("prixUnitaire");
+    if (brutPrix) {
+      prixUnitaire = montant(brutPrix);
+      if (prixUnitaire == null) avertir(`prix unitaire illisible « ${brutPrix} »`);
+    }
+
+    let coutChiffrier = null;
+    const brutTotal = cellule("coutTotal");
+    if (brutTotal) {
+      coutChiffrier = montant(brutTotal);
+      if (coutChiffrier == null) avertir(`coût total illisible « ${brutTotal} »`);
+    }
+    const coutCalcule = prixUnitaire == null ? null : prixUnitaire * quantite;
+    const ecart = coutChiffrier != null && coutCalcule != null
+      && Math.abs(coutChiffrier - coutCalcule) > 0.005;
+    if (ecart) {
+      avertir(`le coût du chiffrier (${argent(coutChiffrier)}) diffère de ${nombreFr(quantite)} × `
+            + `${argent(prixUnitaire)} ; c'est celui du chiffrier qui est retenu`);
+    }
+
+    const brutPriorite = cellule("priorite");
+    const classe = brutPriorite ? classer(brutPriorite, mappage.echelleInversee) : null;
+    if (brutPriorite && !classe) avertir(`priorité non reconnue « ${brutPriorite} »`);
+
+    const photos = liens.flatMap(resoudrePhotos);
+    for (const photo of photos) if (photo.type === "absente") avertir(`photo introuvable « ${photo.nom} »`);
+
+    const autres = {};
+    mappage.entetes.forEach((entete, colonne) => {
+      const utilisee = Object.values(cols).includes(colonne) || mappage.photosSup.includes(colonne);
+      const valeur = propre(rangee[colonne]);
+      if (!utilisee && valeur && entete.trim()) autres[entete] = valeur;
+    });
+
+    constats.push({
+      id: "c" + numero + "-" + constats.length, ligne: numero, titre, description,
+      recommandation: cellule("recommandation"), quantite, unite: cellule("unite"),
+      prixUnitaire, coutChiffrier, coutCalcule, ecart,
+      cout: coutChiffrier != null ? coutChiffrier : coutCalcule,
+      classe, codeBrut: brutPriorite, categorie: cellule("categorie"),
+      localisation: cellule("localisation"), photos, autres,
+    });
+  }
+
+  etat.constats = constats;
+  etat.exclus = new Set();
+  etat.rapport = { lues, ignorees, avertissements, ajustements: mappage.ajustements, feuille: feuille.nom };
+  etat.selection = constats.length ? constats[0].id : null;
+}
+
+/* =========================================================================
+   7. Mémoire du mappage (confort local, jamais indispensable)
+   ========================================================================= */
+
+const memoire = {
+  lire(signature) {
+    try { return JSON.parse(localStorage.getItem("constats.mappage." + signature) || "null"); }
+    catch { return null; }
+  },
+  ecrire(mappage) {
+    try {
+      localStorage.setItem("constats.mappage." + mappage.signature,
+        JSON.stringify({ colonnes: mappage.colonnes, photosSup: mappage.photosSup,
+                         echelleInversee: mappage.echelleInversee }));
+    } catch { /* navigation privée : on continue sans mémoire */ }
+  },
+};
+
+/* =========================================================================
+   8. Rendu
+   ========================================================================= */
+
+const $ = (s) => document.querySelector(s);
+const ech = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const CLASSE_INDEFINIE = { cle: "?", nom: "À préciser", couleur: "var(--encre-pale)", rang: 99, detail: "" };
+const classeDe = (constat) => constat.classe || CLASSE_INDEFINIE;
+
+const etiquetteClasse = (classe) =>
+  `<span class="etiquette-classe" style="color:${classe.couleur};background:color-mix(in srgb, ${classe.couleur} 14%, transparent)">
+     <span class="pastille" style="background:${classe.couleur}"></span>${ech(classe.nom)}</span>`;
+
+function repartition() {
+  const compte = new Map();
+  for (const constat of retenus()) {
+    const classe = classeDe(constat);
+    const entree = compte.get(classe.cle) || { classe, n: 0 };
+    entree.n++; compte.set(classe.cle, entree);
+  }
+  return [...compte.values()].sort((a, b) => a.classe.rang - b.classe.rang);
+}
+
+const retenus = () => etat.constats.filter((c) => !etat.exclus.has(c.id));
+
+function visibles() {
+  const terme = cle(etat.recherche);
+  let liste = etat.constats.filter((constat) => {
+    if (etat.filtres.size && !etat.filtres.has(classeDe(constat).cle)) return false;
+    if (!terme) return true;
+    const corpus = [constat.titre, constat.description, constat.recommandation,
+                    constat.localisation, constat.categorie].filter(Boolean).join(" ");
+    return cle(corpus).includes(terme);
+  });
+  const tri = etat.tri;
+  if (tri === "priorite") liste.sort((a, b) => classeDe(a).rang - classeDe(b).rang || a.ligne - b.ligne);
+  else if (tri === "cout") liste.sort((a, b) => (b.cout ?? -1) - (a.cout ?? -1));
+  else if (tri === "titre") liste.sort((a, b) => a.titre.localeCompare(b.titre, "fr"));
+  return liste;
+}
+
+function rendreJetons() {
+  $("#jetons").innerHTML = repartition().map(({ classe, n }) => `
+    <button class="jeton" data-classe="${ech(classe.cle)}" aria-pressed="${etat.filtres.has(classe.cle)}"
+            title="${ech(classe.detail || classe.nom)}" style="color:${classe.couleur}">
+      <span class="pastille" style="background:${classe.couleur}"></span>${ech(classe.nom)} <b>${n}</b>
+    </button>`).join("");
+  for (const bouton of document.querySelectorAll(".jeton")) {
+    bouton.onclick = () => {
+      const c = bouton.dataset.classe;
+      etat.filtres.has(c) ? etat.filtres.delete(c) : etat.filtres.add(c);
+      rendreJetons(); rendreListe();
+    };
+  }
+}
+
+function rendreListe() {
+  const liste = visibles();
+  if (liste.length && !liste.some((c) => c.id === etat.selection)) etat.selection = liste[0].id;
+  $("#liste").innerHTML = liste.length ? liste.map((constat) => {
+    const classe = classeDe(constat);
+    const metas = [etiquetteClasse(classe)];
+    if (constat.quantite > 1 || constat.unite) {
+      metas.push(`<span class="chiffre">× ${ech(nombreFr(constat.quantite))}${constat.unite ? " " + ech(constat.unite) : ""}</span>`);
+    }
+    if (constat.cout != null) metas.push(`<span class="chiffre">${ech(argent(constat.cout))}</span>`);
+    if (constat.photos.length) metas.push(`<span>▣ ${constat.photos.length}</span>`);
+    if (constat.localisation) metas.push(`<span>${ech(constat.localisation)}</span>`);
+    return `<div class="rangee${etat.exclus.has(constat.id) ? " exclu" : ""}" role="option" tabindex="0"
+              aria-selected="${constat.id === etat.selection}"
+              aria-current="${constat.id === etat.selection}" data-id="${constat.id}">
+        <span class="stripe" style="background:${classe.couleur}"></span>
+        <div>
+          <h3>${ech(constat.titre)}</h3>
+          ${constat.description ? `<p>${ech(constat.description)}</p>` : ""}
+          <div class="meta">${metas.join("")}</div>
+        </div></div>`;
+  }).join("") : `<p class="vide-doux">Aucun constat ne correspond à la recherche ou au filtre.</p>`;
+
+  const choisir = (rangee) => {
+    etat.selection = rangee.dataset.id;
+    $("#corps").dataset.vue = "fiche";
+    rendreListe(); rendreFiche();
+  };
+  for (const rangee of document.querySelectorAll(".rangee")) {
+    rangee.onclick = () => choisir(rangee);
+    rangee.onkeydown = (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); choisir(rangee); }
+      else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        const voisin = e.key === "ArrowDown" ? rangee.nextElementSibling : rangee.previousElementSibling;
+        if (voisin) { voisin.focus(); choisir(voisin); }
+      }
+    };
+  }
+}
+
+function rendreFiche() {
+  const constat = etat.constats.find((c) => c.id === etat.selection);
+  const zone = $("#fiche");
+  if (!constat) { zone.innerHTML = `<p class="vide-doux">Choisissez un constat dans la liste.</p>`; return; }
+  const classe = classeDe(constat);
+
+  const photos = constat.photos.map((photo, rang) => {
+    if (photo.type === "absente") {
+      return `<div class="photo-absente">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="2.5" y="4" width="15" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="m4 14 4-4 3 3 2-2 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <strong>Photo introuvable</strong><span>${ech(photo.nom)}</span></div>`;
+    }
+    const source = photo.type === "fichier" ? URL.createObjectURL(photo.fichier) : photo.nom;
+    return `<figure class="photo" style="margin:0">
+        <img src="${ech(source)}" alt="Photo ${rang + 1} du constat" loading="lazy">
+        <figcaption>${ech(photo.nom)}</figcaption></figure>`;
+  }).join("");
+
+  const autres = Object.entries(constat.autres)
+    .map(([k, v]) => `<dt>${ech(k)}</dt><dd>${ech(v)}</dd>`).join("");
+
+  zone.innerHTML = `
+    <button class="btn retour" id="b-retour">← Tous les constats</button>
+    ${photos ? `<div class="photos">${photos}</div>` : ""}
+    <div class="tete">
+      <h2>${ech(constat.titre)}</h2>
+      <div class="classe-bloc">${etiquetteClasse(classe)}
+        ${constat.codeBrut && cle(constat.codeBrut) !== cle(classe.nom)
+          ? `<span class="code-brut">chiffrier : ${ech(constat.codeBrut)}</span>` : ""}
+        ${classe.detail && classe.detail !== classe.nom
+          ? `<span class="code-brut">${ech(classe.detail)}</span>` : ""}
+      </div>
+    </div>
+    <div class="etiquettes">
+      ${constat.categorie ? `<span>${ech(constat.categorie)}</span>` : ""}
+      ${constat.localisation ? `<span>${ech(constat.localisation)}</span>` : ""}
+    </div>
+    ${constat.description ? `<div class="bloc"><h4>Description</h4><p>${ech(constat.description)}</p></div>` : ""}
+    ${constat.recommandation ? `<div class="bloc"><h4>Recommandation</h4><p>${ech(constat.recommandation)}</p></div>` : ""}
+    <div class="chiffres">
+      <div><small>Quantité</small><b>${ech(nombreFr(constat.quantite))}${constat.unite ? " " + ech(constat.unite) : ""}</b></div>
+      <div><small>Prix unitaire</small><b>${ech(argent(constat.prixUnitaire))}</b></div>
+      <div><small>${constat.coutChiffrier != null ? "Coût (chiffrier)" : "Coût"}</small><b>${ech(argent(constat.cout))}</b></div>
+    </div>
+    ${constat.ecart ? `<p class="note-ecart">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2.5 15 14H1L8 2.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6.5v3.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="11.8" r=".85" fill="currentColor"/></svg>
+        <span>Le chiffrier annonce ${ech(argent(constat.coutChiffrier))} alors que ${ech(nombreFr(constat.quantite))} ×
+        ${ech(argent(constat.prixUnitaire))} donne ${ech(argent(constat.coutCalcule))}. Le montant du chiffrier est retenu.</span></p>` : ""}
+    ${autres ? `<div class="bloc"><h4>Autres colonnes du chiffrier</h4><dl class="autres">${autres}</dl></div>` : ""}
+    <div class="pied-fiche">
+      <span>Ligne ${constat.ligne} du chiffrier</span>
+      <label><input type="checkbox" id="inclure" ${etat.exclus.has(constat.id) ? "" : "checked"}> Retenir ce constat</label>
+    </div>`;
+
+  const retour = $("#b-retour");
+  if (retour) retour.onclick = () => { $("#corps").dataset.vue = "liste"; };
+  $("#inclure").onchange = (e) => {
+    e.target.checked ? etat.exclus.delete(constat.id) : etat.exclus.add(constat.id);
+    rendreListe(); rendreJetons(); rendrePied();
+  };
+}
+
+function rendrePied() {
+  const liste = retenus();
+  const somme = liste.reduce((t, c) => t + (c.cout ?? 0), 0);
+  $("#compte").textContent = `${nombreFr(liste.length)} constat${liste.length > 1 ? "s" : ""}`;
+  $("#repartition").innerHTML = repartition().map(({ classe, n }) =>
+    `<span title="${ech(classe.nom)}"><i style="background:${classe.couleur}"></i>${n}</span>`).join("");
+  $("#somme").textContent = liste.some((c) => c.cout != null) ? argent(somme) : "—";
+  const nb = etat.rapport ? etat.rapport.avertissements.length : 0;
+  $("#b-rapport").textContent = nb ? `Rapport (${nb})` : "Rapport";
+  $("#b-rapport").dataset.alerte = nb ? "oui" : "non";
+}
+
+function rendreTout() {
+  const aDesDonnees = etat.constats.length > 0 || etat.feuille != null;
+  $("#accueil").hidden = aDesDonnees;
+  $("#filtres").hidden = !aDesDonnees;
+  $("#corps").hidden = !aDesDonnees;
+  $("#pied").hidden = !aDesDonnees;
+  $("#nom-fichier").textContent = etat.nomFichier
+    ? `${etat.nomFichier}${etat.feuille ? " — feuille « " + etat.feuille.nom + " »" : ""}`
+    : "aucun fichier";
+  rendreJetons(); rendreListe(); rendreFiche(); rendrePied();
+}
+
+/* =========================================================================
+   9. Panneaux : colonnes, rapport, export
+   ========================================================================= */
+
+function ouvrirColonnes() {
+  const { entetes, colonnes, photosSup, ajustements } = etat.mappage;
+  const option = (i, choisi) =>
+    `<option value="${i}" ${choisi === i ? "selected" : ""}>${ech(entetes[i] || "colonne " + (i + 1))}</option>`;
+
+  $("#corps-colonnes").innerHTML = CHAMPS.map((champ) => `
+    <div class="rangee-champ">
+      <label for="col-${champ.id}">${ech(champ.nom)}${champ.requis ? " <em>requis</em>" : ""}</label>
+      <select id="col-${champ.id}" data-champ="${champ.id}">
+        <option value="-1">— aucune —</option>
+        ${entetes.map((_, i) => option(i, colonnes[champ.id])).join("")}
+      </select>
+    </div>`).join("")
+    + `<div class="rangee-champ" style="margin-top:8px">
+         <label for="inverse" style="width:auto">Échelle inversée (1 = le plus grave)</label>
+         <input type="checkbox" id="inverse" ${etat.mappage.echelleInversee ? "checked" : ""}>
+       </div>`
+    + (photosSup.length ? `<div class="encadre"><h4>Photos supplémentaires lues</h4>
+         <p style="margin:0">${ech(photosSup.map((i) => entetes[i] || "colonne " + (i + 1)).join(", "))}</p></div>` : "")
+    + (ajustements.length ? `<div class="encadre"><h4>Déduit des valeurs</h4>
+         <ul>${ajustements.map((a) => `<li>${ech(a)}</li>`).join("")}</ul></div>` : "");
+
+  $("#dlg-colonnes").showModal();
+}
+
+$("#b-appliquer").onclick = () => {
+  const colonnes = {};
+  for (const select of document.querySelectorAll("#corps-colonnes select")) {
+    const valeur = parseInt(select.value, 10);
+    if (valeur >= 0) colonnes[select.dataset.champ] = valeur;
+  }
+  if (colonnes.titre == null) {
+    alert("La colonne « Titre » est requise : c'est elle qui nomme chaque constat.");
+    return;
+  }
+  etat.mappage.colonnes = colonnes;
+  etat.mappage.echelleInversee = $("#inverse").checked;
+  memoire.ecrire(etat.mappage);
+  construire();
+  rendreTout();
+  $("#dlg-colonnes").close();
+};
+
+function ouvrirRapport() {
+  const r = etat.rapport;
+  $("#rapport-sous-titre").textContent = `${etat.nomFichier} — feuille « ${r.feuille} »`;
+  $("#corps-rapport").innerHTML = `
+    <div class="stats">
+      <div><b>${nombreFr(r.lues)}</b><small>Lignes lues</small></div>
+      <div><b>${nombreFr(etat.constats.length)}</b><small>Constats</small></div>
+      <div><b>${nombreFr(r.ignorees)}</b><small>Lignes vides</small></div>
+      <div><b style="color:${r.avertissements.length ? "var(--alerte)" : "inherit"}">${nombreFr(r.avertissements.length)}</b><small>Avertissements</small></div>
+    </div>
+    ${r.ajustements.length ? `<div class="encadre"><h4>Lecture automatique</h4>
+       <ul>${r.ajustements.map((a) => `<li>${ech(a)}</li>`).join("")}</ul></div>` : ""}
+    ${r.avertissements.length ? `<ul class="avis">${r.avertissements.map((a) => `
+       <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2.5 15 14H1L8 2.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6.5v3.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="11.8" r=".85" fill="currentColor"/></svg>
+       <span>Ligne ${a.ligne} — ${ech(a.message)}</span></li>`).join("")}</ul>`
+     : `<p class="vide-doux">Aucun avertissement : toutes les lignes ont été lues sans ambiguïté.</p>`}`;
+  $("#dlg-rapport").showModal();
+}
+
+const texteRapport = () => {
+  const r = etat.rapport;
+  const lignes = [
+    `Lecture de constats — ${etat.nomFichier}`, `Feuille : ${r.feuille}`,
+    `Lignes lues : ${r.lues}`, `Constats : ${etat.constats.length}`,
+    `Lignes vides ignorées : ${r.ignorees}`, `Avertissements : ${r.avertissements.length}`,
+  ];
+  if (r.ajustements.length) lignes.push("", "Lecture automatique :", ...r.ajustements.map((a) => "- " + a));
+  if (r.avertissements.length) lignes.push("", ...r.avertissements.map((a) => `Ligne ${a.ligne} — ${a.message}`));
+  return lignes.join("\n");
+};
+
+const COLONNES_EXPORT = [
+  ["Ligne", (c) => c.ligne], ["Priorité", (c) => classeDe(c).nom], ["Code", (c) => c.codeBrut ?? ""],
+  ["Titre", (c) => c.titre], ["Description", (c) => c.description ?? ""],
+  ["Recommandation", (c) => c.recommandation ?? ""], ["Quantité", (c) => c.quantite],
+  ["Unité", (c) => c.unite ?? ""], ["Prix unitaire", (c) => c.prixUnitaire ?? ""],
+  ["Coût retenu", (c) => c.cout ?? ""], ["Coût du chiffrier", (c) => c.coutChiffrier ?? ""],
+  ["Catégorie", (c) => c.categorie ?? ""], ["Localisation", (c) => c.localisation ?? ""],
+  ["Photos", (c) => c.photos.map((p) => p.nom).join(" | ")],
+];
+
+function versCsv() {
+  const echappe = (v) => {
+    const t = String(v ?? "");
+    return /[";\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+  };
+  return [COLONNES_EXPORT.map(([n]) => n).join(";")]
+    .concat(retenus().map((c) => COLONNES_EXPORT.map(([, f]) => echappe(f(c))).join(";")))
+    .join("\n");
+}
+
+const versJson = () => JSON.stringify(retenus().map((c) => ({
+  ligne: c.ligne, titre: c.titre, description: c.description, recommandation: c.recommandation,
+  priorite: classeDe(c).nom, code: c.codeBrut, quantite: c.quantite, unite: c.unite,
+  prixUnitaire: c.prixUnitaire, cout: c.cout, coutDuChiffrier: c.coutChiffrier,
+  categorie: c.categorie, localisation: c.localisation,
+  photos: c.photos.map((p) => p.nom), autresColonnes: c.autres,
+})), null, 2);
+
+async function copier(texte, bouton) {
+  const ancien = bouton.textContent;
+  try {
+    await navigator.clipboard.writeText(texte);
+    bouton.textContent = "Copié ✓";
+  } catch {
+    const zone = document.createElement("textarea");
+    zone.value = texte; document.body.appendChild(zone); zone.select();
+    try { document.execCommand("copy"); bouton.textContent = "Copié ✓"; }
+    catch { bouton.textContent = "Copie refusée"; }
+    zone.remove();
+  }
+  setTimeout(() => { bouton.textContent = ancien; }, 1800);
+}
+
+function ouvrirExport() {
+  const liste = retenus();
+  const somme = liste.reduce((t, c) => t + (c.cout ?? 0), 0);
+  $("#corps-export").innerHTML = `
+    <p style="margin:0 0 14px;color:var(--encre-douce)">
+      ${nombreFr(liste.length)} constat${liste.length > 1 ? "s" : ""} retenu${liste.length > 1 ? "s" : ""},
+      ${argent(somme)} au total.</p>
+    <div style="display:flex;gap:9px;flex-wrap:wrap">
+      <button class="btn" id="x-csv">Copier en CSV</button>
+      <button class="btn" id="x-json">Copier en JSON</button>
+      <button class="btn" id="x-rapport">Copier le rapport</button>
+    </div>
+    <div class="encadre"><h4>Colonnes exportées</h4>
+      <p style="margin:0">${COLONNES_EXPORT.map(([n]) => ech(n)).join(" · ")}</p></div>`;
+  $("#x-csv").onclick = (e) => copier(versCsv(), e.currentTarget);
+  $("#x-json").onclick = (e) => copier(versJson(), e.currentTarget);
+  $("#x-rapport").onclick = (e) => copier(texteRapport(), e.currentTarget);
+  $("#dlg-export").showModal();
+}
+
+/* =========================================================================
+   10. Chargement d'un chiffrier
+   ========================================================================= */
+
+function afficherErreur(message) {
+  $("#ruban").hidden = false;
+  $("#ruban-texte").textContent = message;
+  $("#ruban-action").hidden = true;
+}
+
+async function charger(source, nom, estExemple = false) {
+  try {
+    const estTexte = /\.(csv|tsv|txt)$/i.test(nom);
+    const feuilles = estTexte
+      ? lireCsv(typeof source === "string" ? source : new TextDecoder().decode(source))
+      : await lireXlsx(source);
+
+    const { feuille, ligne } = choisirFeuille(feuilles);
+    const entetes = feuille.lignes[ligne] || [];
+    if (!entetes.length) throw new Error("Aucune ligne d'en-têtes exploitable dans ce fichier.");
+
+    const donnees = feuille.lignes.slice(ligne + 1);
+    const mappage = detecter(entetes, donnees);
+    const retenu = memoire.lire(mappage.signature);
+    if (retenu && retenu.colonnes && retenu.colonnes.titre != null) {
+      mappage.colonnes = retenu.colonnes;
+      mappage.photosSup = retenu.photosSup || [];
+      mappage.echelleInversee = !!retenu.echelleInversee;
+      mappage.ajustements = mappage.ajustements.concat("mappage mémorisé pour ce format de chiffrier");
+    }
+
+    Object.assign(etat, { feuilles, feuille, ligne, mappage, nomFichier: nom, estExemple,
+                          recherche: "", filtres: new Set(), tri: "chiffrier" });
+    $("#recherche").value = "";
+    $("#tri").value = "chiffrier";
+
+    if (mappage.colonnes.titre == null) {
+      construire();
+      rendreTout();
+      ouvrirColonnes();
+      return;
+    }
+    construire();
+    rendreTout();
+    $("#corps").dataset.vue = "liste";
+
+    $("#ruban").hidden = !estExemple;
+    if (estExemple) {
+      $("#ruban-texte").textContent =
+        "Exemple de démonstration — des constats fictifs, pour voir l'outil en marche.";
+      $("#ruban-action").hidden = false;
+    }
+  } catch (erreur) {
+    console.error(erreur);
+    afficherErreur("Lecture impossible : " + (erreur.message || erreur));
+  }
+}
+
+async function chargerFichier(fichier) {
+  if (!fichier) return;
+  if (/\.(csv|tsv|txt)$/i.test(fichier.name)) await charger(await fichier.text(), fichier.name);
+  else await charger(await fichier.arrayBuffer(), fichier.name);
+}
+
+/* ---- branchements ---- */
+
+const entree = $("#entree-fichier");
+entree.onchange = () => { chargerFichier(entree.files[0]); entree.value = ""; };
+$("#b-ouvrir").onclick = () => entree.click();
+$("#b-ouvrir-2").onclick = () => entree.click();
+$("#ruban-action").onclick = () => entree.click();
+
+const dossier = $("#entree-dossier");
+$("#b-photos").onclick = () => dossier.click();
+dossier.onchange = () => {
+  const n = indexerDossier(dossier.files);
+  if (etat.mappage) { construire(); rendreTout(); }
+  $("#ruban").hidden = false;
+  $("#ruban-texte").textContent = n
+    ? `${nombreFr(n / 2 | 0)} images indexées : les photos du chiffrier sont retrouvées par leur nom.`
+    : "Aucune image dans ce dossier.";
+  $("#ruban-action").hidden = true;
+};
+
+$("#b-colonnes").onclick = () => { if (etat.mappage) ouvrirColonnes(); };
+$("#b-rapport").onclick = () => { if (etat.rapport) ouvrirRapport(); };
+$("#b-exporter").onclick = () => { if (etat.constats.length) ouvrirExport(); };
+for (const bouton of document.querySelectorAll("[data-fermer]")) {
+  bouton.onclick = (e) => e.currentTarget.closest("dialog").close();
+}
+
+$("#recherche").addEventListener("input", (e) => { etat.recherche = e.target.value; rendreListe(); });
+$("#tri").addEventListener("change", (e) => { etat.tri = e.target.value; rendreListe(); });
+
+const zone = $("#zone-depot");
+document.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  if (zone) zone.classList.add("survol");
+});
+document.addEventListener("dragleave", () => zone && zone.classList.remove("survol"));
+document.addEventListener("drop", (e) => {
+  e.preventDefault();
+  if (zone) zone.classList.remove("survol");
+  if (e.dataTransfer.files.length) chargerFichier(e.dataTransfer.files[0]);
+});
+
+/* ---- démarrage : un exemple chargé, pour que l'outil s'ouvre en marche ---- */
+
+function octetsDepuisBase64(base64) {
+  const binaire = atob(base64.trim());
+  const octets = new Uint8Array(binaire.length);
+  for (let i = 0; i < binaire.length; i++) octets[i] = binaire.charCodeAt(i);
+  return octets.buffer;
+}
+
+window.__charger = charger;   // utilisé pour la vérification hors ligne
+
+(async () => {
+  if (!("DecompressionStream" in window)) {
+    afficherErreur("Ce navigateur ne sait pas ouvrir les .xlsx. Safari 16.4+, Chrome ou Edge conviennent ; "
+                 + "un export .csv fonctionne partout.");
+    $("#accueil").hidden = false;
+    return;
+  }
+  try {
+    const base64 = document.getElementById("exemple-b64").textContent;
+    await charger(octetsDepuisBase64(base64), "exemple-rapport-bsi.xlsx", true);
+  } catch (erreur) {
+    console.error(erreur);
+    $("#accueil").hidden = false;
+  }
+})();
+</script>

@@ -239,13 +239,18 @@ public enum ImportateurConstats {
                            + "c'est celui du chiffrier qui est retenu"))
             }
 
+            // Le code de priorité fait foi ; l'échelle de gravité ne sert qu'à défaut.
+            var priorite: Priorite?
             var gravite: Gravite?
             let graviteSource = cellule(.gravite)
             if let brut = graviteSource {
-                gravite = Gravite.depuis(brut, echelleInversee: mappage.echelleGraviteInversee)
-                if gravite == nil {
+                priorite = Priorite.depuis(brut)
+                if priorite == nil {
+                    gravite = Gravite.depuis(brut, echelleInversee: mappage.echelleGraviteInversee)
+                }
+                if priorite == nil && gravite == nil {
                     rapport.avertissements.append(
-                        .init(ligne: numeroExcel, message: "gravité non reconnue « \(brut) »"))
+                        .init(ligne: numeroExcel, message: "priorité non reconnue « \(brut) »"))
                 }
             }
 
@@ -280,6 +285,7 @@ public enum ImportateurConstats {
                 unite: cellule(.unite),
                 prixUnitaire: prixUnitaire,
                 prixTotalChiffrier: prixTotalChiffrier,
+                priorite: priorite,
                 gravite: gravite,
                 graviteSource: graviteSource,
                 localisation: cellule(.localisation),

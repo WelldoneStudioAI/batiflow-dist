@@ -40,7 +40,7 @@ présent comme mot entier.
 | `unite`          | —      | unité(s), u, mesure, um — *et la colonne sans en-tête à droite de la quantité*               |
 | `prixUnitaire`   | —      | prix unitaire, coût unitaire, prix, coût, montant, estimation, budget, price, cost           |
 | `prixTotal`      | —      | coût total, prix total, total, montant total — *et toute colonne de prix résiduelle*         |
-| `gravite`        | —      | gravité, sévérité, criticité, priorité, niveau, urgence, risque, cote, **code**, horizon    |
+| `priorite`       | —      | priorité, **code**, horizon, gravité, sévérité, criticité, niveau, urgence, risque, cote    |
 | `photo`          | —      | photo(s), image(s), lien photo, url photo, pièce jointe, annexe, média, visuel               |
 | `localisation`   | —      | localisation, local, emplacement, zone, pièce, étage, secteur, lieu, location                |
 | `categorie`      | —      | catégorie, **composante(s)**, système, lot, discipline, famille, corps de métier             |
@@ -71,18 +71,18 @@ le contenu des colonnes et consigne chaque décision dans le rapport :
 2. **Coût total reconnu.** Si un prix unitaire est déjà identifié, la colonne de prix
    restante, numérique et dont le nom ne dit pas « unitaire », devient le **coût total
    du chiffrier**.
-3. **Gravité validée puis déduite.** Si la colonne trouvée par son nom n'est pas
+3. **Priorité validée puis déduite.** Si la colonne trouvée par son nom n'est pas
    interprétable (moins de 50 % des valeurs), elle est écartée ; l'outil cherche alors
-   la colonne dont les valeurs *sont* des gravités (seuil 70 %). C'est ainsi qu'une
+   la colonne dont les valeurs *sont* des priorités (seuil 70 %). C'est ainsi qu'une
    colonne `Code` contenant `U / CT / MT / LT / LT+ / EX / CO` est trouvée sans que
-   son nom ne parle de gravité.
+   son nom ne parle de priorité.
 4. **Unité devinée.** La colonne immédiatement à droite de la quantité, aux valeurs
    courtes contenant des lettres (`u.`, `pi2`, `m²`), devient l'unité même si son
    en-tête est vide — cas très fréquent.
 
 ## 5. Normalisation des valeurs
 
-### Gravité — échelle interne à 5 niveaux
+### Gravité — échelle à 5 niveaux (chiffriers sans code de priorité)
 
 | Niveau BSI    | Entrées reconnues                                                                 |
 |---------------|------------------------------------------------------------------------------------|
@@ -92,32 +92,33 @@ le contenu des colonnes et consigne chaque décision dans le rapport :
 | `mineure`     | mineur, faible, bas, low, minor, léger, 2, D                                        |
 | `observation` | observation, informatif, note, pour information, aucune, conforme, 1, E              |
 
-### Gravité — codes de priorité des rapports BSI
+### Priorité — codes des rapports BSI
 
-Légende du rapport d'inspection (p. 8), reconnue telle quelle :
+Le code de priorité **fait foi** : c'est lui qui classe le constat, tel quel. Ce n'est
+pas une échelle de gravité, et aucun code n'est traduit en degré de gravité — `EX` dit
+qu'une expertise est requise, `CO` qu'un entretien est suggéré ; ni l'un ni l'autre ne
+se range entre « mineur » et « critique ».
 
-| Code  | Signification                     | Gravité retenue |
-|-------|-----------------------------------|-----------------|
-| `U`   | Urgent                            | critique        |
-| `CT`  | Court terme (d'ici 1 an)          | majeure         |
-| `MT`  | Moyen terme (d'ici 4 ans)         | modérée         |
-| `LT`  | Long terme (d'ici 9 ans)          | mineure         |
-| `LT+` | Long terme (10 ans et +)          | mineure         |
-| `EX`  | Avis d'un expert recommandé       | majeure         |
-| `CO`  | Entretien ou amélioration suggéré | observation     |
+| Code  | Classe affichée | Précision (légende du rapport, p. 8) |
+|-------|-----------------|---------------------------------------|
+| `U`   | Urgent          | Urgent                                |
+| `CT`  | Court terme     | D'ici 1 an                            |
+| `MT`  | Moyen terme     | D'ici 4 ans                           |
+| `LT`  | Long terme      | D'ici 9 ans                           |
+| `LT+` | Long terme +    | 10 ans et plus                        |
+| `EX`  | Expertise       | Avis d'un expert recommandé           |
+| `CO`  | Entretien       | Entretien ou amélioration suggéré     |
 
-Deux correspondances relèvent du **jugement** et sont donc explicites dans le code :
-`EX` est traité comme majeur (une expertise à commander n'attend pas) et `LT+` comme
-mineur, au même niveau que `LT`. Le code d'origine est conservé
-(`ConstatImporte.graviteSource`) et affiché sous la pastille : l'inspecteur retrouve
-sa propre cotation. Ces deux choix sont à confirmer avec l'auteur du rapport.
+Chaque classe a sa propre teinte : ce sont sept catégories, pas les degrés d'une même
+échelle, et une rampe rouge → vert les trahirait. Le tri « par priorité » suit l'ordre
+du tableau ; le code d'origine reste affiché sous l'étiquette.
 
 Le `+` de `LT+` est lu avant toute normalisation, sinon il disparaîtrait avec la
 ponctuation et `LT+` se confondrait avec `LT`.
 
-Les échelles numériques sont ambiguës : par défaut **5 = critique**. Si le chiffrier
-utilise 1 = le plus grave, l'utilisateur bascule « échelle inversée » dans la feuille
-de mappage ; le choix est mémorisé avec le mappage.
+L'échelle de gravité à cinq niveaux ci-dessus ne sert qu'aux chiffriers **sans** code
+de priorité. Les échelles numériques y sont ambiguës : par défaut **5 = critique**, et
+« échelle inversée » dans la feuille de mappage bascule le sens ; le choix est mémorisé.
 
 ### Montants
 

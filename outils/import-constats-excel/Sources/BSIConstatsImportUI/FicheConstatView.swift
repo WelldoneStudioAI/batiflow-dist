@@ -60,11 +60,17 @@ public struct FicheConstatView: View {
                     .textSelection(.enabled)
                 Spacer(minLength: 8)
                 VStack(alignment: .trailing, spacing: 3) {
-                    BadgeGravite(gravite: constat.gravite)
+                    let classement = Classement.pour(constat)
+                    BadgeClassement(classement: classement)
                     // Cotation d'origine (« CT », « U », « 4 ») : l'inspecteur reconnaît la sienne.
                     if let source = constat.graviteSource,
-                       NormalisationTexte.cle(source) != NormalisationTexte.cle(constat.gravite?.libelle ?? "") {
+                       NormalisationTexte.cle(source) != NormalisationTexte.cle(classement.libelle) {
                         Text("chiffrier : \(source)")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    if !classement.precision.isEmpty, classement.precision != classement.libelle {
+                        Text(classement.precision)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     }

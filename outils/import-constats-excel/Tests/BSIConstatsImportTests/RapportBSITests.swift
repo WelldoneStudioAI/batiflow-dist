@@ -82,20 +82,39 @@ final class RapportBSITests: XCTestCase {
 
     func testCodesDePrioriteBSI() throws {
         let (constats, _) = try importer()
-        var parCode: [String: Gravite] = [:]
+        var parCode: [String: Priorite] = [:]
         for constat in constats {
-            if let code = constat.graviteSource, let gravite = constat.gravite {
-                parCode[code] = gravite
+            if let code = constat.graviteSource, let priorite = constat.priorite {
+                parCode[code] = priorite
             }
         }
-        XCTAssertEqual(parCode["U"], .critique)
-        XCTAssertEqual(parCode["CT"], .majeure)
-        XCTAssertEqual(parCode["MT"], .moderee)
-        XCTAssertEqual(parCode["LT+"], .mineure, "le « + » ne doit pas être perdu en cours de route")
-        XCTAssertEqual(parCode["CO"], .observation)
-        XCTAssertEqual(parCode["EX"], .majeure)
-        XCTAssertNil(constats.first { $0.gravite == nil },
+        XCTAssertEqual(parCode["U"], .urgent)
+        XCTAssertEqual(parCode["CT"], .courtTerme)
+        XCTAssertEqual(parCode["MT"], .moyenTerme)
+        XCTAssertEqual(parCode["LT+"], .longTermePlus, "le « + » ne doit pas être perdu en route")
+        XCTAssertEqual(parCode["CO"], .entretien)
+        XCTAssertEqual(parCode["EX"], .expertise)
+        XCTAssertNil(constats.first { $0.priorite == nil },
                      "toutes les lignes portent un code interprétable")
+    }
+
+    func testAucunCodeNEstTraduitEnGravite() throws {
+        let (constats, _) = try importer()
+        XCTAssertTrue(constats.allSatisfy { $0.gravite == nil },
+                      "« Expertise » et « Entretien » ne sont pas des degrés de gravité : "
+                      + "aucun code ne doit être rangé sur l'échelle à cinq niveaux")
+        XCTAssertEqual(Priorite.depuis("LT+"), .longTermePlus)
+        XCTAssertEqual(Priorite.depuis(" ex "), .expertise)
+        XCTAssertNil(Priorite.depuis("Majeur"))
+        XCTAssertNil(Gravite.depuis("CT"), "un code de priorité n'est pas une gravité")
+    }
+
+    func testOrdreDePriorite() throws {
+        let (constats, _) = try importer()
+        let rangs = constats.map(\.rangClassement)
+        XCTAssertEqual(rangs.min(), Priorite.urgent.rang)
+        XCTAssertLessThan(Priorite.urgent.rang, Priorite.entretien.rang)
+        XCTAssertLessThan(Priorite.courtTerme.rang, Priorite.longTerme.rang)
     }
 
     func testTexteLongScindeEnTitreEtDescription() throws {

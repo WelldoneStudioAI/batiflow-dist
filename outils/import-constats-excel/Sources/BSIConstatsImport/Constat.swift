@@ -17,9 +17,13 @@ public struct ConstatImporte: Identifiable, Hashable, Sendable {
     /// Coût total lu directement dans le chiffrier, quand la colonne existe. Il fait foi :
     /// dans un vrai rapport, il n'est pas toujours égal à quantité × prix unitaire.
     public var prixTotalChiffrier: Decimal?
+    /// Code de priorité du rapport, quand le chiffrier en porte un. C'est le classement
+    /// qui fait foi.
+    public var priorite: Priorite?
+    /// Gravité écrite en toutes lettres, pour un chiffrier sans code de priorité.
     public var gravite: Gravite?
-    /// Valeur brute de la colonne de gravité (« CT », « Majeur », « 4 »), conservée pour
-    /// que l'inspecteur reconnaisse sa propre cotation sur la fiche.
+    /// Valeur brute de la colonne (« CT », « Majeur », « 4 »), conservée pour que
+    /// l'inspecteur reconnaisse sa propre cotation sur la fiche.
     public var graviteSource: String?
     public var localisation: String?
     public var categorie: String?
@@ -38,6 +42,7 @@ public struct ConstatImporte: Identifiable, Hashable, Sendable {
         unite: String? = nil,
         prixUnitaire: Decimal? = nil,
         prixTotalChiffrier: Decimal? = nil,
+        priorite: Priorite? = nil,
         gravite: Gravite? = nil,
         graviteSource: String? = nil,
         localisation: String? = nil,
@@ -54,12 +59,26 @@ public struct ConstatImporte: Identifiable, Hashable, Sendable {
         self.unite = unite
         self.prixUnitaire = prixUnitaire
         self.prixTotalChiffrier = prixTotalChiffrier
+        self.priorite = priorite
         self.gravite = gravite
         self.graviteSource = graviteSource
         self.localisation = localisation
         self.categorie = categorie
         self.photos = photos
         self.champsSupplementaires = champsSupplementaires
+    }
+
+    /// Étiquette de classement affichée sur la fiche : le code de priorité s'il existe,
+    /// sinon la gravité, sinon « À préciser ».
+    public var libelleClassement: String {
+        priorite?.libelle ?? gravite?.libelle ?? "À préciser"
+    }
+
+    /// Rang de tri : les codes de priorité d'abord, puis l'échelle de gravité.
+    public var rangClassement: Int {
+        if let priorite { return priorite.rang }
+        if let gravite { return 10 - gravite.rawValue }
+        return 99
     }
 
     /// Prix unitaire × occurrence, tel que l'outil le recalcule.

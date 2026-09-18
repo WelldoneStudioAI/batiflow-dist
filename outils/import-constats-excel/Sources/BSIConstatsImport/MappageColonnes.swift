@@ -234,7 +234,9 @@ public struct MappageColonnes: Equatable, Sendable {
         // 7 — gravité : une colonne trouvée par son nom mais dont les valeurs ne veulent rien
         //     dire est écartée, puis on cherche la colonne réellement interprétable. C'est
         //     ainsi qu'une colonne « Code » de priorités BSI (U, CT, MT, LT…) est trouvée.
-        let estGravite: (String) -> Bool = { Gravite.depuis($0) != nil }
+        let estGravite: (String) -> Bool = {
+            Priorite.depuis($0) != nil || Gravite.depuis($0) != nil
+        }
         if let index = colonnes[.gravite], proportion(index, estGravite) < 0.5 {
             ajustements.append("« \(libelle(index)) » écartée du champ Gravité : valeurs non interprétables")
             colonnes[.gravite] = nil

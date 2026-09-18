@@ -39,7 +39,7 @@ struct LigneConstat: View {
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
             Rectangle()
-                .fill(constat.gravite?.couleur ?? Color.secondary.opacity(0.4))
+                .fill(Classement.pour(constat).couleur)
                 .frame(width: 3)
                 .clipShape(Capsule())
 
@@ -56,8 +56,8 @@ struct LigneConstat: View {
                 }
 
                 HStack(spacing: 8) {
-                    BadgeGravite(gravite: constat.gravite, compact: true)
-                    if constat.occurrence > 1 {
+                    BadgeClassement(classement: Classement.pour(constat), compact: true)
+                    if constat.occurrence > 1 || constat.unite != nil {
                         etiquetteCompacte("×\(constat.quantiteAffichable)", symbole: "number")
                     }
                     if constat.prixTotal != nil {

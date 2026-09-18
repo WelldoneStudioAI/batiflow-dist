@@ -5,12 +5,12 @@ import BSIConstatsImport
 
 /// Tri disponible dans la fenêtre.
 public enum TriConstats: String, CaseIterable, Identifiable {
-    case ordreChiffrier, gravite, prix, titre
+    case ordreChiffrier, priorite, prix, titre
     public var id: String { rawValue }
     public var libelle: String {
         switch self {
         case .ordreChiffrier: return "Ordre du chiffrier"
-        case .gravite: return "Gravité"
+        case .priorite: return "Priorité"
         case .prix: return "Coût total"
         case .titre: return "Titre"
         }
@@ -35,7 +35,7 @@ public final class ModeleFenetreImport {
     public private(set) var rapport = RapportImport()
 
     public var recherche: String = ""
-    public var filtreGravite: Set<Gravite> = []
+    public var filtreClassement: Set<String> = []
     public var tri: TriConstats = .ordreChiffrier
     public var selection: ConstatImporte.ID?
     public var exclus: Set<ConstatImporte.ID> = []
@@ -113,21 +113,18 @@ public final class ModeleFenetreImport {
             }
         }
 
-        if !filtreGravite.isEmpty {
-            liste = liste.filter { constat in
-                guard let gravite = constat.gravite else { return false }
-                return filtreGravite.contains(gravite)
-            }
+        if !filtreClassement.isEmpty {
+            liste = liste.filter { filtreClassement.contains(Classement.pour($0).id) }
         }
 
         switch tri {
         case .ordreChiffrier:
             break
-        case .gravite:
+        case .priorite:
             liste.sort { gauche, droite in
-                let niveauGauche = gauche.gravite?.rawValue ?? 0
-                let niveauDroite = droite.gravite?.rawValue ?? 0
-                if niveauGauche != niveauDroite { return niveauGauche > niveauDroite }
+                if gauche.rangClassement != droite.rangClassement {
+                    return gauche.rangClassement < droite.rangClassement
+                }
                 return gauche.ligneSource < droite.ligneSource
             }
         case .prix:
@@ -146,10 +143,13 @@ public final class ModeleFenetreImport {
         constatsRetenus.compactMap(\.prixTotal).reduce(0, +)
     }
 
-    public var repartitionGravite: [(gravite: Gravite, compte: Int)] {
-        Gravite.allCases.reversed().map { gravite in
-            (gravite, constatsRetenus.filter { $0.gravite == gravite }.count)
-        }.filter { $0.compte > 0 }
+    /// Les classes réellement présentes dans ce chiffrier, dans l'ordre de priorité.
+    public var repartition: [(classement: Classement, compte: Int)] {
+        var comptes: [Classement: Int] = [:]
+        for constat in constatsRetenus {
+            comptes[Classement.pour(constat), default: 0] += 1
+        }
+        return comptes.map { ($0.key, $0.value) }.sorted { $0.0.rang < $1.0.rang }
     }
 
     public func basculerExclusion(_ constat: ConstatImporte) {
@@ -172,7 +172,7 @@ public final class ModeleFenetreImport {
         constats = []
         rapport = RapportImport()
         recherche = ""
-        filtreGravite = []
+        filtreClassement = []
         exclus = []
         selection = nil
         etape = .accueil

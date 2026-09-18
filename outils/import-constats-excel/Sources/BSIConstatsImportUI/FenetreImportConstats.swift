@@ -141,18 +141,18 @@ public struct FenetreImportConstats: View {
 
                 Divider()
 
-                ForEach(Gravite.allCases.reversed(), id: \.self) { gravite in
-                    Toggle(gravite.libelle, isOn: Binding(
-                        get: { modele.filtreGravite.contains(gravite) },
+                ForEach(modele.repartition, id: \.classement) { element in
+                    Toggle("\(element.classement.libelle) (\(element.compte))", isOn: Binding(
+                        get: { modele.filtreClassement.contains(element.classement.id) },
                         set: { actif in
-                            if actif { modele.filtreGravite.insert(gravite) }
-                            else { modele.filtreGravite.remove(gravite) }
+                            if actif { modele.filtreClassement.insert(element.classement.id) }
+                            else { modele.filtreClassement.remove(element.classement.id) }
                         }
                     ))
                 }
-                if !modele.filtreGravite.isEmpty {
+                if !modele.filtreClassement.isEmpty {
                     Divider()
-                    Button("Effacer les filtres") { modele.filtreGravite = [] }
+                    Button("Effacer les filtres") { modele.filtreClassement = [] }
                 }
             } label: {
                 Label("Trier et filtrer", systemImage: "line.3.horizontal.decrease.circle")
@@ -186,12 +186,12 @@ public struct FenetreImportConstats: View {
             Text("\(modele.constatsRetenus.count) constat\(modele.constatsRetenus.count > 1 ? "s" : "")")
                 .font(.callout.weight(.medium))
 
-            ForEach(modele.repartitionGravite, id: \.gravite) { element in
+            ForEach(modele.repartition, id: \.classement) { element in
                 HStack(spacing: 4) {
-                    Circle().fill(element.gravite.couleur).frame(width: 7, height: 7)
+                    Circle().fill(element.classement.couleur).frame(width: 7, height: 7)
                     Text("\(element.compte)").font(.caption).monospacedDigit()
                 }
-                .help(element.gravite.libelle)
+                .help(element.classement.libelle)
             }
 
             Spacer()

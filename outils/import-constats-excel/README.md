@@ -4,6 +4,11 @@ Outil proposé pour BatiFlow Mac : **ouvrir un chiffrier Excel de constats et le
 voir comme s'ils avaient été saisis avec l'outil terrain iOS**, puis les verser
 dans le BSI.
 
+> **Une web app fait le même travail sans toucher à BatiFlow** :
+> [`../web-constats`](../web-constats/) — même logique de lecture, aucun risque de
+> régression sur l'app Mac. Ce module Swift reste disponible pour le jour où l'import
+> sera intégré au BSI.
+>
 > Le code source de BatiFlow est privé et n'est pas dans ce dépôt. Le module est
 > donc livré ici comme **paquet Swift autonome, prêt à être déposé dans le projet**,
 > avec sa spec, son gabarit Excel et ses tests. Il n'a pas pu être compilé dans
@@ -125,6 +130,7 @@ enum ConstatsImportBridge {
                 recommandation: importe.recommandation ?? "",
                 occurrence: importe.occurrence,
                 prixUnitaire: importe.prixUnitaire,
+                priorite: importe.priorite?.rawValue,   // « CT », « LT+ », « EX »…
                 gravite: importe.gravite.map(Constat.Gravite.init(niveau:)),
                 localisation: importe.localisation,
                 photos: importe.photos.compactMap(\.url),
@@ -179,7 +185,7 @@ cd outils/import-constats-excel && swift test
 ```
 
 Couvert : montants québécois et anglo-saxons, quantités textuelles, échelle de
-gravité (y compris inversée et codes de priorité BSI), détection des en-têtes
+priorité (codes BSI) et gravité (y compris inversée), détection des en-têtes
 approchants, rejet des synonymes génériques, CSV avec guillemets et retours de ligne,
 lecture XLSX (références de cellules, feuilles multiples, hyperliens), résolution de
 photos par nom insensible à la casse, et deux imports de bout en bout :
@@ -206,7 +212,7 @@ Résultat sur le vrai fichier :
 |----------------------------|-------------------------------------------------------------|
 | Feuille choisie            | « Extérieur » (et non « Lisez-moi » ni « Par composante »)   |
 | Constats lus               | 130 sur 139 lignes — 9 lignes vides écartées                 |
-| Gravités reconnues         | 130 / 130, depuis la colonne `Code` (U, CT, MT, LT, LT+, EX, CO) |
+| Priorités reconnues        | 130 / 130, depuis la colonne `Code` : 15 Urgent, 77 Court terme, 29 Moyen terme, 2 Long terme, 3 Long terme +, 2 Expertise, 2 Entretien |
 | Total retenu               | 2 886 715 $ — au cent près la somme de la colonne `Coût ($)` |
 | Colonnes déduites          | quantité `Qtes`, unité (`u.`, `pi2`) malgré un en-tête vide  |
 | Avertissements             | 19 : 11 écarts de coût, 7 photos absentes du disque, 1 titre déduit |
@@ -223,15 +229,12 @@ Ce test a révélé trois défauts, tous corrigés :
    et faillait passer pour une colonne de montants (`650$/margelle`). Les synonymes
    génériques et la validation par les valeurs règlent les deux cas.
 
-Au passage : reconnaissance des codes de priorité BSI, deuxième colonne de photos,
+Au passage : classement par code de priorité BSI, deuxième colonne de photos,
 colonne d'unité sans en-tête, et découpage d'un paragraphe de constat en titre court
 + description — les textes de ce rapport font 109 caractères en médiane, 836 au plus.
 
 ## Limites connues
 
-- `EX` (avis d'expert) et `LT+` (long terme 10 ans et +) sont rattachés à une gravité
-  par jugement — respectivement majeure et mineure. À confirmer avec l'auteur du
-  rapport ; le code d'origine reste affiché sur chaque fiche.
 - Les images **incorporées** dans les cellules (objets flottants Excel) ne sont pas
   extraites — seulement les liens et les fichiers. Extensible en v2 via
   `xl/media/` + `drawing1.xml`.
