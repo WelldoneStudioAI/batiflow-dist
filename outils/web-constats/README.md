@@ -28,7 +28,8 @@ chiffrier .xlsx  →  [ web app : lecture, contrôle, correction ]  →  dossier
    ligne à ligne.
 4. **La fiche est l'aperçu du rendu BatiFlow, éditable en un clic** : bandeau
    priorité + bâtiment + statut, titre, description, localisation, encart de
-   recommandation, bande de photos, puis quantité × prix = coût. Chaque champ se
+   recommandation, bande de photos, puis quantité × prix = coût. La localisation est
+   une liste : on en ajoute, on en retire, on les corrige. Chaque champ se
    corrige sur place ; les photos s'ajoutent par glisser-déposer et se retirent d'un
    clic. Tout ce qui est corrigé part dans le dossier exporté.
 5. **Dossier de photos…** : vous désignez le dossier, les photos du chiffrier sont

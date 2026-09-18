@@ -97,7 +97,8 @@ public enum LecteurDossierBatiFlow {
                 priorite: ligne.priorite.flatMap { Priorite(rawValue: $0.code) },
                 gravite: ligne.graviteTexte.flatMap { Gravite.depuis($0) },
                 graviteSource: ligne.cotationOrigine,
-                localisation: ligne.localisation,
+                localisations: ligne.localisations
+                    ?? ligne.localisation.map { [$0] } ?? [],
                 categorie: ligne.categorie,
                 photos: photos,
                 champsSupplementaires: ligne.autresColonnes ?? [:]
@@ -163,6 +164,8 @@ public struct ManifesteDossier: Decodable, Sendable {
         public let ecartDeCout: Bool?
         public let categorie: String?
         public let localisation: String?
+        /// Les lieux, un par un. `localisation` en est la version réunie.
+        public let localisations: [String]?
         /// Texte affiché à droite du bandeau dans le rapport (« NC », « SU »…).
         public let statut: String?
         /// Vrai si l'utilisateur a retouché la ligne dans l'outil web avant l'export.

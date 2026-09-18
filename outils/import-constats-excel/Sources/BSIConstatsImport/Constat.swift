@@ -25,7 +25,12 @@ public struct ConstatImporte: Identifiable, Hashable, Sendable {
     /// Valeur brute de la colonne (« CT », « Majeur », « 4 »), conservée pour que
     /// l'inspecteur reconnaisse sa propre cotation sur la fiche.
     public var graviteSource: String?
-    public var localisation: String?
+    /// Lieux touchés par le constat. Un constat peut en porter plusieurs.
+    public var localisations: [String]
+    /// Les lieux réunis en une ligne, pour un affichage compact.
+    public var localisation: String? {
+        localisations.isEmpty ? nil : localisations.joined(separator: " ; ")
+    }
     public var categorie: String?
     public var photos: [ReferencePhoto]
 
@@ -45,7 +50,7 @@ public struct ConstatImporte: Identifiable, Hashable, Sendable {
         priorite: Priorite? = nil,
         gravite: Gravite? = nil,
         graviteSource: String? = nil,
-        localisation: String? = nil,
+        localisations: [String] = [],
         categorie: String? = nil,
         photos: [ReferencePhoto] = [],
         champsSupplementaires: [String: String] = [:]
@@ -62,7 +67,7 @@ public struct ConstatImporte: Identifiable, Hashable, Sendable {
         self.priorite = priorite
         self.gravite = gravite
         self.graviteSource = graviteSource
-        self.localisation = localisation
+        self.localisations = localisations
         self.categorie = categorie
         self.photos = photos
         self.champsSupplementaires = champsSupplementaires

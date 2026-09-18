@@ -288,7 +288,10 @@ public enum ImportateurConstats {
                 priorite: priorite,
                 gravite: gravite,
                 graviteSource: graviteSource,
-                localisation: cellule(.localisation),
+                localisations: (cellule(.localisation) ?? "")
+                    .split(whereSeparator: { $0 == ";" || $0 == "\n" })
+                    .map { $0.trimmingCharacters(in: .whitespaces) }
+                    .filter { !$0.isEmpty },
                 categorie: cellule(.categorie),
                 photos: photos,
                 champsSupplementaires: supplementaires

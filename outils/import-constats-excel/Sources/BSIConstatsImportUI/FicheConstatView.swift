@@ -80,8 +80,9 @@ public struct FicheConstatView: View {
                 if let categorie = constat.categorie {
                     etiquette(categorie, symbole: "square.grid.2x2")
                 }
-                if let localisation = constat.localisation {
-                    etiquette(localisation, symbole: "mappin.and.ellipse")
+                // Un constat peut toucher plusieurs endroits : une étiquette par lieu.
+                ForEach(constat.localisations, id: \.self) { lieu in
+                    etiquette(lieu, symbole: "mappin.and.ellipse")
                 }
             }
         }

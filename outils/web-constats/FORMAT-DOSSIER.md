@@ -68,7 +68,8 @@ Les entrées sont **stockées sans compression** : n'importe quel lecteur ZIP le
       "ecartDeCout": true,                    // les deux montants diffèrent
 
       "categorie": "Mur de fondation",
-      "localisation": "façade avant",
+      "localisation": "Façade avant ; Entrée de service",   // les lieux réunis
+      "localisations": ["Façade avant", "Entrée de service"], // un par un
       "statut": "NC",                         // le texte du coin droit du bandeau
       "modifieDansLOutil": true,              // la ligne a été retouchée avant l'export
 
