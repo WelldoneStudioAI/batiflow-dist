@@ -4,11 +4,11 @@
         <title>BatiFlow</title>
         <item>
             <title>1.0</title>
-            <pubDate>Tue, 29 Sep 2026 23:34:29 -0400</pubDate>
-            <sparkle:version>36</sparkle:version>
+            <pubDate>Wed, 30 Sep 2026 03:22:25 -0400</pubDate>
+            <sparkle:version>37</sparkle:version>
             <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/WelldoneStudioAI/batiflow-dist/releases/download/mac-v1.0b36/BatiFlow-1.0b36.dmg" length="504718150" type="application/octet-stream" sparkle:edSignature="d2ws+VIlhp1OjrmrXL/jsnPmhEpKIyyoFAXcFAAJtsaDgYHuLZpoIw6taKaKU0d9+s8Qxj+wuQ5FQFH8NBUfAA=="/>
+            <enclosure url="https://github.com/WelldoneStudioAI/batiflow-dist/releases/download/mac-v1.0b37/BatiFlow-1.0b37.dmg" length="504815460" type="application/octet-stream" sparkle:edSignature="/KA/BYDnuRkThgjosqPYp3YmLSDwf7Ba2FeAQOxppifNeZVBCz/nOxOJd8P6bctX0sZxzvEQvKYtSpPU2Gl6Dw=="/>
         </item>
     </channel>
 </rss>
