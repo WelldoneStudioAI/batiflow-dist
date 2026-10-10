@@ -1,0 +1,6 @@
+Titre;Description;Recommandation;Occurrence;Prix unitaire;Gravité;Lien photo;Localisation;Catégorie
+Fissure verticale en fondation;Fissure verticale d'environ 1,2 m, trace d'infiltration.;Injection de polyuréthane.;2;1 234,56 $;Majeur;https://exemple.ca/photos/fissure-nord.jpg;Sous-sol;Structure
+;Calfeutrage des fenêtres à reprendre au complet.;Reprise du calfeutrage sur les 14 fenêtres.;14 unités;85,00;modéré;fenetre-salon.JPG;Ensemble du bâtiment;Enveloppe
+Panneau électrique saturé;Aucun espace libre au panneau principal, deux disjoncteurs doubles bricolés.;Ajout d'un panneau secondaire par un maître électricien.;1;à valider;urgence;;Local technique;Électricité
+;;;;;;;;
+Ventilateur de salle de bain inopérant;"Le ventilateur tourne mais n'évacue pas ; conduit probablement débranché.";Vérification du conduit et remplacement de l'appareil au besoin.;x2;$325.00;3;photo;Salle de bain étage;Ventilation

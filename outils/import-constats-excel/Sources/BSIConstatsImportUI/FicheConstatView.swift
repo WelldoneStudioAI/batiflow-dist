@@ -1,0 +1,203 @@
+import SwiftUI
+import BSIConstatsImport
+
+/// Fiche d'un constat, mise en page comme dans l'outil terrain iOS :
+/// photo, titre + gravité, description, recommandation, puis le bloc chiffré.
+public struct FicheConstatView: View {
+    let constat: ConstatImporte
+    var estExclu: Bool
+    var basculerExclusion: () -> Void
+
+    public init(constat: ConstatImporte,
+                estExclu: Bool = false,
+                basculerExclusion: @escaping () -> Void = {}) {
+        self.constat = constat
+        self.estExclu = estExclu
+        self.basculerExclusion = basculerExclusion
+    }
+
+    public var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                if !constat.photos.isEmpty {
+                    photos
+                }
+                entete
+                if let description = constat.description {
+                    section("Description", texte: description, symbole: "text.alignleft")
+                }
+                if let recommandation = constat.recommandation {
+                    section("Recommandation", texte: recommandation, symbole: "checkmark.seal")
+                }
+                blocChiffre
+                if !constat.champsSupplementaires.isEmpty {
+                    champsSupplementaires
+                }
+                piedDePage
+            }
+            .padding(22)
+            .frame(maxWidth: 720, alignment: .leading)
+        }
+        .background(Color(nsColor: .textBackgroundColor))
+        .opacity(estExclu ? 0.5 : 1)
+    }
+
+    // MARK: - Blocs
+
+    private var photos: some View {
+        VStack(spacing: 8) {
+            ForEach(Array(constat.photos.enumerated()), id: \.offset) { _, photo in
+                VuePhotoConstat(reference: photo)
+            }
+        }
+    }
+
+    private var entete: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Text(constat.titre)
+                    .font(.title2.weight(.semibold))
+                    .textSelection(.enabled)
+                Spacer(minLength: 8)
+                VStack(alignment: .trailing, spacing: 3) {
+                    let classement = Classement.pour(constat)
+                    BadgeClassement(classement: classement)
+                    // Cotation d'origine (« CT », « U », « 4 ») : l'inspecteur reconnaît la sienne.
+                    if let source = constat.graviteSource,
+                       NormalisationTexte.cle(source) != NormalisationTexte.cle(classement.libelle) {
+                        Text("chiffrier : \(source)")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    if !classement.precision.isEmpty, classement.precision != classement.libelle {
+                        Text(classement.precision)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            HStack(spacing: 10) {
+                if let categorie = constat.categorie {
+                    etiquette(categorie, symbole: "square.grid.2x2")
+                }
+                // Un constat peut toucher plusieurs endroits : une étiquette par lieu.
+                ForEach(constat.localisations, id: \.self) { lieu in
+                    etiquette(lieu, symbole: "mappin.and.ellipse")
+                }
+            }
+        }
+    }
+
+    private func section(_ titre: String, texte: String, symbole: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label(titre, systemImage: symbole)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+            Text(texte)
+                .font(.body)
+                .textSelection(.enabled)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var blocChiffre: some View {
+        VStack(spacing: 6) {
+            HStack(spacing: 0) {
+                colonneChiffre("Quantité", valeur: constat.quantiteAffichable)
+                Divider().frame(height: 34)
+                colonneChiffre("Prix unitaire", valeur: FormatageMontant.texte(constat.prixUnitaire))
+                Divider().frame(height: 34)
+                colonneChiffre(constat.prixTotalChiffrier != nil ? "Total (chiffrier)" : "Total",
+                               valeur: FormatageMontant.texte(constat.prixTotal), accent: true)
+            }
+            if constat.totalDivergent {
+                Label("Le chiffrier annonce \(FormatageMontant.texte(constat.prixTotalChiffrier)) "
+                      + "alors que \(constat.quantiteAffichable) × "
+                      + "\(FormatageMontant.texte(constat.prixUnitaire)) donne "
+                      + "\(FormatageMontant.texte(constat.prixTotalCalcule)). Le montant du chiffrier est retenu.",
+                      systemImage: "exclamationmark.triangle")
+                    .font(.caption2)
+                    .foregroundStyle(.orange)
+                    .multilineTextAlignment(.leading)
+                    .padding(.horizontal, 10)
+            }
+        }
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity)
+        .background(Color.secondary.opacity(0.08),
+                    in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
+
+    private func colonneChiffre(_ titre: String, valeur: String, accent: Bool = false) -> some View {
+        VStack(spacing: 3) {
+            Text(titre)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Text(valeur)
+                .font(.system(.body, design: .rounded).weight(accent ? .bold : .medium))
+                .monospacedDigit()
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var champsSupplementaires: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label("Autres colonnes du chiffrier", systemImage: "tablecells")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+            ForEach(constat.champsSupplementaires.sorted(by: { $0.key < $1.key }), id: \.key) { cle, valeur in
+                HStack(alignment: .top, spacing: 8) {
+                    Text(cle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 150, alignment: .leading)
+                    Text(valeur).font(.caption).textSelection(.enabled)
+                }
+            }
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.secondary.opacity(0.05),
+                    in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+
+    private var piedDePage: some View {
+        HStack {
+            Text("Ligne \(constat.ligneSource) du chiffrier")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Toggle(isOn: Binding(get: { !estExclu }, set: { _ in basculerExclusion() })) {
+                Text("Inclure dans l'import")
+            }
+            .toggleStyle(.checkbox)
+            .font(.caption)
+        }
+    }
+
+    private func etiquette(_ texte: String, symbole: String) -> some View {
+        Label(texte, systemImage: symbole)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background(Color.secondary.opacity(0.10), in: Capsule())
+    }
+}
+
+/// Formatage monétaire québécois partagé par la liste et la fiche.
+public enum FormatageMontant {
+    private static let formateur: NumberFormatter = {
+        let formateur = NumberFormatter()
+        formateur.numberStyle = .currency
+        formateur.locale = Locale(identifier: "fr_CA")
+        formateur.maximumFractionDigits = 2
+        return formateur
+    }()
+
+    public static func texte(_ montant: Decimal?) -> String {
+        guard let montant else { return "—" }
+        return formateur.string(from: montant as NSDecimalNumber) ?? "—"
+    }
+}
