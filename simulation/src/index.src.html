@@ -1,0 +1,1161 @@
+<title>Essai BatiFlow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Une maquette d'iPhone qui rejoue BatiFlow : viseur sombre, feuille blanche, orange de la refonte.
+   Valeurs reprises de simulation-inputs/INFOS.md (commit e30c179e de batiflow-app). */
+:root {
+  color-scheme: dark;
+  --page: #0e0e11;
+  --page-ink: #c9cad0;
+  --orange: #F15A24;
+  --anneau: #E0543E;
+  --pilule: #26262B;
+  --rond-sombre: #1C1C1E;
+  --ink: #1A1B1E;
+  --encre-carrousel: #111214;
+  --gris: #5B5E64;
+  --filet: #E6E6E8;
+  --champ: #F4F4F5;
+  --champ-carrousel: #EEEEF0;
+  --sub: #8A8F98;
+  --rouge-dictee: #FF5A4F;
+  --rouge-enr: #FF3B30;
+  --rouge-annot: #FF453A;
+  --bleu-systeme: #0A84FF;
+  --sf: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Helvetica Neue", Arial, sans-serif;
+  --inter: "Inter", -apple-system, system-ui, "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+html, body { height: 100%; }
+body { margin: 0; background: var(--page); color: var(--page-ink); font-family: var(--sf); overflow: hidden; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--bleu-systeme); outline-offset: 2px; }
+.ic { width: 1em; height: 1em; display: block; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* ---------- cadre ---------- */
+#wrap { height: 100%; display: flex; align-items: center; justify-content: center; gap: 56px; }
+#phone { position: relative; flex: none; width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff; isolation: isolate; }
+#aside { display: none; max-width: 300px; font-family: var(--inter); }
+#aside h1 { font-size: 22px; line-height: 1.25; color: #fff; margin: 0 0 12px; font-weight: 700; text-wrap: balance; }
+#aside p { font-size: 14.5px; line-height: 1.55; margin: 0 0 12px; color: var(--page-ink); }
+#aside .k { color: var(--orange); font-weight: 600; }
+@media (min-width: 760px) {
+  #phone { width: auto; height: min(852px, calc(100% - 48px)); aspect-ratio: 393 / 852; border-radius: 54px; box-shadow: 0 0 0 11px #1b1b1f, 0 0 0 12px #3a3a40, 0 40px 90px rgba(0,0,0,.55); }
+  #aside { display: block; }
+}
+
+.scr { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.light { background: #fff; color: var(--ink); color-scheme: light; }
+
+/* ---------- accueil ---------- */
+#scr-intro { background: radial-gradient(120% 70% at 50% 0%, #26201d 0%, #000 62%); padding: 28px 24px 24px; font-family: var(--inter); }
+.marque { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 17px; letter-spacing: -.01em; }
+.marque i { width: 10px; height: 10px; border-radius: 50%; background: var(--orange); }
+#scr-intro h2 { font-size: 30px; line-height: 1.12; letter-spacing: -.02em; font-weight: 700; margin: auto 0 14px; text-wrap: balance; }
+#scr-intro .lead { font-size: 15.5px; line-height: 1.5; color: rgba(255,255,255,.72); margin: 0 0 26px; }
+.etapes { list-style: none; margin: 0 0 28px; padding: 0; display: grid; gap: 10px; }
+.etapes li { display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center; font-size: 15px; }
+.etapes .r { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.1); display: grid; place-items: center; font-size: 18px; }
+.etapes b { display: block; font-weight: 600; }
+.etapes span { color: rgba(255,255,255,.55); font-size: 13px; }
+.btn-orange { height: 52px; border-radius: 16px; background: var(--orange); color: #fff; font-size: 17px; font-weight: 600; width: 100%; font-family: var(--sf); }
+.btn-orange:active { filter: brightness(.92); }
+.btn-gris { height: 48px; border-radius: 16px; background: var(--champ); color: var(--ink); font-size: 16px; font-weight: 600; width: 100%; font-family: var(--sf); }
+.fine { font-size: 12.5px; color: rgba(255,255,255,.45); text-align: center; margin-top: 12px; }
+
+/* ---------- caméra ---------- */
+#scr-cam { background: #000; gap: 12px; }
+.cam-head { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; padding: 6px 16px 4px; }
+.cam-head h3 { margin: 0; text-align: center; font-size: 17px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rond40 { width: 40px; height: 40px; border-radius: 50%; background: var(--rond-sombre); display: grid; place-items: center; font-size: 16px; box-shadow: 0 1px 5px rgba(0,0,0,.1), inset 0 0 0 .5px rgba(0,0,0,.06); }
+.rond40.bleu { color: var(--bleu-systeme); }
+.vf-zone { flex: 1 1 auto; min-height: 0; padding: 0 12px; display: flex; justify-content: center; }
+#vf { position: relative; height: 100%; max-width: 100%; aspect-ratio: 3 / 4; border-radius: 22px; overflow: hidden; background: #000; }
+#vf video, #vf .vf-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+#vf .vf-img { animation: balaye 14s ease-in-out infinite alternate; transform-origin: 50% 50%; }
+@keyframes balaye { from { transform: scale(1.06) translateX(-3%); } to { transform: scale(1.12) translateX(4%); } }
+#vf.live .vf-img { display: none; }
+#vf:not(.live) video { display: none; }
+#vf .flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+#vf .flash.go { animation: flash .32s ease-out; }
+@keyframes flash { 0% { opacity: .9; } 100% { opacity: 0; } }
+#vf .apercu { position: absolute; left: 10px; bottom: 10px; display: flex; gap: 8px; align-items: center; background: rgba(0,0,0,.55); border-radius: 12px; padding: 5px 10px 5px 5px; font-size: 12.5px; font-weight: 500; }
+#vf .apercu img { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; }
+.pilule { margin: 0 12px; height: 88px; border-radius: 44px; background: var(--pilule); padding: 0 18px; display: flex; align-items: center; justify-content: space-between; flex: none; }
+.rond46 { width: 46px; height: 46px; border-radius: 50%; background: rgba(255,255,255,.12); display: grid; place-items: center; font-size: 18px; color: #fff; }
+.rond46.blanc { background: #fff; color: var(--ink); font-size: 17px; }
+#shutter { position: relative; width: 68px; height: 68px; border-radius: 50%; box-shadow: inset 0 0 0 4px #fff; display: grid; place-items: center; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; }
+#shutter .coeur { position: absolute; inset: 7px; border-radius: 50%; background: var(--orange); transition: transform .18s cubic-bezier(.3,.7,.4,1); }
+#shutter.press .coeur { transform: scale(.88); }
+#shutter svg.ring { position: absolute; inset: 0; width: 68px; height: 68px; transform: rotate(-90deg); pointer-events: none; }
+#shutter svg.ring circle { fill: none; stroke: var(--anneau); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 201; stroke-dashoffset: 201; }
+#shutter.arming svg.ring circle { stroke-dashoffset: 0; transition: stroke-dashoffset .3s linear; }
+#shutter .tip { position: absolute; top: -34px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: .8px; background: rgba(0,0,0,.62); padding: 5px 10px; border-radius: 99px; opacity: 0; transition: opacity .15s; pointer-events: none; }
+#shutter.press .tip { opacity: 1; }
+.aide-cam { text-align: center; font-size: 13px; color: #3D3F44; margin-top: -4px; }
+.dernier { margin: -4px 12px 0; height: 46px; border-radius: 14px; background: #fff; color: var(--encre-carrousel); display: flex; align-items: center; gap: 10px; padding: 0 16px; box-shadow: inset 0 0 0 1px var(--filet); flex: none; }
+.dernier .ic { font-size: 17px; }
+.dernier .t { flex: 1; min-width: 0; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dernier .t.discret { color: #8D8E93; }
+.dernier .n { display: flex; align-items: center; gap: 6px; font-size: 14.5px; font-variant-numeric: tabular-nums; }
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); height: 56px; flex: none; margin-top: -2px; }
+.tabs div { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10.5px; font-weight: 600; color: rgba(255,255,255,.55); }
+.tabs div .ic { font-size: 23px; }
+.tabs div.on { color: #fff; }
+
+/* bandeau de note vocale */
+#bandeau { position: absolute; top: 8px; left: 14px; right: 14px; z-index: 6; display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 5px 5px 5px 14px; border-radius: 99px; background: rgba(0,0,0,.72); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+#bandeau .pt { width: 10px; height: 10px; border-radius: 50%; background: var(--rouge-enr); flex: none; animation: bat .7s ease-in-out infinite alternate; }
+#bandeau .ti { font-size: 14.5px; font-weight: 600; white-space: nowrap; }
+#bandeau .ch { font-size: 14.5px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.onde { display: flex; gap: 2px; align-items: center; height: 20px; margin-left: auto; }
+.onde i { width: 2.5px; border-radius: 2px; background: var(--orange); animation: onde .9s ease-in-out infinite alternate; }
+@keyframes onde { from { transform: scaleY(.35); } to { transform: scaleY(1); } }
+#bandeau .stop { height: 36px; padding: 0 12px; border-radius: 99px; background: var(--orange); display: flex; align-items: center; gap: 6px; font-size: 14.5px; font-weight: 600; }
+#bandeau .stop .ic { font-size: 18px; }
+@keyframes bat { from { opacity: .3; } to { opacity: 1; } }
+
+/* bulle « J'écoute… » (AIBQMicroDirect, version sombre) */
+#bulle { position: absolute; left: 12px; right: 12px; z-index: 6; padding: 12px; border-radius: 12px; background: rgba(0,0,0,.34); -webkit-backdrop-filter: blur(22px) saturate(1.2); backdrop-filter: blur(22px) saturate(1.2); box-shadow: inset 0 0 0 1.5px var(--rouge-dictee); display: grid; gap: 10px; }
+#bulle .hd { display: flex; align-items: center; gap: 6px; color: var(--rouge-dictee); font-size: 12px; font-weight: 600; }
+#bulle .hd i { width: 8px; height: 8px; border-radius: 50%; background: var(--rouge-dictee); animation: bat .7s ease-in-out infinite alternate; }
+#bulle .tx { font-size: 16px; font-weight: 500; line-height: 1.35; min-height: 22px; max-height: 110px; overflow: auto; display: flex; flex-direction: column-reverse; }
+#bulle .tx.invite { color: rgba(255,255,255,.5); }
+#bulle textarea { font: 500 16px/1.35 var(--sf); color: #fff; background: rgba(255,255,255,.08); border: 0; border-radius: 8px; padding: 8px; resize: none; height: 76px; width: 100%; box-sizing: border-box; }
+#bulle .act { display: flex; gap: 8px; flex-wrap: wrap; }
+#bulle .act button { height: 38px; padding: 0 16px; border-radius: 99px; display: flex; align-items: center; gap: 7px; font-size: 14px; }
+#bulle .arreter { background: #fff; color: #000; font-weight: 600; }
+#bulle .clavier { box-shadow: inset 0 0 0 1.2px rgba(255,255,255,.35); font-weight: 500; }
+#bulle .act .ic { font-size: 14px; }
+
+/* ---------- annotation ---------- */
+#scr-annot { background: #000; font-family: var(--inter); }
+.an-head { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; padding: 12px 16px 8px; }
+.an-head .tt { justify-self: center; font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 99px; background: rgba(0,0,0,.42); }
+.rond-noir { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.08); display: grid; place-items: center; font-size: 16px; }
+#stage { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; touch-action: none; }
+#zoom { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+#cv { display: block; }
+#toast { position: absolute; top: 10px; left: 50%; transform: translate(-50%, -6px); background: rgba(0,0,0,.7); border-radius: 99px; padding: 6px 12px; font-size: 12.5px; font-weight: 600; opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; white-space: nowrap; }
+#toast.on { opacity: 1; transform: translate(-50%, 0); }
+.champs { display: grid; gap: 8px; padding: 8px 14px 10px; }
+.carte-champ { display: flex; gap: 12px; align-items: center; padding: 10px; border-radius: 16px; background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
+.carte-champ:focus-within { background: rgba(255,255,255,.16); box-shadow: inset 0 0 0 1.5px var(--rouge-annot); }
+.carte-champ .mic { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.14); display: grid; place-items: center; font-size: 15px; flex: none; }
+.carte-champ .b { flex: 1; min-width: 0; }
+.carte-champ .l { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.carte-champ .l span { font-weight: 400; font-size: 11.5px; color: rgba(255,255,255,.55); }
+.carte-champ input { width: 100%; box-sizing: border-box; background: none; border: 0; padding: 2px 0 0; color: rgba(255,255,255,.92); font: 400 16px/1.3 var(--inter); }
+.carte-champ input:focus-visible { outline: none; }
+.carte-champ input::placeholder { color: rgba(255,255,255,.45); }
+.outils { margin: 0 14px 18px; padding: 10px 11px; border-radius: 24px; background: var(--pilule); display: flex; align-items: center; gap: 6px; flex: none; }
+.outil { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 7px 0; border-radius: 12px; color: rgba(255,255,255,.72); font-size: 9px; font-weight: 500; }
+.outil .ic { font-size: 19px; stroke-width: 2.2; }
+.outil .aa { font: 600 18px/19px var(--sf); height: 19px; }
+.outil.on { color: #fff; background: rgba(255,255,255,.16); }
+#couleur { width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 2.5px #fff; margin-left: 4px; flex: none; }
+#btn-ok { font: 700 13px var(--inter); color: #0A0A0C; background: #fff; border-radius: 99px; padding: 9px 15px; flex: none; }
+#saisie-texte { position: absolute; left: 14px; right: 14px; bottom: 96px; z-index: 5; display: flex; gap: 8px; padding: 8px; border-radius: 16px; background: var(--pilule); }
+#saisie-texte input { flex: 1; min-width: 0; background: rgba(255,255,255,.08); border: 0; border-radius: 10px; color: #fff; padding: 8px 10px; font: 600 16px var(--inter); }
+#saisie-texte button { font: 700 13px var(--inter); color: #0A0A0C; background: #fff; border-radius: 99px; padding: 0 15px; }
+
+/* ---------- fiche « Préparer le constat » ---------- */
+#scr-fiche .defile { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px 18px 16px; display: flex; flex-direction: column; gap: 14px; }
+.barre-haut { display: flex; align-items: center; justify-content: space-between; height: 48px; padding: 0 12px; flex: none; }
+.barre-haut .ret { display: flex; align-items: center; gap: 8px; font-size: 16px; }
+.barre-haut .ret .ic { font-size: 17px; stroke-width: 1.8; }
+.barre-haut .plus { width: 44px; height: 44px; display: grid; place-items: center; font-size: 18px; }
+.titre-fiche { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px 10px; }
+.titre-fiche .puce-ia { grid-column: 1 / -1; justify-self: end; margin-top: -4px; }
+.titre-fiche h3 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -.01em; line-height: 1.15; }
+.badge-valider { height: 28px; padding: 0 10px; border-radius: 99px; box-shadow: inset 0 0 0 1.3px var(--orange); color: var(--orange); display: flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; }
+.puce-ia { height: 28px; padding: 0 10px; border-radius: 99px; background: var(--champ); display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; }
+.puce-ia .ic, .badge-valider .ic { font-size: 14px; }
+.deux { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.case { padding: 8px 12px; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--filet); display: flex; align-items: center; gap: 6px; min-width: 0; }
+.case div { flex: 1; min-width: 0; }
+.case small { display: block; font-size: 12.5px; color: var(--gris); }
+.case b { display: block; font-size: 15.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.case .ic { font-size: 13px; stroke-width: 2.4; }
+.carte-preuve { padding: 14px; border-radius: 14px; box-shadow: inset 0 0 0 1px var(--filet); display: grid; gap: 10px; }
+.carte-preuve h4 { margin: 0; font-size: 15px; font-weight: 700; }
+.lecteur { display: flex; align-items: center; gap: 12px; }
+.lecteur .play { width: 44px; height: 44px; border-radius: 50%; background: #BDBEC2; display: grid; place-items: center; color: #fff; font-size: 17px; flex: none; }
+.lecteur .play.ok { background: var(--orange); }
+.lecteur .wf { display: flex; gap: 2.5px; align-items: center; }
+.lecteur .wf i { width: 2.5px; border-radius: 2px; background: #BDBEC2; }
+.lecteur .wf i.o { background: var(--orange); }
+.lecteur .du { font-size: 14px; font-variant-numeric: tabular-nums; }
+.carte-preuve .lab { font-size: 14px; color: var(--gris); }
+.carte-preuve q { font-size: 14px; line-height: 1.4; quotes: "« " " »"; }
+.carte-preuve .vignette { display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--gris); }
+.carte-preuve .vignette img { width: 64px; height: 48px; object-fit: cover; border-radius: 8px; }
+.prop h4 { margin: 0; font-size: 16px; font-weight: 700; }
+.prop p { margin: 2px 0 0; font-size: 13.5px; color: var(--gris); }
+.bloc { border-radius: 14px; box-shadow: inset 0 0 0 1px var(--filet); overflow: hidden; }
+.ligne { display: grid; grid-template-columns: 104px 1fr; gap: 8px; padding: 11px 14px; position: relative; }
+.ligne + .ligne { border-top: 1px solid var(--filet); }
+.ligne > div { min-width: 0; }
+.ligne > span { font-size: 13.5px; color: var(--gris); padding-top: 2px; }
+.ligne textarea { border: 0; padding: 0; margin: 0; resize: none; font: 400 16px/1.35 var(--sf); color: var(--ink); background: transparent; width: 100%; overflow: hidden; field-sizing: content; min-height: 22px; }
+.grav { display: flex; align-items: center; gap: 8px; font-size: 15.5px; }
+.grav i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.grav .ic { margin-left: auto; font-size: 13px; color: var(--gris); stroke-width: 2.4; }
+.ligne select { position: absolute; inset: 0; opacity: 0; width: 100%; font-size: 16px; }
+.confirmer { grid-column: 1 / -1; justify-self: end; white-space: nowrap; height: 32px; padding: 0 12px; border-radius: 99px; background: var(--ink); color: #fff; font-size: 14px; font-weight: 600; position: relative; z-index: 1; }
+.shim { height: 14px; border-radius: 6px; background: linear-gradient(90deg, #eee 0%, #f8f8f9 40%, #eee 80%); background-size: 200% 100%; animation: shim 1.1s linear infinite; margin: 4px 0; }
+@keyframes shim { to { background-position: -200% 0; } }
+.etat-ia { font-size: 13px; color: var(--gris); display: flex; align-items: center; gap: 6px; }
+.zone-btn { padding: 8px 18px 14px; display: grid; gap: 8px; background: #fff; flex: none; box-shadow: 0 -1px 0 var(--filet); }
+.btn-orange:disabled { opacity: .4; }
+
+/* ---------- fil (carrousel) ---------- */
+#scr-fil { background: #fff; }
+.fil-head { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; padding: 10px 8px 0; }
+.fil-head .ic { font-size: 20px; stroke-width: 2.4; margin: auto; }
+.fil-head b { display: block; font-size: 20px; font-weight: 700; }
+.fil-head small { font-size: 14px; color: var(--gris); }
+.scene { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center; perspective: 1100px; padding: 14px 0 6px; }
+.carte { position: relative; width: 78%; max-width: 340px; height: min(548px, 100%); transform-style: preserve-3d; transition: transform .45s cubic-bezier(.25,.70,.25,1); }
+.carte.entre { animation: entre .62s cubic-bezier(.22,.75,.20,1) both; }
+@keyframes entre { from { transform: translateX(110%) rotateY(-40deg) scale(.91); opacity: .3; } to { transform: none; opacity: 1; } }
+.carte.flip { transform: rotateY(180deg); }
+.face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; background: #fff; border-radius: 24px; box-shadow: inset 0 0 0 1px #E2E2E5, 0 12px 34px rgba(0,0,0,.16); padding: 16px 15px 14px; display: flex; flex-direction: column; color: var(--encre-carrousel); box-sizing: border-box; }
+.face.dos { transform: rotateY(180deg); }
+.face .hd { display: flex; justify-content: space-between; font-size: 14px; }
+.face .hd b { font-weight: 600; color: #222; }
+.face .hd span { font-weight: 500; font-variant-numeric: tabular-nums; }
+.badge-g { align-self: flex-start; margin-top: 12px; display: flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 99px; font-size: 12px; font-weight: 600; letter-spacing: .4px; box-shadow: inset 0 0 0 1.5px var(--orange); color: var(--orange); }
+.badge-g i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.badge-g.plein { background: var(--orange); color: #fff; box-shadow: none; }
+.badge-g.neutre { box-shadow: inset 0 0 0 1.5px #B7B9BE; color: var(--gris); }
+.face h4 { margin: 12px 0 8px; font-size: 21px; font-weight: 700; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.face .txt { font-size: 14px; line-height: 1.45; color: var(--gris); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; margin: 0; }
+.photos { margin-top: auto; display: flex; gap: 7px; height: 132px; }
+.photos img { flex: 1; min-width: 0; height: 132px; object-fit: cover; border-radius: 12px; background: #DDD; }
+.ajout { width: 74px; flex: none; border-radius: 12px; border: 1.5px dashed #C9C9CD; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 12px; color: var(--gris); text-align: center; line-height: 1.25; }
+.ajout .ic { font-size: 22px; stroke-width: 1.4; }
+.pied { display: flex; gap: 7px; padding-top: 12px; }
+.statut { flex: 1; height: 42px; border-radius: 99px; background: var(--champ-carrousel); display: flex; align-items: center; gap: 8px; padding: 0 12px; font-size: 14px; font-weight: 500; }
+.statut i { width: 20px; height: 20px; border-radius: 50%; background: var(--encre-carrousel); color: #fff; display: grid; place-items: center; font-size: 10px; }
+.statut i .ic { stroke-width: 3.5; }
+.statut.attente { background: #FFF1EB; color: #D9481A; }
+.statut.attente i { background: #D9481A; }
+.btn-flip { flex: 1; height: 42px; border-radius: 99px; box-shadow: inset 0 0 0 1.5px var(--orange); color: var(--orange); display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 15px; font-weight: 600; }
+.btn-flip .ic { font-size: 16px; }
+.dos dl { margin: 12px 0 0; display: grid; gap: 10px; overflow: auto; }
+.dos dt { font-size: 12.5px; color: var(--gris); }
+.dos dd { margin: 2px 0 0; font-size: 14px; line-height: 1.4; }
+.points { display: flex; align-items: center; justify-content: center; gap: 22px; color: var(--encre-carrousel); padding-bottom: 6px; }
+.points .ic { font-size: 20px; stroke-width: 2.4; }
+.points i { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); }
+.barre-sec { margin: 4px 12px 10px; border-radius: 22px; background: #F2F2F4; display: grid; grid-template-columns: 1fr 1fr; padding: 4px; flex: none; }
+.barre-sec div { padding: 7px 14px; border-radius: 18px; min-width: 0; }
+.barre-sec div:first-child { background: var(--encre-carrousel); color: #fff; }
+.barre-sec b { display: block; font-size: 15.5px; font-weight: 600; }
+.barre-sec small { display: block; font-size: 12.5px; opacity: .7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* fin */
+#fin { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 8; background: var(--encre-carrousel); color: #fff; border-radius: 24px; padding: 18px; display: grid; gap: 10px; transform: translateY(130%); transition: transform .5s cubic-bezier(.22,.75,.2,1); font-family: var(--inter); }
+#fin.on { transform: none; }
+#fin h4 { margin: 0; font-size: 19px; font-weight: 700; }
+#fin p { margin: 0; font-size: 14px; line-height: 1.45; color: rgba(255,255,255,.72); }
+#fin .row { display: flex; gap: 8px; }
+#fin .row button { flex: 1; height: 44px; border-radius: 14px; font-size: 15px; font-weight: 600; }
+#fin .b1 { background: var(--orange); }
+#fin .b2 { background: rgba(255,255,255,.12); }
+#fin small { font-size: 12px; color: rgba(255,255,255,.45); line-height: 1.4; }
+
+/* ---------- guide ---------- */
+#coach { position: absolute; z-index: 20; max-width: 270px; background: var(--orange); color: #fff; border-radius: 14px; padding: 10px 14px; font: 600 14px/1.35 var(--inter); box-shadow: 0 8px 24px rgba(0,0,0,.35); pointer-events: auto; transition: opacity .2s; }
+#coach small { display: block; font-size: 11px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; opacity: .8; margin-bottom: 2px; }
+#coach .lien { display: inline-block; margin-top: 8px; font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+#coach .fl { position: absolute; width: 14px; height: 14px; background: var(--orange); transform: rotate(45deg); left: calc(var(--fx, 50%) - 7px); }
+#coach.dessus .fl { bottom: -6px; }
+#coach.dessous .fl { top: -6px; }
+#coach.secoue { animation: secoue .4s; }
+@keyframes secoue { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.cible { animation: cible 1.6s ease-out infinite; }
+@keyframes cible { 0% { box-shadow: 0 0 0 0 rgba(241,90,36,.75), inset 0 0 0 4px #fff; } 100% { box-shadow: 0 0 0 18px rgba(241,90,36,0), inset 0 0 0 4px #fff; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-house" viewBox="0 0 24 24"><path d="M3 11.2 12 4l9 7.2V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3 2.5 8 12 13l9.5-5z" fill="currentColor"/><path d="M2.5 12 12 17l9.5-5M2.5 16 12 21l9.5-5"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6.5 3h7.5l4.5 4.5V21h-12zM14 3v4.5h4.5M9.5 12.5h6M9.5 16.5h6" stroke-width="1.7"/></symbol>
+  <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5" stroke-width="1.7"/><circle cx="8.5" cy="10" r="1.6" fill="currentColor" stroke="none"/><path d="M21 15.5 16 11l-8.5 8" stroke-width="1.7"/></symbol>
+  <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="M9 5.5 15.5 12 9 18.5"/></symbol>
+  <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="M15 5.5 8.5 12l6.5 6.5"/></symbol>
+  <symbol id="i-chev-d" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor" stroke="none"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-stopc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" stroke="none"/><rect x="8.5" y="8.5" width="7" height="7" rx="1.2" fill="#F15A24" stroke="none"/></symbol>
+  <symbol id="i-kbd" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2" stroke-width="1.7"/><path d="M6.5 10h.01M10 10h.01M14 10h.01M17.5 10h.01M8 14h8" stroke-width="2"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path fill-rule="evenodd" fill="currentColor" stroke="none" d="M4 7h3l2-2.5h6L17 7h3a1.5 1.5 0 0 1 1.5 1.5v10A1.5 1.5 0 0 1 20 20H4a1.5 1.5 0 0 1-1.5-1.5v-10A1.5 1.5 0 0 1 4 7zm11.6 6a3.6 3.6 0 1 0-7.2 0 3.6 3.6 0 0 0 7.2 0z"/></symbol>
+  <symbol id="i-stack" viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11.5" rx="2.2" fill="currentColor" stroke="none"/><path d="M6 6.2h12M8.5 3.5h7" stroke-width="1.8"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.8"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="1.8"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="1.8"/><rect x="13" y="13" width="7.5" height="7.5" rx="1.8"/></g></symbol>
+  <symbol id="i-docsearch" viewBox="0 0 24 24"><path d="M12 21H5.5V3H13l4.5 4.5V11M13 3v4.5h4.5" stroke-width="1.7"/><circle cx="15.5" cy="16" r="3" stroke-width="1.7"/><path d="M17.7 18.2 20.5 21" stroke-width="1.7"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M6 18 18 6M9 6h9v9"/></symbol>
+  <symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></symbol>
+  <symbol id="i-rect" viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="12" rx="1.5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><path d="M11 3l1.8 5.2L18 10l-5.2 1.8L11 17l-1.8-5.2L4 10l5.2-1.8z"/><path d="M18.5 14.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></g></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5 9.5 17 19 7.5"/></symbol>
+  <symbol id="i-flip" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 9M20 4v5h-5M20 12a8 8 0 0 1-13.7 5.6L4 15M4 20v-5h5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-dots" viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><circle cx="5.5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="18.5" cy="12" r="1.8"/></g></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+</svg>
+
+<div id="wrap">
+  <aside id="aside">
+    <h1>Essai BatiFlow, la simulation</h1>
+    <p>Prototype de ce que le visiteur ouvrirait depuis le texto : la vue caméra de l'app, l'annotation au doigt, la dictée, puis la fiche rédigée.</p>
+    <p><span class="k">Ouvrez ce lien sur votre iPhone</span> pour l'essayer avec votre propre appareil photo et vos vrais gestes.</p>
+    <p>Sur ordinateur, tout fonctionne à la souris, avec la photo d'exemple.</p>
+  </aside>
+
+  <div id="phone">
+    <!-- accueil -->
+    <section class="scr" id="scr-intro">
+      <div class="marque"><i></i>BatiFlow</div>
+      <h2>Créez un vrai constat, sur votre téléphone.</h2>
+      <p class="lead">Une photo, une annotation au doigt, une phrase dictée. BatiFlow rédige le reste dans le style de votre rapport.</p>
+      <ul class="etapes">
+        <li><div class="r"><svg class="ic"><use href="#i-camera"/></svg></div><div><b>Photographiez</b><span>un mur, une fissure, une gouttière</span></div></li>
+        <li><div class="r"><svg class="ic"><use href="#i-pencil"/></svg></div><div><b>Annotez au doigt</b><span>entourez, BatiFlow ajuste la forme</span></div></li>
+        <li><div class="r"><svg class="ic"><use href="#i-mic"/></svg></div><div><b>Dictez</b><span>une phrase suffit</span></div></li>
+      </ul>
+      <button class="btn-orange" id="btn-start">Ouvrir la caméra</button>
+      <div class="fine">Environ 1 minute · votre photo reste sur ce téléphone</div>
+    </section>
+
+    <!-- caméra -->
+    <section class="scr" id="scr-cam" hidden>
+      <div class="cam-head">
+        <div class="rond40"><svg class="ic"><use href="#i-menu"/></svg></div>
+        <h3>Extérieur · Évacuation des eaux</h3>
+        <div class="rond40 bleu"><svg class="ic"><use href="#i-house"/></svg></div>
+      </div>
+      <div class="vf-zone">
+        <div id="vf">
+          <img class="vf-img" alt="" src="__COUR__">
+          <video id="vf-video" playsinline muted autoplay></video>
+          <div class="flash" id="flash"></div>
+          <div class="apercu" id="apercu" hidden><img alt="Photo annotée" id="apercu-img">Photo annotée</div>
+        </div>
+      </div>
+      <div class="pilule">
+        <div class="rond46"><svg class="ic"><use href="#i-bolt"/></svg></div>
+        <button class="rond46" id="btn-crayon" aria-label="Annoter"><svg class="ic"><use href="#i-pencil"/></svg></button>
+        <button id="shutter" aria-label="Déclencheur">
+          <span class="coeur"></span>
+          <svg class="ring" viewBox="0 0 68 68"><circle cx="34" cy="34" r="32"/></svg>
+          <span class="tip">MAINTIENS POUR DICTER</span>
+        </button>
+        <div class="rond46 blanc"><svg class="ic"><use href="#i-house"/></svg></div>
+        <div class="rond46"><svg class="ic"><use href="#i-layers"/></svg></div>
+      </div>
+      <div class="aide-cam">Appui long : note vocale</div>
+      <div class="dernier">
+        <svg class="ic"><use href="#i-doc"/></svg>
+        <div class="t" id="dernier-t">Aucun constat encore</div>
+        <div class="n" id="dernier-n" hidden><svg class="ic" style="font-size:15px"><use href="#i-photo"/></svg>1 photo</div>
+        <svg class="ic" style="font-size:13px;stroke-width:2.6"><use href="#i-chev-r"/></svg>
+      </div>
+      <nav class="tabs" aria-hidden="true">
+        <div class="on"><svg class="ic"><use href="#i-camera"/></svg>Caméra</div>
+        <div><svg class="ic"><use href="#i-stack"/></svg>Constats</div>
+        <div><svg class="ic"><use href="#i-grid"/></svg>Aperçu</div>
+        <div><svg class="ic"><use href="#i-docsearch"/></svg>Compte rendu</div>
+      </nav>
+
+      <div id="bandeau" hidden>
+        <i class="pt"></i><span class="ti">Note vocale en cours</span><span class="ch" id="chrono">0:00</span>
+        <span class="onde" id="onde"></span>
+        <button class="stop" id="btn-stop1"><svg class="ic"><use href="#i-stopc"/></svg>Arrêter</button>
+      </div>
+      <div id="bulle" hidden>
+        <div class="hd" id="bulle-hd"><i></i><span>J'écoute…</span></div>
+        <div class="tx invite" id="bulle-tx"><span>Dis ce que tu vois, et où.</span></div>
+        <textarea id="bulle-saisie" hidden placeholder="Ex. : pente de sol négative vers le bâtiment, côté cour" aria-label="Votre constat"></textarea>
+        <div class="act">
+          <button class="arreter" id="btn-stop2"><svg class="ic"><use href="#i-stop"/></svg>Arrêter</button>
+          <button class="clavier" id="btn-clavier"><svg class="ic"><use href="#i-kbd"/></svg>Clavier</button>
+          <button class="clavier" id="btn-exemple" hidden><svg class="ic"><use href="#i-play"/></svg>Exemple</button>
+        </div>
+      </div>
+      <input type="file" id="file-cam" accept="image/*" capture="environment" hidden>
+    </section>
+
+    <!-- annotation -->
+    <section class="scr" id="scr-annot" hidden>
+      <div class="an-head">
+        <button class="rond-noir" id="an-back" aria-label="Retour"><svg class="ic"><use href="#i-chev-l"/></svg></button>
+        <div class="tt">Annoter la photo</div>
+        <button class="rond-noir" id="an-undo" aria-label="Annuler le dernier tracé"><svg class="ic"><use href="#i-undo"/></svg></button>
+      </div>
+      <div id="stage"><div id="zoom"><canvas id="cv"></canvas></div><div id="toast"></div></div>
+      <div class="champs">
+        <label class="carte-champ"><span class="mic"><svg class="ic"><use href="#i-mic"/></svg></span><span class="b"><span class="l">Annotation <span>· légende de la photo au rapport</span></span><input id="in-legende" placeholder="Touche pour dicter" autocomplete="off"></span></label>
+      </div>
+      <div class="outils" id="outils">
+        <button class="outil" data-t="fleche"><svg class="ic"><use href="#i-arrow"/></svg>Flèche</button>
+        <button class="outil" data-t="cercle"><svg class="ic"><use href="#i-circle"/></svg>Cercle</button>
+        <button class="outil" data-t="rect"><svg class="ic"><use href="#i-rect"/></svg>Rectangle</button>
+        <button class="outil on" data-t="trait"><svg class="ic"><use href="#i-pencil"/></svg>Trait</button>
+        <button class="outil" data-t="texte"><span class="aa">Aa</span>Texte</button>
+        <button id="couleur" aria-label="Changer de couleur"></button>
+        <button id="btn-ok">OK</button>
+      </div>
+      <div id="saisie-texte" hidden><input id="in-texte" placeholder="Texte sur la photo" autocomplete="off"><button id="btn-texte-ok">OK</button></div>
+    </section>
+
+    <!-- fiche -->
+    <section class="scr light" id="scr-fiche" hidden>
+      <div class="barre-haut">
+        <button class="ret" id="fi-back"><svg class="ic"><use href="#i-left"/></svg>Caméra</button>
+        <span class="plus"><svg class="ic"><use href="#i-dots"/></svg></span>
+      </div>
+      <div class="defile">
+        <div class="titre-fiche">
+          <h3>Préparer le constat</h3>
+          <span class="badge-valider"><svg class="ic"><use href="#i-clock"/></svg>À valider</span>
+          <span class="puce-ia" id="puce-ia"><svg class="ic"><use href="#i-spark"/></svg><span>Rédaction IA</span></span>
+        </div>
+        <div class="deux">
+          <div class="case"><div><small>Section</small><b id="f-section">…</b></div><svg class="ic"><use href="#i-chev-d"/></svg></div>
+          <div class="case"><div><small>Sous-section</small><b id="f-sous">…</b></div><svg class="ic"><use href="#i-chev-d"/></svg></div>
+        </div>
+        <div class="carte-preuve">
+          <h4>Preuve terrain conservée</h4>
+          <div class="lecteur"><span class="play" id="f-play"><svg class="ic"><use href="#i-play"/></svg></span><span class="wf" id="f-wf"></span><span class="du" id="f-duree">0:00</span></div>
+          <div class="lab">Dictée originale</div>
+          <q id="f-dictee"></q>
+          <div class="vignette"><img id="f-photo" alt="Photo annotée">Photo annotée · <span id="f-legende"></span></div>
+        </div>
+        <div class="prop">
+          <h4>Proposition IA · style de la banque</h4>
+          <p>Longueur, ton et structure harmonisés</p>
+        </div>
+        <div class="etat-ia" id="etat-ia"></div>
+        <div class="bloc">
+          <div class="ligne"><span>Gravité</span>
+            <div class="grav"><i id="f-grav-pt"></i><span id="f-grav">…</span><svg class="ic"><use href="#i-chev-d"/></svg></div>
+            <select id="f-grav-sel" aria-label="Gravité"></select>
+            <button class="confirmer" id="f-confirmer" hidden></button>
+          </div>
+          <div class="ligne"><span>Titre</span><div id="w-titre"><div class="shim"></div></div></div>
+          <div class="ligne"><span>Description</span><div id="w-desc"><div class="shim"></div><div class="shim"></div><div class="shim" style="width:60%"></div></div></div>
+          <div class="ligne"><span>Recommandation</span><div id="w-reco"><div class="shim"></div><div class="shim" style="width:70%"></div></div></div>
+        </div>
+      </div>
+      <div class="zone-btn">
+        <button class="btn-orange" id="btn-approuver" disabled>Approuver le constat</button>
+        <button class="btn-gris" id="btn-attente" disabled>Enregistrer à valider</button>
+      </div>
+    </section>
+
+    <!-- fil -->
+    <section class="scr light" id="scr-fil" hidden>
+      <div class="fil-head">
+        <svg class="ic"><use href="#i-chev-l"/></svg>
+        <div><b>Votre essai BatiFlow</b><small>Constat créé à l'instant</small></div>
+        <svg class="ic"><use href="#i-dots"/></svg>
+      </div>
+      <div class="scene">
+        <div class="carte" id="carte">
+          <div class="face">
+            <div class="hd"><b id="c-sous"></b><span>1 / 1</span></div>
+            <div class="badge-g" id="c-badge"><i></i><span></span></div>
+            <h4 id="c-titre"></h4>
+            <p class="txt" id="c-txt"></p>
+            <div class="photos" id="c-photos"><img id="c-photo1" alt="Photo annotée"><button class="ajout" id="c-ajout"><svg class="ic"><use href="#i-plus"/></svg>Ajouter<br>une photo</button></div>
+            <div class="pied">
+              <div class="statut" id="c-statut"><i><svg class="ic"><use href="#i-check"/></svg></i><span>Au rapport</span></div>
+              <button class="btn-flip" id="c-flip"><svg class="ic"><use href="#i-flip"/></svg>Flip</button>
+            </div>
+          </div>
+          <div class="face dos">
+            <div class="hd"><b>Verso</b><span>1 / 1</span></div>
+            <dl>
+              <div><dt>Gravité</dt><dd id="d-grav"></dd></div>
+              <div><dt>Constat</dt><dd id="d-constat"></dd></div>
+              <div><dt>Recommandation</dt><dd id="d-reco"></dd></div>
+              <div><dt>Dictée originale</dt><dd id="d-dictee"></dd></div>
+            </dl>
+            <div class="pied" style="margin-top:auto"><button class="btn-flip" id="c-flip2"><svg class="ic"><use href="#i-flip"/></svg>Flip</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="points"><svg class="ic"><use href="#i-chev-l"/></svg><i></i><svg class="ic"><use href="#i-chev-r"/></svg></div>
+      <div class="barre-sec"><div><b>Section</b><small id="b-section"></small></div><div><b>Sous-section</b><small id="b-sous"></small></div></div>
+      <input type="file" id="file-ajout" accept="image/*" hidden>
+      <div id="fin">
+        <h4>Votre premier constat est prêt.</h4>
+        <p>Photo, annotation, dictée : BatiFlow a fait le reste. Dans l'app, ce constat part directement dans le rapport PDF.</p>
+        <div class="row"><button class="b1" id="fin-voir">Voir la fiche</button><button class="b2" id="fin-recommencer">Recommencer</button></div>
+        <small>Prototype : l'envoi du PDF par courriel et la demande d'accès viendront avec le formulaire du site.</small>
+      </div>
+    </section>
+
+    <div id="coach" hidden><small id="coach-n"></small><span id="coach-t"></span><div id="coach-x"></div><i class="fl"></i></div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const phone = $('#phone');
+const PHOTO_EXEMPLE = document.querySelector('.vf-img').src;
+
+const GRAVITES = [
+  ['correctif', 'Défaut à corriger', '#3B82F6'],
+  ['attention', 'Attention', '#F59E0B'],
+  ['securite', 'Danger', '#EF4444'],
+  ['urgent', 'Urgent', '#DC2626'],
+  ['expertise', 'Expertise requise', '#A855F7'],
+  ['suivi', 'Suivi', '#8B5CF6'],
+  ['limitation', 'Limitation', '#475569'],
+  ['information', 'Information', '#A1A1AA'],
+  ['aucune', 'Aucun défaut', '#10B981'],
+];
+const gravite = code => GRAVITES.find(g => g[0] === code) || GRAVITES[0];
+
+const st = {
+  phase: 'photo', photo: null, annote: null, legende: '',
+  texte: '', debutDictee: 0, duree: 0, ia: null, source: 'ia', approuve: true,
+};
+
+/* ---------- écrans ---------- */
+function montrer(id) {
+  document.querySelectorAll('.scr').forEach(s => { s.hidden = s.id !== id; });
+  cacherCoach();
+}
+
+/* ---------- guide ---------- */
+const coach = $('#coach');
+let coachCible = null;
+function guider(n, texte, cible, place = 'dessus', lien) {
+  coach.hidden = false;
+  $('#coach-n').textContent = n || '';
+  $('#coach-n').hidden = !n;
+  $('#coach-t').textContent = texte;
+  const x = $('#coach-x'); x.textContent = '';
+  if (lien) { const b = document.createElement('button'); b.className = 'lien'; b.textContent = lien[0]; b.onclick = lien[1]; x.appendChild(b); }
+  coach.className = place;
+  coach.querySelector('.fl').hidden = place === 'dedans';
+  if (coachCible) coachCible.classList.remove('cible');
+  coachCible = cible && cible.id === 'shutter' ? cible : null;
+  if (coachCible) coachCible.classList.add('cible');
+  requestAnimationFrame(() => placer(cible, place));
+}
+function placer(cible, place) {
+  if (coach.hidden) return;
+  const P = phone.getBoundingClientRect();
+  const r = cible.getBoundingClientRect();
+  const w = coach.offsetWidth, h = coach.offsetHeight;
+  const cx = r.left + r.width / 2 - P.left;
+  let left = Math.max(12, Math.min(P.width - w - 12, cx - w / 2));
+  const top = place === 'dessus' ? r.top - P.top - h - 14 : place === 'dedans' ? r.top - P.top + 12 : r.bottom - P.top + 14;
+  coach.style.left = left + 'px';
+  coach.style.top = top + 'px';
+  coach.style.setProperty('--fx', Math.max(16, Math.min(w - 16, cx - left)) + 'px');
+}
+function cacherCoach() { coach.hidden = true; if (coachCible) coachCible.classList.remove('cible'); coachCible = null; }
+function secouer() { coach.classList.remove('secoue'); void coach.offsetWidth; coach.classList.add('secoue'); }
+
+/* ---------- caméra ---------- */
+const video = $('#vf-video');
+let flux = null;
+async function ouvrirCamera() {
+  if (flux || !navigator.mediaDevices?.getUserMedia) return;
+  try {
+    flux = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1440 } }, audio: false });
+    video.srcObject = flux;
+    await video.play();
+    $('#vf').classList.add('live');
+  } catch (e) { flux = null; }
+}
+const enDirect = () => $('#vf').classList.contains('live') && video.videoWidth > 0;
+
+function guiderPhoto() {
+  const lien = enDirect() ? null : ['ou prendre la vue d’exemple', () => prendreExemple()];
+  guider('Étape 1 sur 3', enDirect() ? 'Visez quelque chose et touchez le déclencheur.' : 'Touchez le déclencheur pour prendre une photo.', $('#shutter'), 'dessus', lien);
+}
+
+$('#btn-start').onclick = () => {
+  montrer('scr-cam');
+  ouvrirCamera().then(() => { if (st.phase === 'photo') guiderPhoto(); });
+  guiderPhoto();
+};
+
+function flash() { const f = $('#flash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); }
+
+function versCanvas(src, w, h) {
+  const max = 1600, k = Math.min(1, max / Math.max(w, h));
+  const c = document.createElement('canvas');
+  c.width = Math.round(w * k); c.height = Math.round(h * k);
+  c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+  return c;
+}
+function chargerImage(url) {
+  return new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = ko; i.src = url; });
+}
+async function photoDepuisUrl(url) {
+  const img = await chargerImage(url);
+  return versCanvas(img, img.naturalWidth, img.naturalHeight);
+}
+async function prendreExemple() {
+  flash();
+  st.photo = await photoDepuisUrl(PHOTO_EXEMPLE);
+  setTimeout(ouvrirAnnotation, 260);
+}
+function prendreDirect() {
+  flash();
+  st.photo = versCanvas(video, video.videoWidth, video.videoHeight);
+  setTimeout(ouvrirAnnotation, 260);
+}
+$('#file-cam').onchange = async e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  const url = URL.createObjectURL(f);
+  try { st.photo = await photoDepuisUrl(url); ouvrirAnnotation(); }
+  catch (err) { guider('Étape 1 sur 3', 'Cette photo ne s’ouvre pas. Essayez-en une autre.', $('#shutter')); }
+  finally { URL.revokeObjectURL(url); }
+};
+$('#btn-crayon').onclick = () => { if (st.photo) ouvrirAnnotation(); };
+
+/* déclencheur : toucher = photo, appui long = dictée */
+const shutter = $('#shutter');
+let tenue = null, arme = false, appuye = false;
+shutter.addEventListener('contextmenu', e => e.preventDefault());
+shutter.addEventListener('click', () => {
+  if (st.phase !== 'photo') return;
+  if (enDirect()) prendreDirect(); else $('#file-cam').click();
+});
+shutter.addEventListener('pointerdown', e => {
+  shutter.classList.add('press');
+  if (st.phase !== 'dictee' || enregistre) return;
+  appuye = true; arme = false;
+  shutter.classList.add('arming');
+  demarrerReco();
+  tenue = setTimeout(() => { arme = true; shutter.classList.remove('arming'); commencerDictee(); }, 300);
+});
+const relache = () => {
+  shutter.classList.remove('press');
+  if (!appuye) return;
+  appuye = false;
+  if (!arme) {
+    clearTimeout(tenue); shutter.classList.remove('arming');
+    arreterReco(true);
+    guider('Étape 3 sur 3', 'Gardez le doigt sur le déclencheur un instant, puis parlez.', shutter);
+    secouer();
+  }
+};
+['pointerup', 'pointercancel', 'pointerleave'].forEach(t => shutter.addEventListener(t, relache));
+
+/* ---------- annotation ---------- */
+const stage = $('#stage'), zoom = $('#zoom'), cv = $('#cv'), ctx = cv.getContext('2d');
+const PALETTE = ['#FF453A', '#FF9F0A', '#FFD60A', '#32D74B', '#0A84FF', '#FFFFFF', '#0A0A0C'];
+let couleur = 0, outil = 'trait', formes = [], encre = null, morph = null;
+let fit = { s: 1, x: 0, y: 0, w: 0, h: 0 }, z = { k: 1, x: 0, y: 0 };
+const W = () => st.photo.width, H = () => st.photo.height;
+
+function ouvrirAnnotation() {
+  montrer('scr-annot');
+  formes = []; encre = null; z = { k: 1, x: 0, y: 0 };
+  $('#in-legende').value = st.legende;
+  requestAnimationFrame(() => {
+    ajuster();
+    guider('Étape 2 sur 3', 'Entourez le problème au doigt. BatiFlow redessine une forme propre. Deux doigts pour zoomer.', stage, 'dedans');
+  });
+}
+function ajuster() {
+  const r = stage.getBoundingClientRect();
+  const s = Math.min(r.width / W(), r.height / H());
+  fit = { s, w: W() * s, h: H() * s, x: (r.width - W() * s) / 2, y: (r.height - H() * s) / 2 };
+  const dpr = Math.min(3, window.devicePixelRatio || 1);
+  cv.width = Math.round(fit.w * dpr); cv.height = Math.round(fit.h * dpr);
+  cv.style.width = fit.w + 'px'; cv.style.height = fit.h + 'px';
+  appliquerZoom(); dessiner();
+}
+function appliquerZoom() { zoom.style.transform = `translate(${fit.x + z.x}px, ${fit.y + z.y}px) scale(${z.k})`; }
+window.addEventListener('resize', () => { if (!$('#scr-annot').hidden) ajuster(); if (!coach.hidden) cacherCoach(); });
+
+/* épaisseurs reprises de BFPhotoAnnotationView : max(3, largeur × 0.012), pointe max(14, largeur × 0.05) */
+const epais = () => Math.max(W() * 0.012, 3 / fit.s);
+const pointe = () => Math.max(W() * 0.05, 14 / fit.s);
+
+function tracerForme(c, f, k, alpha = 1) {
+  c.save(); c.globalAlpha = alpha;
+  c.strokeStyle = c.fillStyle = f.c; c.lineWidth = epais() * k; c.lineCap = c.lineJoin = 'round';
+  if (f.t === 'fleche') {
+    const [ax, ay] = f.a, [bx, by] = f.b, ang = Math.atan2(by - ay, bx - ax), L = pointe() * k;
+    c.beginPath(); c.moveTo(ax * k, ay * k); c.lineTo(bx * k - Math.cos(ang) * L * .6, by * k - Math.sin(ang) * L * .6); c.stroke();
+    c.beginPath(); c.moveTo(bx * k, by * k);
+    c.lineTo(bx * k - L * Math.cos(ang - Math.PI / 7), by * k - L * Math.sin(ang - Math.PI / 7));
+    c.lineTo(bx * k - L * Math.cos(ang + Math.PI / 7), by * k - L * Math.sin(ang + Math.PI / 7));
+    c.closePath(); c.fill();
+  } else if (f.t === 'rect') {
+    c.beginPath(); c.roundRect ? c.roundRect(f.x * k, f.y * k, f.w * k, f.h * k, 3 * k / fit.s) : c.rect(f.x * k, f.y * k, f.w * k, f.h * k); c.stroke();
+  } else if (f.t === 'cercle') {
+    c.beginPath(); c.ellipse(f.cx * k, f.cy * k, Math.max(1, f.rx * k), Math.max(1, f.ry * k), 0, 0, Math.PI * 2); c.stroke();
+  } else if (f.t === 'libre') {
+    c.beginPath(); f.p.forEach(([x, y], i) => i ? c.lineTo(x * k, y * k) : c.moveTo(x * k, y * k)); c.stroke();
+  } else if (f.t === 'texte') {
+    const fs = Math.max(W() * 0.05, 16 / fit.s) * k;
+    c.font = `800 ${fs}px ${getComputedStyle(document.body).fontFamily}`;
+    c.shadowColor = 'rgba(0,0,0,.5)'; c.shadowBlur = 2 * k / fit.s;
+    c.textBaseline = 'middle'; c.fillText(f.s, f.x * k, f.y * k);
+  }
+  c.restore();
+}
+function dessiner() {
+  const k = cv.width / W();
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.drawImage(st.photo, 0, 0, cv.width, cv.height);
+  formes.forEach(f => { if (!morph || morph.f !== f) tracerForme(ctx, f, k); });
+  if (morph) {
+    tracerForme(ctx, morph.libre, k, 1 - morph.t);
+    tracerForme(ctx, morph.f, k, morph.t);
+  }
+  if (encre) tracerForme(ctx, encre, k);
+}
+
+/* reconnaissance reprise de Domain/BFFormeAjustee.swift */
+function reconnaitre(p) {
+  if (p.length < 3) return 'fleche';
+  const xs = p.map(q => q[0]), ys = p.map(q => q[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const w = x1 - x0, h = y1 - y0;
+  if (Math.min(w, h) / Math.max(w, h, 1e-6) < 0.2) return 'fleche';
+  let L = 0; for (let i = 1; i < p.length; i++) L += Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]);
+  const ecart = Math.hypot(p[p.length - 1][0] - p[0][0], p[p.length - 1][1] - p[0][1]);
+  if (ecart > 0.35 * L) return 'fleche';
+  const diag = Math.hypot(w, h);
+  const coins = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+  const moy = coins.reduce((s, [cx, cy]) => s + Math.min(...p.map(([x, y]) => Math.hypot(x - cx, y - cy))), 0) / 4;
+  return moy <= 0.09 * diag ? 'rect' : 'cercle';
+}
+function formeAjustee(p, c) {
+  const type = reconnaitre(p);
+  if (type === 'fleche') return { t: 'fleche', a: p[0], b: p[p.length - 1], c };
+  const xs = p.map(q => q[0]), ys = p.map(q => q[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const w = x1 - x0, h = y1 - y0;
+  if (type === 'rect') return { t: 'rect', x: x0, y: y0, w, h, c };
+  const cx = xs.reduce((a, b) => a + b, 0) / p.length, cy = ys.reduce((a, b) => a + b, 0) / p.length;
+  if (Math.max(w, h) / Math.max(Math.min(w, h), 1e-6) > 1.6) return { t: 'cercle', cx, cy, rx: w / 2, ry: h / 2, c };
+  const r = (w + h) / 4;
+  return { t: 'cercle', cx, cy, rx: r, ry: r, c };
+}
+const NOMS = { fleche: 'Flèche', rect: 'Rectangle', cercle: 'Cercle' };
+let toastT = null;
+function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 1300); }
+
+function animerMorph(libre, f) {
+  morph = { libre, f, t: 0 };
+  const t0 = performance.now();
+  const pas = now => {
+    morph.t = Math.min(1, (now - t0) / 220);
+    dessiner();
+    if (morph.t < 1) requestAnimationFrame(pas); else { morph = null; dessiner(); }
+  };
+  requestAnimationFrame(pas);
+}
+
+const doigts = new Map();
+let pince = null, depart = null, texteA = null, aDessine = false;
+function versPhoto(e) {
+  const r = cv.getBoundingClientRect();
+  return [(e.clientX - r.left) / r.width * W(), (e.clientY - r.top) / r.height * H()];
+}
+stage.addEventListener('pointerdown', e => {
+  if (!st.photo) return;
+  if (!coach.hidden) cacherCoach();
+  stage.setPointerCapture(e.pointerId);
+  doigts.set(e.pointerId, [e.clientX, e.clientY]);
+  if (doigts.size === 2) {
+    encre = null; depart = null; dessiner();
+    const [a, b] = [...doigts.values()];
+    const S = stage.getBoundingClientRect();
+    const m = [(a[0] + b[0]) / 2 - S.left, (a[1] + b[1]) / 2 - S.top];
+    pince = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), k: z.k, lx: (m[0] - fit.x - z.x) / z.k, ly: (m[1] - fit.y - z.y) / z.k };
+    return;
+  }
+  if (doigts.size > 2) return;
+  const p = versPhoto(e);
+  if (outil === 'texte') { texteA = p; ouvrirSaisieTexte(); return; }
+  depart = p;
+  encre = outil === 'trait' ? { t: 'libre', p: [p], c: PALETTE[couleur] } : null;
+});
+stage.addEventListener('pointermove', e => {
+  if (!doigts.has(e.pointerId)) return;
+  doigts.set(e.pointerId, [e.clientX, e.clientY]);
+  if (pince && doigts.size === 2) {
+    const [a, b] = [...doigts.values()];
+    const S = stage.getBoundingClientRect();
+    const m = [(a[0] + b[0]) / 2 - S.left, (a[1] + b[1]) / 2 - S.top];
+    z.k = Math.max(1, Math.min(4, pince.k * Math.hypot(a[0] - b[0], a[1] - b[1]) / pince.d));
+    z.x = m[0] - fit.x - pince.lx * z.k; z.y = m[1] - fit.y - pince.ly * z.k;
+    appliquerZoom(); return;
+  }
+  if (!depart) return;
+  const p = versPhoto(e), c = PALETTE[couleur];
+  if (outil === 'trait') encre.p.push(p);
+  else if (outil === 'fleche') encre = { t: 'fleche', a: depart, b: p, c };
+  else if (outil === 'rect') encre = { t: 'rect', x: Math.min(depart[0], p[0]), y: Math.min(depart[1], p[1]), w: Math.abs(p[0] - depart[0]), h: Math.abs(p[1] - depart[1]), c };
+  else if (outil === 'cercle') encre = { t: 'cercle', cx: (depart[0] + p[0]) / 2, cy: (depart[1] + p[1]) / 2, rx: Math.abs(p[0] - depart[0]) / 2, ry: Math.abs(p[1] - depart[1]) / 2, c };
+  dessiner();
+});
+function finDoigt(e) {
+  if (!doigts.has(e.pointerId)) return;
+  doigts.delete(e.pointerId);
+  if (pince) {
+    if (doigts.size === 0) { pince = null; if (z.k <= 1.02) { z = { k: 1, x: 0, y: 0 }; appliquerZoom(); } }
+    return;
+  }
+  if (!depart || !encre) { depart = null; return; }
+  const seuil = 0.01 * Math.max(W(), H());
+  if (encre.t === 'libre') {
+    const p = encre.p;
+    const bouge = p.some(q => Math.hypot(q[0] - p[0][0], q[1] - p[0][1]) > seuil);
+    if (bouge) {
+      const f = formeAjustee(p, encre.c);
+      formes.push(f); animerMorph(encre, f); toast(NOMS[f.t] + ' ajusté' + (f.t === 'fleche' ? 'e' : ''));
+      noterDessin();
+    }
+  } else {
+    const grand = encre.t === 'fleche' ? Math.hypot(encre.b[0] - encre.a[0], encre.b[1] - encre.a[1]) > seuil : (encre.w || encre.rx * 2) > seuil;
+    if (grand) { formes.push(encre); noterDessin(); }
+  }
+  encre = null; depart = null; dessiner();
+}
+['pointerup', 'pointercancel'].forEach(t => stage.addEventListener(t, finDoigt));
+
+function noterDessin() {
+  if (aDessine) return;
+  aDessine = true;
+  setTimeout(() => guider('Étape 2 sur 3', 'Bien. Ajoutez une légende si vous voulez, puis touchez OK.', stage, 'dedans'), 700);
+}
+
+$('#outils').addEventListener('click', e => {
+  const b = e.target.closest('.outil'); if (!b) return;
+  outil = b.dataset.t;
+  document.querySelectorAll('.outil').forEach(o => o.classList.toggle('on', o === b));
+  if (outil === 'texte') toast('Touchez la photo pour placer le texte');
+});
+const pastille = $('#couleur');
+const majCouleur = () => { pastille.style.background = PALETTE[couleur]; };
+pastille.onclick = () => { couleur = (couleur + 1) % PALETTE.length; majCouleur(); };
+majCouleur();
+$('#an-undo').onclick = () => { formes.pop(); dessiner(); };
+$('#an-back').onclick = () => { st.phase = 'photo'; montrer('scr-cam'); guiderPhoto(); };
+
+function ouvrirSaisieTexte() { $('#saisie-texte').hidden = false; const i = $('#in-texte'); i.value = ''; i.focus(); }
+function validerTexte() {
+  const s = $('#in-texte').value.trim();
+  $('#saisie-texte').hidden = true;
+  if (s && texteA) { formes.push({ t: 'texte', x: texteA[0], y: texteA[1], s, c: PALETTE[couleur] }); dessiner(); noterDessin(); }
+  texteA = null;
+}
+$('#btn-texte-ok').onclick = validerTexte;
+$('#in-texte').addEventListener('keydown', e => { if (e.key === 'Enter') validerTexte(); });
+
+$('#btn-ok').onclick = () => {
+  const c = document.createElement('canvas'); c.width = W(); c.height = H();
+  const x = c.getContext('2d'); x.drawImage(st.photo, 0, 0);
+  formes.forEach(f => tracerForme(x, f, 1));
+  st.annote = c.toDataURL('image/jpeg', 0.86);
+  st.legende = $('#in-legende').value.trim();
+  st.phase = 'dictee';
+  montrer('scr-cam');
+  $('#apercu-img').src = st.annote; $('#apercu').hidden = false;
+  $('#dernier-n').hidden = false;
+  setTimeout(() => guider('Étape 3 sur 3', 'Maintenant, dictez le constat : gardez le doigt sur le déclencheur, puis parlez.', shutter), 250);
+};
+
+/* ---------- dictée ---------- */
+const Reco = window.SpeechRecognition || window.webkitSpeechRecognition;
+let reco = null, recoKo = !Reco, acquis = '', courant = '', enregistre = false, chronoT = null, modeClavier = false, exempleT = null;
+
+function demarrerReco() {
+  if (!Reco || reco) return;
+  recoKo = false; acquis = ''; courant = '';
+  try {
+    const r = new Reco(); reco = r;
+    r.lang = 'fr-CA'; r.continuous = true; r.interimResults = true;
+    r.onresult = ev => {
+      if (r !== reco) return;
+      let fin = '', prov = '';
+      for (let i = 0; i < ev.results.length; i++) { const r = ev.results[i]; if (r.isFinal) fin += r[0].transcript; else prov += r[0].transcript; }
+      courant = (fin + ' ' + prov).trim();
+      if (enregistre && !modeClavier) afficherTexte();
+    };
+    r.onerror = ev => {
+      if (r !== reco) return;
+      if (['not-allowed', 'service-not-allowed', 'audio-capture', 'network'].includes(ev.error)) { recoKo = true; if (enregistre) passerAuClavier(true); }
+    };
+    r.onend = () => {
+      if (r !== reco) return;
+      acquis = (acquis + ' ' + courant).trim(); courant = '';
+      if (enregistre && !recoKo && !modeClavier) { try { r.start(); return; } catch (e) {} }
+      reco = null;
+    };
+    r.start();
+  } catch (e) { recoKo = true; reco = null; }
+}
+function arreterReco(annuler) {
+  if (!reco) return;
+  const r = reco; reco = null;
+  try { annuler ? r.abort() : r.stop(); } catch (e) {}
+}
+const texteDicte = () => (acquis + ' ' + courant).trim();
+function afficherTexte() {
+  const tx = $('#bulle-tx'), t = texteDicte();
+  tx.classList.toggle('invite', !t);
+  tx.firstElementChild.textContent = t || 'Dis ce que tu vois, et où.';
+}
+const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+
+function commencerDictee() {
+  enregistre = true; modeClavier = false;
+  cacherCoach();
+  if (navigator.vibrate) navigator.vibrate(12);
+  st.debutDictee = performance.now();
+  $('#bandeau').hidden = false; $('#bulle').hidden = false;
+  $('#bulle-saisie').hidden = true; $('#btn-exemple').hidden = true;
+  $('#bulle-hd').lastElementChild.textContent = 'J’écoute…';
+  afficherTexte();
+  placerBulle();
+  $('#dernier-t').textContent = 'Dictée + photos → nouveau constat';
+  $('#dernier-t').classList.add('discret');
+  $('#chrono').textContent = '0:00';
+  chronoT = setInterval(() => { $('#chrono').textContent = fmt(Math.floor((performance.now() - st.debutDictee) / 1000)); }, 250);
+  if (recoKo) passerAuClavier(true);
+}
+function placerBulle() {
+  const P = phone.getBoundingClientRect(), r = document.querySelector('.pilule').getBoundingClientRect();
+  $('#bulle').style.bottom = (P.bottom - r.top + 10) + 'px';
+}
+function passerAuClavier(micKo) {
+  modeClavier = true;
+  arreterReco(true);
+  const zone = $('#bulle-saisie');
+  zone.value = texteDicte();
+  zone.hidden = false;
+  $('#bulle-tx').hidden = true;
+  $('#btn-clavier').hidden = true;
+  $('#btn-exemple').hidden = false;
+  $('#bulle-hd').lastElementChild.textContent = micKo ? 'Micro non disponible ici : écrivez, ou touchez le micro du clavier' : 'Clavier';
+  if (!micKo) zone.focus();
+}
+$('#btn-clavier').onclick = () => passerAuClavier(false);
+$('#btn-exemple').onclick = () => {
+  const mots = 'Pente de sol négative vers le bâtiment, côté cour latérale. L’eau de pluie s’écoule vers la fondation.'.split(' ');
+  const zone = $('#bulle-saisie'); zone.value = ''; let i = 0;
+  clearInterval(exempleT);
+  exempleT = setInterval(() => { zone.value += (i ? ' ' : '') + mots[i++]; if (i >= mots.length) clearInterval(exempleT); }, 130);
+};
+function arreter() {
+  if (!enregistre) return;
+  clearInterval(exempleT);
+  const texte = modeClavier ? $('#bulle-saisie').value.trim() : texteDicte();
+  if (!texte) {
+    $('#bulle-hd').lastElementChild.textContent = 'Je n’ai rien entendu. Parlez plus près, ou utilisez le clavier.';
+    if (!modeClavier) passerAuClavier(true);
+    return;
+  }
+  enregistre = false;
+  arreterReco(false);
+  clearInterval(chronoT);
+  st.duree = Math.max(1, Math.round((performance.now() - st.debutDictee) / 1000));
+  st.texte = texte;
+  $('#bandeau').hidden = true; $('#bulle').hidden = true;
+  $('#bulle-tx').hidden = false; $('#btn-clavier').hidden = false;
+  ouvrirFiche();
+}
+$('#btn-stop1').onclick = arreter;
+$('#btn-stop2').onclick = arreter;
+
+/* ---------- rédaction ---------- */
+let sample = null;
+try { window.claude?.use?.('sample').then(s => { sample = s; }).catch(() => {}); } catch (e) {}
+
+const SECTIONS = ['Terrain', 'Extérieur', 'Toiture', 'Structure', 'Fondations', 'Intérieur', 'Plomberie', 'Électricité', 'Chauffage', 'Ventilation', 'Isolation'];
+function consigne(texte, legende) {
+  return `Tu es l'assistant de rédaction de BatiFlow, une app d'inspection préachat au Québec qui suit le style AIBQ.
+À partir de la dictée d'un inspecteur sur le terrain, rédige UN constat pour son rapport.
+
+Règles :
+- Français du Québec, ton professionnel et neutre, phrases complètes.
+- N'invente aucun fait qui n'est pas dans la dictée ou la légende.
+- "constat" commence par « Nous avons constaté » (1 ou 2 phrases).
+- "recommandation" commence par « Nous recommandons » (1 phrase).
+- "titre" : 3 à 8 mots, sans point final.
+- "localisation" : seulement si elle est dite, sinon "".
+- "gravite" : un code parmi correctif, attention, securite, urgent, expertise, suivi, limitation, information, aucune.
+- "section" : une valeur parmi ${SECTIONS.join(', ')}. "sous_section" : 2 à 4 mots.
+- Si la dictée ne parle pas d'un bâtiment, fais au mieux avec la gravité information.
+
+Exemple de style. Dictée : « Pente de sol négative vers le bâtiment »
+{"section":"Extérieur","sous_section":"Évacuation des eaux","gravite":"correctif","titre":"Pente de sol négative vers le bâtiment","constat":"Nous avons constaté que les pentes de sol, à certains endroits, ne favorisent pas l'écoulement de l'eau loin de la fondation.","recommandation":"Nous recommandons de corriger le nivellement du terrain afin d'éloigner l'eau de la fondation.","localisation":""}
+
+Dictée : « ${texte} »
+Légende de la photo : « ${legende || ''} »
+
+Réponds uniquement avec l'objet JSON, avec exactement ces clés : section, sous_section, gravite, titre, constat, recommandation, localisation.`;
+}
+function valide(r) {
+  if (!r || typeof r !== 'object') return null;
+  const s = k => typeof r[k] === 'string' ? r[k].trim() : '';
+  if (!s('titre') || !s('constat')) return null;
+  return { section: s('section') || 'Extérieur', sous_section: s('sous_section') || 'Général', gravite: GRAVITES.some(g => g[0] === s('gravite')) ? s('gravite') : 'correctif', titre: s('titre').replace(/\.$/, ''), constat: s('constat'), recommandation: s('recommandation'), localisation: s('localisation') };
+}
+function redactionLocale(texte) {
+  const t = texte.replace(/\s+/g, ' ').trim();
+  if (/pente/i.test(t) && /(sol|terrain)/i.test(t)) return {
+    section: 'Extérieur', sous_section: 'Évacuation des eaux', gravite: 'correctif',
+    titre: 'Pente de sol négative vers le bâtiment',
+    constat: 'Nous avons constaté que les pentes de sol, à certains endroits, ne favorisent pas l’écoulement de l’eau loin de la fondation.',
+    recommandation: 'Nous recommandons de corriger le nivellement du terrain afin d’éloigner l’eau de la fondation.', localisation: /cour/i.test(t) ? 'Cour latérale' : '' };
+  const phrase = t.split(/[.!?]/)[0].trim();
+  const titre = (phrase.length > 60 ? phrase.slice(0, 57).replace(/\s\S*$/, '') : phrase).replace(/^./, c => c.toUpperCase());
+  const corps = t.replace(/^./, c => c.toLowerCase()).replace(/[.\s]*$/, '');
+  return { section: 'Extérieur', sous_section: 'Général', gravite: 'correctif', titre,
+    constat: `Nous avons constaté ${corps}.`, recommandation: 'Nous recommandons de faire évaluer la situation par un entrepreneur qualifié.', localisation: '' };
+}
+
+function ouvrirFiche() {
+  montrer('scr-fiche');
+  $('#scr-fiche .defile').scrollTop = 0;
+  $('#f-dictee').textContent = st.texte;
+  $('#f-duree').textContent = fmt(st.duree);
+  $('#f-photo').src = st.annote;
+  $('#f-legende').textContent = st.legende || 'sans légende';
+  const wf = $('#f-wf'); wf.textContent = '';
+  for (let k = 0; k < 22; k++) { const i = document.createElement('i'); i.style.height = (5 + Math.abs(Math.sin(k * 2.1)) * 18) + 'px'; if (k < 11) i.className = 'o'; wf.appendChild(i); }
+  ['#w-titre', '#w-desc', '#w-reco'].forEach((s, n) => { $(s).innerHTML = '<div class="shim"></div>'.repeat(n + 1); });
+  $('#f-section').textContent = '…'; $('#f-sous').textContent = '…'; $('#f-grav').textContent = '…'; $('#f-grav-pt').style.background = '#ddd';
+  $('#f-confirmer').hidden = true;
+  $('#btn-approuver').disabled = $('#btn-attente').disabled = true;
+  rediger();
+}
+async function rediger() {
+  let r = null, source = 'ia';
+  const etat = $('#etat-ia');
+  etat.innerHTML = '<svg class="ic" style="font-size:14px"><use href="#i-spark"/></svg>Rédaction en cours…';
+  if (sample) {
+    const ctl = new AbortController(); const minuterie = setTimeout(() => ctl.abort(), 45000);
+    try { r = valide(await sample.json(consigne(st.texte, st.legende), { modelTier: 'quick', signal: ctl.signal })); }
+    catch (e) { r = null; }
+    finally { clearTimeout(minuterie); }
+  }
+  if (!r) { r = redactionLocale(st.texte); source = 'demo'; await new Promise(ok => setTimeout(ok, 900)); }
+  st.ia = r; st.source = source;
+  $('#puce-ia').lastElementChild.textContent = source === 'ia' ? 'Rédaction IA' : 'Texte de démo';
+  etat.textContent = source === 'ia' ? '' : 'Rédaction IA non disponible dans cet aperçu : texte de démonstration.';
+  remplir(r);
+}
+function taper(el, texte, vitesse) {
+  return new Promise(ok => {
+    const ta = document.createElement('textarea'); ta.rows = 1; el.textContent = ''; el.appendChild(ta);
+    let i = 0;
+    const pas = () => { i = Math.min(texte.length, i + 3); ta.value = texte.slice(0, i); grandir(ta); if (i < texte.length) setTimeout(pas, vitesse); else ok(ta); };
+    pas();
+  });
+}
+function grandir(ta) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
+async function remplir(r) {
+  $('#f-section').textContent = r.section; $('#f-sous').textContent = r.sous_section;
+  majGravite(r.gravite);
+  const sel = $('#f-grav-sel'); sel.textContent = '';
+  GRAVITES.forEach(([c, n]) => { const o = document.createElement('option'); o.value = c; o.textContent = n; sel.appendChild(o); });
+  sel.value = r.gravite;
+  const conf = $('#f-confirmer'); conf.textContent = `Confirmer « ${gravite(r.gravite)[1]} »`; conf.hidden = false;
+  const tt = await taper($('#w-titre'), r.titre, 22);
+  const td = await taper($('#w-desc'), r.constat, 14);
+  const tr = await taper($('#w-reco'), r.recommandation, 14);
+  tt.oninput = () => { st.ia.titre = tt.value; grandir(tt); };
+  td.oninput = () => { st.ia.constat = td.value; grandir(td); };
+  tr.oninput = () => { st.ia.recommandation = tr.value; grandir(tr); };
+  $('#btn-approuver').disabled = $('#btn-attente').disabled = false;
+}
+function majGravite(code) {
+  const g = gravite(code);
+  $('#f-grav').textContent = g[1]; $('#f-grav-pt').style.background = g[2];
+  if (st.ia) st.ia.gravite = code;
+}
+$('#f-grav-sel').onchange = e => { majGravite(e.target.value); $('#f-confirmer').hidden = true; };
+$('#f-confirmer').onclick = () => { $('#f-confirmer').hidden = true; };
+$('#fi-back').onclick = () => { st.phase = 'dictee'; montrer('scr-cam'); guider('Étape 3 sur 3', 'Gardez le doigt sur le déclencheur pour dicter à nouveau.', shutter); };
+$('#btn-approuver').onclick = () => { st.approuve = true; ouvrirFil(); };
+$('#btn-attente').onclick = () => { st.approuve = false; ouvrirFil(); };
+
+/* ---------- fil ---------- */
+function ouvrirFil() {
+  const r = st.ia, g = gravite(r.gravite);
+  montrer('scr-fil');
+  $('#c-sous').textContent = r.sous_section;
+  const b = $('#c-badge');
+  b.className = 'badge-g' + (['urgent', 'securite'].includes(r.gravite) ? ' plein' : r.gravite === 'correctif' ? '' : ' neutre');
+  b.lastElementChild.textContent = (r.gravite === 'correctif' ? 'À corriger' : g[1]).toUpperCase();
+  $('#c-titre').textContent = r.titre;
+  $('#c-txt').textContent = r.constat;
+  $('#c-photo1').src = st.annote;
+  document.querySelectorAll('#c-photos img:not(#c-photo1)').forEach(i => i.remove());
+  $('#c-ajout').hidden = false;
+  const s = $('#c-statut');
+  s.classList.toggle('attente', !st.approuve);
+  s.lastElementChild.textContent = st.approuve ? 'Au rapport' : 'À valider';
+  $('#d-grav').textContent = g[1];
+  $('#d-constat').textContent = r.constat + (r.localisation ? ` (${r.localisation})` : '');
+  $('#d-reco').textContent = r.recommandation || '—';
+  $('#d-dictee').textContent = `« ${st.texte} »`;
+  $('#b-section').textContent = r.section; $('#b-sous').textContent = r.sous_section;
+  const c = $('#carte'); c.classList.remove('flip', 'entre'); void c.offsetWidth; c.classList.add('entre');
+  $('#fin').classList.remove('on');
+  setTimeout(() => $('#fin').classList.add('on'), 1500);
+}
+const retourner = () => { const c = $('#carte'); c.classList.remove('entre'); c.classList.toggle('flip'); };
+$('#c-flip').onclick = retourner; $('#c-flip2').onclick = retourner;
+$('#c-ajout').onclick = () => $('#file-ajout').click();
+$('#file-ajout').onchange = async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  const url = URL.createObjectURL(f);
+  try {
+    const c = await photoDepuisUrl(url);
+    const img = document.createElement('img'); img.alt = 'Photo ajoutée'; img.src = c.toDataURL('image/jpeg', 0.85);
+    $('#c-photos').insertBefore(img, $('#c-ajout'));
+    $('#c-ajout').hidden = true;
+  } catch (err) {} finally { URL.revokeObjectURL(url); }
+};
+$('#fin-voir').onclick = () => $('#fin').classList.remove('on');
+$('#fin-recommencer').onclick = () => {
+  Object.assign(st, { phase: 'photo', photo: null, annote: null, legende: '', texte: '', ia: null });
+  aDessine = false;
+  $('#apercu').hidden = true; $('#dernier-n').hidden = true;
+  $('#dernier-t').textContent = 'Aucun constat encore'; $('#dernier-t').classList.remove('discret');
+  montrer('scr-cam'); guiderPhoto();
+};
+
+/* onde du bandeau */
+const onde = $('#onde');
+for (let k = 0; k < 5; k++) { const i = document.createElement('i'); i.style.height = (5 + Math.abs(Math.sin(k * 1.9)) * 13) + 'px'; i.style.animationDelay = (k * 0.13) + 's'; onde.appendChild(i); }
+})();
+</script>
