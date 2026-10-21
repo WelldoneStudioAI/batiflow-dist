@@ -30,11 +30,19 @@ Les fichiers SwiftUI des quatre écrans :
 
 ## 3. Apparence (couleurs, polices, tailles)
 
-Relevé en cours dans le code : il arrive dans un commit suivant, sur cette même branche. En attendant, voici les palettes communes (valeurs exactes) :
+Le relevé écran par écran arrive dans un commit suivant, sur cette même branche. En attendant, voici les palettes communes, avec leurs valeurs exactes.
 
--  (, ligne 153) : ready #5B8443 / readyBG #E9F2E1 ; draft #3F72AA / draftBG #E4EEFA ; review (à valider) #9A6B00 / reviewBG #FFE566 ; urgent #A44A4A / urgentBG #FBE5E5 ; neutralBG #F1F1F1 ; sub #8A8F98 ; ink #1A1B1E ; bankStripe #4CAF50 ; dictedBG #F2F2F4 ; dictedLine #D9DADF ; hairline = noir 8 % ; jauneFranc #FFD60A ; fait #8A8F98 ; encreBouton #1A1B1E (clair) / #F2F2F7 (sombre).
--  () : Severity attention #FFD93D, correctif #FFA552, securite #E63946, urgent #7B1818, limitation #9CA3AF ; Dark bg #07080A, surface #101216, texte blanc (55 % pour le secondaire) ; Light bg #F4F4F2, texte #0A0A0C ; amber #F7B500. Police maison : Inter (Inter-Light à Inter-ExtraBold) et JetBrains Mono pour les compteurs. Les écrans iPhone cités utilisent surtout la police système (SF Pro) via .
--  () : gravités bfNoneFound #25BC6C, bfInformation #8C8C8C, bfLimitation #996633, bfExpertise #9F5BD5, bfAttention #F5A81E, bfCorrectif #3E94EA, bfSecurite #E2301F, bfUrgent #EC4A41.
+- **`AIBQChatPalette`** (`BatiFlow/Views/iPhone/AIBQChat/AIBQChatFeature.swift`, ligne 153) :
+  - états : ready `#5B8443` / readyBG `#E9F2E1` ; draft `#3F72AA` / draftBG `#E4EEFA` ; review (à valider) `#9A6B00` / reviewBG `#FFE566` ; urgent `#A44A4A` / urgentBG `#FBE5E5` ;
+  - neutres : neutralBG `#F1F1F1` ; sub `#8A8F98` ; ink `#1A1B1E` ; hairline = noir à 8 % ; fait `#8A8F98` ;
+  - dictée et banque : dictedBG `#F2F2F4` ; dictedLine `#D9DADF` ; bankStripe `#4CAF50` ; jauneFranc `#FFD60A` ;
+  - boutons pleins : encreBouton `#1A1B1E` (clair) / `#F2F2F7` (sombre).
+- **`BFTokens`** (`BatiFlow/DesignSystem/BFTokens.swift`) :
+  - gravités (Severity) : attention `#FFD93D`, correctif `#FFA552`, securite `#E63946`, urgent `#7B1818`, limitation `#9CA3AF` ;
+  - thème sombre : bg `#07080A`, surface `#101216`, texte blanc (55 % pour le secondaire) ;
+  - thème clair : bg `#F4F4F2`, texte `#0A0A0C` ; amber `#F7B500`.
+- **Polices.** La police maison est Inter (de Inter-Light à Inter-ExtraBold), avec JetBrains Mono pour les compteurs. Les écrans iPhone cités utilisent surtout la police système (SF Pro), via `.font(.system(size:weight:))`.
+- **`Color.bf*`** (`BatiFlow/DesignSystem/BatiFlowStyle.swift`), gravités : bfNoneFound `#25BC6C`, bfInformation `#8C8C8C`, bfLimitation `#996633`, bfExpertise `#9F5BD5`, bfAttention `#F5A81E`, bfCorrectif `#3E94EA`, bfSecurite `#E2301F`, bfUrgent `#EC4A41`.
 
 ## 5. Ce que fait l'app une fois la dictée terminée
 
@@ -61,23 +69,23 @@ En bref : oui, le texte est réécrit par une IA, **Claude d'Anthropic**, appel�
 
 **Pour la simulation web.** Un navigateur public ne peut pas appeler Claude avec la clé de JP. Pour rendre ce comportement, deux options : un résultat préparé à l'avance (la phrase de démo « Pente de sol négative vers le bâtiment » et sa proposition, visibles dans les captures `4-fiche-constat/`), ou un petit relais côté serveur qui garde la clé. Pour la dictée en direct, l'équivalent web de `SFSpeechRecognizer` est la Web Speech API (`webkitSpeechRecognition`, `lang = "fr-CA"`), absente de Firefox.
 
-## Les captures ()
+## Les captures (`captures/`)
 
 Captures iPhone en 1206 × 2622 px (iPhone 17 Pro, @3x), sauf mention contraire.
 
--  : le vrai écran caméra () rendu par le banc de captures le 21/10, dossier de démo Maison B. Deux vues : façade () et défaut (). La pastille « dernier constat » montre un constat d'un autre dossier de démo (« Cerne d'eau au plafond… »).
--  :
-  -  : l'écran « Annoter la photo » (banc, 21/10).
-  -  : une **composition** de marketing, pas un écran de l'app. Elle montre trois tracés au doigt (rond, rectangle, trait courbe) et la forme que l'app pose pour chacun (cercle, rectangle, flèche).
--  : la bulle  (« ● J'écoute… », la transcription qui s'écrit, « ■ Arrêter », « ⌨ Clavier »).
-  -  : recadrages en 1206 × 900.
-  -  : la bulle posée sur la caméra.
-  - Captures de la série du **4 octobre** : l'habillage de la caméra a changé depuis (fond noir et pastille, voir ), la bulle est la même.
--  :
-  -  : la fiche après dictée et rédaction IA.
-  -  : la fiche quand le constat vient de la banque.
-  -  : le verso de la fiche, éditable.
-  -  : la carte qui glisse dans le fil (1206 × 2460).
-  -  : l'ancienne feuille « Constat » du 4/10, pour mémoire.
+- `1-camera/` : le vrai écran caméra (`BFCameraScreen`) rendu par le banc de captures le 21/10, dossier de démo Maison B. Deux vues : façade (`camera-viseur-facade.png`) et défaut (`camera-viseur-defaut.png`). La pastille « dernier constat » montre un constat d'un autre dossier de démo (« Cerne d'eau au plafond… »).
+- `2-annotation/` :
+  - `annoter-la-photo.png` : l'écran « Annoter la photo » (banc, 21/10).
+  - `formes-reconnues-composition.png` : une **composition** de marketing, pas un écran de l'app. Elle montre trois tracés au doigt (rond, rectangle, trait courbe) et la forme que l'app pose pour chacun (cercle, rectangle, flèche).
+- `3-dictee/` : la bulle `AIBQMicroDirect` (« ● J'écoute… », la transcription qui s'écrit, « ■ Arrêter », « ⌨ Clavier »).
+  - `bulle-jecoute-*.jpg` : recadrages en 1206 × 900.
+  - `dictee-sur-camera-*.jpg` : la bulle posée sur la caméra.
+  - Captures de la série du **4 octobre** : l'habillage de la caméra a changé depuis (fond noir et pastille, voir `1-camera`), la bulle est la même.
+- `4-fiche-constat/` :
+  - `preparer-le-constat-dictee.png` : la fiche après dictée et rédaction IA.
+  - `preparer-le-constat-banque.png` : la fiche quand le constat vient de la banque.
+  - `modifier-le-constat.png` : le verso de la fiche, éditable.
+  - `carrousel-fiche-constat.png` : la carte qui glisse dans le fil (1206 × 2460).
+  - `ancienne-feuille-constat-t2-11.jpg` : l'ancienne feuille « Constat » du 4/10, pour mémoire.
 
 Toutes les données visibles sont celles des dossiers de démonstration (Maison A, B et C, Condo 1204). Les adresses sont fictives.
