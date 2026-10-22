@@ -505,6 +505,127 @@ textarea, input { -webkit-user-select: text; user-select: text; }
 .guide { position: absolute; left: 201px; transform: translateX(-50%); z-index: 50; font-size: 13px; line-height: 16px; font-weight: 600; color: #fff; padding: 8px 14px; border-radius: 99px; background: rgba(0,0,0,.72); white-space: nowrap; pointer-events: none; }
 .guide button { pointer-events: auto; text-decoration: underline; text-underline-offset: 2px; margin-left: 8px; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+
+/* ===================== Parcours guidé de l'essai (propre au site) ===================== */
+@keyframes monte { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(241,90,36,.7); } 70% { box-shadow: 0 0 0 16px rgba(241,90,36,0); } 100% { box-shadow: 0 0 0 0 rgba(241,90,36,0); } }
+@keyframes remplir { 0%, 15% { stroke-dashoffset: 226; } 70%, 100% { stroke-dashoffset: 0; } }
+@keyframes tourne { to { transform: rotate(360deg); } }
+@keyframes apparait { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* accueil */
+#intro { position: absolute; inset: 0; z-index: 99; background: linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.55) 40%, rgba(0,0,0,.88) 70%); animation: fondu .3s; }
+#intro .carte { position: absolute; left: 12px; right: 12px; bottom: 14px; padding: 22px 20px 14px; border-radius: 30px; background: #1C1C1E; color: #fff; box-shadow: 0 20px 60px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.06); animation: monte .45s cubic-bezier(.2,.8,.2,1); }
+#intro .marque { display: flex; align-items: center; gap: 8px; }
+#intro .marque i { width: 18px; height: 18px; border-radius: 50%; background: var(--orange); box-shadow: inset 0 0 0 4px #1C1C1E, 0 0 0 2px #fff; }
+#intro .marque b { font-size: 15px; letter-spacing: -.2px; }
+#intro .marque span { margin-left: auto; font: 500 10px var(--mono); letter-spacing: 1.2px; color: var(--ambre); }
+#intro h1 { margin: 16px 0 18px; font-size: 25px; line-height: 1.15; letter-spacing: -.5px; font-weight: 700; }
+#intro ol { list-style: none; margin: 0 0 20px; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+#intro li { display: flex; gap: 12px; align-items: flex-start; }
+#intro li .n { flex: none; width: 28px; height: 28px; border-radius: 50%; background: rgba(241,90,36,.16); color: var(--orange); font: 700 14px/28px var(--sf); text-align: center; }
+#intro li b { display: block; font-size: 15.5px; line-height: 19px; }
+#intro li small { display: block; margin-top: 2px; font-size: 13px; line-height: 17px; color: rgba(235,235,245,.62); }
+#intro .go, #scene-ia .go, #rapport .go { width: 100%; height: 54px; border-radius: 16px; background: var(--orange); color: #fff; font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; }
+#intro .go { animation: pulse 1.8s 1s infinite; }
+#intro .libre { width: 100%; height: 44px; margin-top: 4px; color: rgba(235,235,245,.7); font-size: 15px; }
+
+/* coach : anneau sur la commande + bulle */
+#coach { position: absolute; inset: 0; z-index: 60; pointer-events: none; }
+#coach .anneau { position: absolute; border-radius: 50%; box-shadow: 0 0 0 3px var(--orange); animation: pulse 1.4s infinite; }
+#coach.maintien .anneau { box-shadow: none; animation: none; }
+#coach.maintien .anneau::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; background: conic-gradient(var(--orange) var(--p, 0%), transparent 0); -webkit-mask: radial-gradient(circle, transparent 62%, #000 64%); mask: radial-gradient(circle, transparent 62%, #000 64%); animation: tenirAnim 2s ease-in-out infinite; }
+@property --p { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+@keyframes tenirAnim { 0%, 10% { --p: 0%; } 60%, 85% { --p: 100%; } 100% { --p: 100%; opacity: 0; } }
+#coach .bulle-coach { position: absolute; left: 14px; right: 14px; padding: 14px 16px 15px; border-radius: 20px; background: #fff; color: var(--ink); box-shadow: 0 14px 40px rgba(0,0,0,.45); pointer-events: auto; animation: monte .35s cubic-bezier(.2,.8,.2,1); }
+#coach .bulle-coach .tete { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.et { font: 600 10.5px var(--mono); letter-spacing: .8px; text-transform: uppercase; color: var(--orange); }
+#coach .pts { display: flex; gap: 4px; }
+#coach .pts i { width: 16px; height: 4px; border-radius: 2px; background: #E4E4E7; }
+#coach .pts i.on { background: var(--orange); }
+#coach .quitter { margin-left: auto; width: 26px; height: 26px; border-radius: 50%; background: #F1F1F3; color: var(--gris); display: grid; place-items: center; }
+#coach .bulle-coach b { display: block; font-size: 17px; line-height: 21px; letter-spacing: -.2px; }
+#coach .bulle-coach p { margin: 4px 0 0; font-size: 14px; line-height: 19px; color: var(--gris); }
+#coach .fl { position: absolute; bottom: -8px; width: 24px; height: 12px; background: #fff; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+
+/* bulle de dictée pendant le parcours */
+.bulle-parcours .consigne { font-size: 13.5px; line-height: 18px; color: var(--ink); }
+.bulle-parcours .consigne .et { display: block; margin-bottom: 2px; }
+.bulle-parcours .exemples { display: flex; flex-direction: column; gap: 6px; }
+.bulle-parcours .exemples small { font-size: 12px; color: var(--sub); }
+.bulle-parcours .exemples button { text-align: left; font-size: 13.5px; line-height: 17px; padding: 8px 11px; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px var(--filet); color: var(--encre); }
+.bulle-parcours .exemples button:active { background: #FFF1EA; }
+
+/* scène de rédaction */
+#scene-ia { position: absolute; inset: 0; z-index: 96; background: radial-gradient(120% 60% at 50% 0%, #2a1609 0%, #0B0B0D 55%); color: #fff; overflow-y: auto; padding: 78px 16px 28px; box-sizing: border-box; animation: fondu .3s; scrollbar-width: none; }
+#scene-ia .haut b { display: block; margin-top: 4px; font-size: 24px; line-height: 28px; letter-spacing: -.5px; }
+#scene-ia .dit { margin-top: 16px; display: flex; gap: 12px; padding: 12px; border-radius: 18px; background: rgba(255,255,255,.07); }
+#scene-ia .dit img { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; flex: none; }
+#scene-ia .dit small { font-size: 11.5px; color: rgba(235,235,245,.55); }
+#scene-ia .dit q { display: block; margin-top: 3px; font-size: 15px; line-height: 20px; font-style: italic; }
+#scene-ia .etapes { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+.etape-ia { display: flex; gap: 12px; align-items: flex-start; opacity: .35; transition: opacity .3s; }
+.etape-ia.cours, .etape-ia.fait { opacity: 1; }
+.etape-ia .rond { flex: none; width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(255,255,255,.25); display: grid; place-items: center; color: #fff; }
+.etape-ia.cours .rond { box-shadow: inset 0 0 0 2px rgba(255,255,255,.15); border: 2px solid transparent; border-top-color: var(--orange); box-sizing: border-box; animation: tourne .8s linear infinite; }
+.etape-ia.fait .rond { background: #30D158; box-shadow: none; }
+.etape-ia b { display: block; font-size: 15px; line-height: 20px; }
+.etape-ia small { display: block; font-size: 12.5px; line-height: 16px; color: rgba(235,235,245,.6); }
+.etape-ia .proches { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+.etape-ia .proches span { font-size: 11.5px; padding: 4px 8px; border-radius: 99px; background: rgba(250,199,117,.13); color: var(--ambre); animation: apparait .4s both; }
+.etape-ia .proches span:nth-child(2) { animation-delay: .15s; } .etape-ia .proches span:nth-child(3) { animation-delay: .3s; }
+#scene-ia .res { margin-top: 20px; padding: 18px 18px 20px; border-radius: 20px; background: #fff; color: #20232A; animation: monte .4s cubic-bezier(.2,.8,.2,1); box-shadow: 0 20px 50px rgba(241,90,36,.18); }
+#scene-ia .res .tete { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sev { font-size: 11.5px; font-weight: 600; padding: 3px 8px; border-radius: 5px; white-space: nowrap; }
+#scene-ia .res .sec { font-size: 11.5px; color: #7A828C; }
+#scene-ia .res .ti { display: block; margin-top: 10px; font-size: 18px; line-height: 23px; color: #2A2D33; min-height: 23px; }
+#scene-ia .res p { margin: 8px 0 0; font-size: 14.5px; line-height: 21px; }
+#scene-ia .res .reco, #rapport .reco { margin-top: 12px; padding: 10px 14px; background: #FBF4E7; border-left: 3px solid #E9A648; border-radius: 0 5px 5px 0; color: #C4862C; font-size: 13.5px; line-height: 19px; }
+#scene-ia .res .reco span, #rapport .reco span { font-weight: 700; }
+#scene-ia .pied { margin-top: 18px; display: flex; flex-direction: column; gap: 14px; animation: monte .4s cubic-bezier(.2,.8,.2,1); }
+#scene-ia .chrono { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 18px; background: rgba(48,209,88,.12); color: #30D158; }
+#scene-ia .chrono b { display: block; font-size: 26px; line-height: 28px; font-variant-numeric: tabular-nums; letter-spacing: -.5px; }
+#scene-ia .chrono small { font-size: 12.5px; color: rgba(235,235,245,.7); }
+#scene-ia .chrono .vs { margin-left: auto; text-align: right; color: rgba(235,235,245,.45); }
+#scene-ia .chrono .vs b { font-size: 18px; text-decoration: line-through; text-decoration-thickness: 2px; }
+
+/* aperçu du rapport (gabarit AIBQCarteRapport) */
+#rapport { position: absolute; inset: 0; z-index: 97; background: #E9E9EE; color: #20232A; color-scheme: light; animation: monte .35s cubic-bezier(.2,.8,.2,1); }
+#rapport .barre { position: absolute; left: 0; right: 0; top: 62px; height: 52px; display: flex; align-items: center; padding: 0 12px; background: #1C1D21; color: #fff; z-index: 2; }
+#rapport .barre button { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.12); display: grid; place-items: center; color: #fff; }
+#rapport .barre b { flex: 1; text-align: center; font-size: 15px; }
+#rapport .barre span { width: 32px; }
+#rapport .defile { position: absolute; left: 0; right: 0; top: 114px; bottom: 0; overflow-y: auto; padding: 16px 12px 24px; scrollbar-width: none; }
+#rapport .papier { background: #fff; border-radius: 6px; padding: 22px 18px 16px; box-shadow: 0 10px 30px rgba(0,0,0,.12); }
+#rapport .entete-r small { font: 700 9.6px var(--mono); letter-spacing: 1.2px; color: #7A828C; }
+#rapport .entete-r h2 { margin: 6px 0 2px; font-size: 21px; line-height: 25px; letter-spacing: -.3px; color: #1C1D21; }
+#rapport .entete-r span { font-size: 12.5px; color: #7A828C; }
+#rapport .sec { margin-top: 18px; padding: 9px 0 7px; border-top: 2px solid #1C1D21; border-bottom: 1px solid #E0E2E7; display: flex; flex-direction: column; }
+#rapport .sec b { font-size: 15px; color: #1C1D21; }
+#rapport .sec span { font: 500 10.5px var(--mono); color: #7A828C; margin-top: 2px; }
+#rapport .cb { padding: 16px 0 18px; border-bottom: 1px solid #E0E2E7; }
+#rapport .cb-head { display: flex; align-items: center; gap: 10px; }
+#rapport .cb-head .sev { font-size: 10.5px; padding: 2px 7px; }
+#rapport .code { font: 700 10.2px var(--mono); letter-spacing: .9px; color: #2A2D33; }
+#rapport .sp { flex: 1; }
+#rapport .etq { display: flex; align-items: center; gap: 3px; font-size: 10.5px; padding: 2px 7px; border-radius: 5px; background: #e9f6ec; color: #248a3d; }
+#rapport .cb .ti { display: block; margin-top: 8px; font-size: 13.8px; line-height: 18px; color: #2A2D33; }
+#rapport .cb p { margin: 6px 0 0; font-size: 12.6px; line-height: 19px; }
+#rapport .reco { font-size: 12px; line-height: 17px; font-style: italic; }
+#rapport .lieu { margin-top: 10px; font: 400 9.6px var(--mono); letter-spacing: .4px; color: #7A828C; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#rapport .photos { margin-top: 11px; display: flex; flex-direction: column; gap: 3px; }
+#rapport .photos small { font: 700 9px var(--mono); color: #2A2D33; }
+#rapport .ph { position: relative; width: 212px; height: 159px; padding: 0; display: block; }
+#rapport .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#rapport .annoter { position: absolute; left: 8px; bottom: 8px; display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 99px; background: rgba(0,0,0,.66); color: #fff; font-size: 12px; font-weight: 600; animation: pulse 1.8s 1.2s infinite; }
+#rapport .suite { padding: 16px 0 6px; display: flex; flex-direction: column; gap: 8px; filter: blur(.4px); }
+#rapport .suite i { height: 9px; border-radius: 3px; background: #EEEEF1; }
+#rapport .pied-papier { margin-top: 12px; font: 500 9px var(--mono); letter-spacing: .6px; color: #A1A1AA; text-align: center; }
+#rapport .appel { margin-top: 16px; padding: 20px 18px 10px; border-radius: 22px; background: #1C1C1E; color: #fff; }
+#rapport .appel > b { display: block; font-size: 20px; line-height: 25px; letter-spacing: -.3px; }
+#rapport .appel p { margin: 6px 0 16px; font-size: 14px; line-height: 19px; color: rgba(235,235,245,.65); }
+#rapport .sec2 { width: 100%; height: 48px; margin-top: 8px; border-radius: 14px; background: rgba(255,255,255,.1); color: #fff; font-size: 15.5px; font-weight: 600; }
+#rapport .lien { width: 100%; height: 42px; color: var(--ambre); font-size: 14.5px; }
 </style>
 </head>
 <body>
@@ -822,7 +943,7 @@ function lotAjouter(p) {
   cam.lot.push(p);
   const v = $('#vignettes'); v.append(h('i', { style: `background-image:url(${p.url})` }));
   while (v.children.length > 4) v.firstChild.remove();
-  majChrome();
+  majChrome(); parcoursPhoto();
 }
 async function photoAuLot() { if (!cam.lot) lotOuvrir(); const p = await prendrePhoto(); lotAjouter(p); }
 $('#file-photo').onchange = async e => {
@@ -945,6 +1066,7 @@ function maintienDebut() {
     secours: () => { cam.dictee.bulle = cam.dictee.bulle || bulleCamera('Dis ce que tu vois, et où.'); cam.dictee.bulle.clavier('Micro non disponible ici — écris, ou touche le micro du clavier'); } };
   if (!micro.actif && !micro.ko) micro.demarrer();
   bandeau({ titre: 'Note vocale en cours', aide: 'Lâche : le micro reste ouvert', arreter: null });
+  parcoursDictee();
   if (micro.ko) cam.dictee.secours();
   majChrome();
 }
@@ -957,6 +1079,7 @@ function maintienLacher() {
 function capsuleStop() {
   const d = cam.dictee; if (!d) return;
   const texte = (d.bulle ? d.bulle.valeur() : '') || d.micro.arreter(false);
+  if (!texte && parcoursActif()) { toast('Dis ou écris ce que tu vois d’abord'); d.bulle?.clavier('Écris ce que tu vois, ou touche un exemple'); return; }
   d.micro.arreter(false);
   const photos = cam.lot ? cam.lot.slice() : [];
   const duree = Math.max(1, Math.round((performance.now() - debutDictee) / 1000));
@@ -965,6 +1088,7 @@ function capsuleStop() {
   if (!texte && !photos.length) { majChrome(); return; }
   const c = { id: nouvelId(), cat: cam.cat, sub: cam.sub, titre: '', constat: '', reco: '', gravite: null, lieu: photos[0]?.lieu || cam.lieu?.caption || '', photos, dictee: texte, duree, createdAt: Date.now(), statut: 'rediger', notes: [], inclus: true };
   dossier.constats.push(c); dernierId = c.id; majChrome();
+  if (texte && parcoursConstat(c)) return;
   ouvrirOnglet('chat', c.id);
   if (texte) redigerEnFond(c);
 }
@@ -1362,7 +1486,7 @@ async function redigerDistant(texte, { cat, sub, theme }) {
     const j = r.ok ? await r.json() : null;
     if (!j?.titre || !j?.constat) return null;
     const c = catParLabel(j.section);
-    return { src: j.src, cat: c ? c[0] : cat, sub: j.sous_section || sub, gravite: GRAV[j.gravite] ? j.gravite : 'correctif', titre: j.titre.trim().replace(/\.$/, ''), constat: j.constat.trim(), reco: (j.recommandation || '').trim(), lieu: (j.localisation || '').trim() };
+    return { src: j.src, cat: c ? c[0] : cat, sub: j.sous_section || sub, gravite: GRAV[j.gravite] ? j.gravite : 'correctif', titre: j.titre.trim().replace(/\.$/, ''), constat: j.constat.trim(), reco: (j.recommandation || '').trim(), lieu: (j.localisation || '').trim(), proches: Array.isArray(j.proches) ? j.proches : [] };
   } catch (e) { return null; }
 }
 async function rediger(texte, { cat, sub, theme } = {}) {
@@ -2046,7 +2170,187 @@ function ouvrirAnnotation(photo, surFin) {
 
 /* ---------- démarrage ---------- */
 majTitre(); majChrome();
-guide('Touchez : photo · Maintenez : note vocale');
+
+/* Partie 3 : le parcours guidé de l'essai (propre au site, pas à l'app).
+   Accueil « 60 secondes » → 1. photo → 2. note vocale → 3. scène de rédaction → aperçu du rapport.
+   Branché sur l'app par quatre crochets : parcoursPhoto (lotAjouter), parcoursDictee (maintienDebut),
+   parcoursConstat (capsuleStop) et parcoursDemarrer (démarrage). */
+
+const MAIN_MINUTES = 4;            /* temps de rédaction à la main d'un constat, affiché en comparaison */
+const NB_BANQUE = BANQUE ? BANQUE.length : 1569;
+const EXEMPLES = [
+  'La pente du terrain descend vers la maison, côté avant.',
+  'Fissure en escalier dans le mur de fondation, coin arrière gauche.',
+  'Le bardeau de toiture est gondolé, il manque des granules.',
+];
+/* AIBQStyle.teinteGravite : fond et encre de la pastille au rapport */
+const TEINTE = { correctif: ['#fff3e8', '#8a4306'], expertise: ['#fff3e8', '#8a4306'], attention: ['#fff6d4', '#9a7400'], suivi: ['#fff6d4', '#9a7400'], securite: ['#fdecec', '#c62828'], urgent: ['#fdecec', '#c62828'] };
+const teinte = g => TEINTE[g] || ['#e9e9ee', '#6e6e73'];
+
+let P = null;   /* { etape: 1|2|3, t0, c } tant que le parcours est en cours */
+const parcoursActif = () => !!P && P.etape < 3;
+
+/* ---------- accueil ---------- */
+function parcoursDemarrer() {
+  guide(null);
+  const el = h('div', { id: 'intro' },
+    h('div', { class: 'carte' },
+      h('div', { class: 'marque' }, h('i'), h('b', {}, 'BatiFlow'), h('span', {}, 'ESSAI · 60 SECONDES')),
+      h('h1', {}, 'Rédige ton premier constat d’inspection en moins d’une minute.'),
+      h('ol', {},
+        h('li', {}, h('span', { class: 'n' }, '1'), h('div', {}, h('b', {}, 'Prends une photo'), h('small', {}, 'Un mur, un plancher, une fenêtre… ou la photo d’exemple.'))),
+        h('li', {}, h('span', { class: 'n' }, '2'), h('div', {}, h('b', {}, 'Décris ce que tu vois'), h('small', {}, 'Maintiens le déclencheur et parle, comme sur un chantier.'))),
+        h('li', {}, h('span', { class: 'n' }, '3'), h('div', {}, h('b', {}, 'BatiFlow rédige'), h('small', {}, `Un constat complet dans le style de la banque AIBQ, prêt pour le rapport.`)))),
+      h('button', { class: 'go', onclick: () => { el.remove(); parcoursEtape1(); } }, 'Commencer'),
+      h('button', { class: 'libre', onclick: () => { el.remove(); P = null; guideVu = false; guide('Touchez : photo · Maintenez : note vocale'); } }, 'Explorer l’app librement')));
+  ecran.append(el);
+}
+
+/* ---------- le coach : un anneau sur la commande et une bulle d'explication ---------- */
+function coach({ cible, etape, titre, texte, haut }) {
+  $('#coach')?.remove();
+  if (!cible) return;
+  const b = $(cible).getBoundingClientRect(), E = ecran.getBoundingClientRect(), s = E.width / 402;
+  const x = (b.left - E.left) / s, y = (b.top - E.top) / s, w = b.width / s, hh = b.height / s;
+  const el = h('div', { id: 'coach' },
+    h('div', { class: 'anneau', style: `left:${x - 7}px;top:${y - 7}px;width:${w + 14}px;height:${hh + 14}px` }),
+    h('div', { class: 'bulle-coach', style: `bottom:${874 - haut}px` },
+      h('div', { class: 'tete' }, h('span', { class: 'et' }, `Étape ${etape} sur 3`), h('span', { class: 'pts' }, ...[1, 2, 3].map(k => h('i', { class: k <= etape ? 'on' : '' }))),
+        h('button', { class: 'quitter', 'aria-label': 'Quitter le parcours', onclick: parcoursQuitter }, ic('xmark', 12, 12))),
+      h('b', {}, titre), h('p', {}, texte),
+      h('span', { class: 'fl', style: `left:${Math.min(Math.max(x + w / 2 - 12, 22), 380 - 22) - 12}px` })));
+  ecran.append(el);
+}
+function parcoursQuitter() { P = null; $('#coach')?.remove(); $$('.bulle-parcours .consigne, .bulle-parcours .exemples').forEach(x => x.remove()); toast('Parcours quitté — l’app est à toi'); }
+
+function parcoursEtape1() {
+  P = { etape: 1, t0: performance.now(), c: null };
+  coach({ cible: '#shutter', etape: 1, titre: 'Prends une photo', texte: 'Vise un mur, un plancher ou une fenêtre, puis touche le déclencheur. Pas de caméra ? La photo d’exemple fera l’affaire.', haut: 600 });
+}
+function parcoursPhoto() {
+  if (!parcoursActif() || P.etape !== 1 || cam.dictee) return;
+  P.etape = 2;
+  coach({ cible: '#shutter', etape: 2, titre: 'Maintiens le déclencheur et décris ce que tu vois', texte: 'Garde le doigt appuyé, puis parle normalement : « La pente du terrain descend vers la maison, côté avant. »', haut: 600 });
+  $('#coach').classList.add('maintien');
+}
+/* pendant la note vocale : la bulle de dictée porte la consigne, l'anneau passe sur Stop */
+function parcoursDictee() {
+  if (!parcoursActif()) return;
+  P.etape = 2;
+  coach({ cible: '#btn-droite', etape: 2, titre: '', texte: '', haut: 0 });
+  $('#coach .bulle-coach')?.remove();
+  const b = cam.dictee.bulle || bulleCamera('Dis ce que tu vois, et où.');
+  cam.dictee.bulle = b;
+  b.classList.add('bulle-parcours');
+  b.insertBefore(h('div', { class: 'consigne' }, h('span', { class: 'et' }, 'Étape 2 sur 3'), 'Décris ce que tu vois, puis touche ', h('b', {}, 'Arrêter'), '.'), b.firstChild);
+  b.insertBefore(h('div', { class: 'exemples' }, h('small', {}, 'Pas d’idée ? Touche un exemple :'),
+    ...EXEMPLES.map(t => h('button', { onclick: () => { const z = b.querySelector('textarea'); z.hidden = false; b.querySelector('.tx').hidden = true; z.value = t; b.titre('Exemple choisi — touche Arrêter'); } }, t))), b.querySelector('.act'));
+}
+/* Arrêter : au lieu d'ouvrir l'onglet Constats, la rédaction se joue devant le visiteur */
+function parcoursConstat(c) {
+  if (!parcoursActif()) return false;
+  P.etape = 3; P.c = c; $('#coach')?.remove();
+  sceneRedaction(c);
+  return true;
+}
+
+/* ---------- 3. la scène de rédaction ---------- */
+const attendre = ms => new Promise(ok => setTimeout(ok, ms));
+function taper(el, texte, ms) {
+  return new Promise(ok => {
+    const t0 = performance.now(), n = texte.length;
+    const pas = () => { const k = Math.min(n, Math.ceil((performance.now() - t0) / ms * n)); el.textContent = texte.slice(0, k); if (k < n) requestAnimationFrame(pas); else ok(); };
+    pas();
+  });
+}
+async function sceneRedaction(c) {
+  if (!c.photos.length) { const p = await prendrePhoto(); p.lieu = c.lieu; c.photos.push(p); }
+  const ligne = (titre) => { const d = h('div', { class: 'etape-ia' }, h('span', { class: 'rond' }), h('div', {}, h('b', {}, titre), h('small'))); return d; };
+  const l1 = ligne('Parole comprise'), l2 = ligne('Banque AIBQ consultée'), l3 = ligne('Rédaction du constat');
+  const carte = h('div', { class: 'res', hidden: true });
+  const pied = h('div', { class: 'pied', hidden: true });
+  const el = h('div', { id: 'scene-ia' },
+    h('div', { class: 'haut' }, h('span', { class: 'et' }, 'Étape 3 sur 3'), h('b', {}, 'BatiFlow rédige ton constat')),
+    h('div', { class: 'dit' }, h('img', { src: c.photos[0].url, alt: '' }), h('div', {}, h('small', {}, 'Ce que tu as dit'), h('q', {}, c.dictee))),
+    h('div', { class: 'etapes' }, l1, l2, l3), carte, pied);
+  ecran.append(el);
+  const fait = (l, detail) => { l.classList.remove('cours'); l.classList.add('fait'); l.querySelector('.rond').replaceChildren(ic('check', 12, 12)); if (detail != null) l.querySelector('small').textContent = detail; };
+  const encours = (l, detail) => { l.classList.add('cours'); if (detail != null) l.querySelector('small').textContent = detail; };
+
+  const redaction = rediger(c.dictee, { cat: c.cat, sub: c.sub });
+  encours(l1); await attendre(500);
+  fait(l1, `${c.dictee.split(/\s+/).filter(Boolean).length} mots · ${c.duree} s de dictée`);
+  encours(l2, `${NB_BANQUE.toLocaleString('fr-CA')} constats types`); await attendre(700);
+  const proches = BANQUE ? candidats(c.dictee, 3).map(x => x.e.t) : [];
+  fait(l2, `${NB_BANQUE.toLocaleString('fr-CA')} constats types · ${proches.length ? 'les plus proches :' : 'comparés à ta phrase'}`);
+  if (proches.length) l2.lastChild.append(h('div', { class: 'proches' }, ...proches.map(t => h('span', {}, t))));
+  encours(l3, 'Style, gravité, recommandation…');
+  const [r] = await Promise.all([redaction, attendre(900)]);
+  if (!proches.length && r?.proches?.length) l2.lastChild.append(h('div', { class: 'proches' }, ...r.proches.slice(0, 3).map(t => h('span', {}, t))));
+  const res = r || { src: 'brouillon', cat: c.cat, sub: c.sub, gravite: 'correctif', titre: c.dictee.split(/[.,;]/)[0].slice(0, 60), constat: 'Nous avons constaté ' + c.dictee.charAt(0).toLowerCase() + c.dictee.slice(1), reco: 'Faire évaluer la situation par un entrepreneur qualifié.', lieu: '' };
+  Object.assign(c, { cat: res.cat, sub: res.sub, titre: res.titre, constat: res.constat, reco: res.reco, gravite: res.gravite, statut: 'valider', iaSrc: res.src, lieu: c.lieu || res.lieu });
+  const secondes = Math.max(1, Math.round((performance.now() - P.t0) / 1000));
+  P.secondes = secondes;
+  fait(l3, res.src === 'ia' ? 'Rédigé par l’IA dans le style de la banque' : res.src === 'banque' ? 'Tiré du constat type le plus proche' : 'Brouillon à compléter');
+  majChrome();
+
+  /* le constat s'écrit sous les yeux du visiteur */
+  const [fond, encre] = teinte(c.gravite);
+  const tT = h('b', { class: 'ti' }), tC = h('p'), tR = h('div', { class: 'reco' });
+  carte.append(h('div', { class: 'tete' }, h('span', { class: 'sev', style: `background:${fond};color:${encre}` }, GRAV[c.gravite][0]),
+    h('span', { class: 'sec' }, `${catLabel(c.cat)} › ${c.sub}`)), tT, tC, tR);
+  carte.hidden = false;
+  requestAnimationFrame(() => carte.scrollIntoView({ behavior: 'smooth', block: 'nearest' }));
+  await taper(tT, c.titre, 450);
+  await taper(tC, c.constat, Math.min(1800, 18 * c.constat.length));
+  tR.hidden = !c.reco;
+  if (c.reco) { tR.append(h('span', {}, '→ '), h('i')); await taper(tR.querySelector('i'), c.reco, Math.min(1200, 16 * c.reco.length)); }
+  vibrer(14);
+  pied.append(
+    h('div', { class: 'chrono' }, ic('clock', 18, 18), h('div', {}, h('b', {}, `${secondes} s`), h('small', {}, 'de la photo au constat rédigé')),
+      h('div', { class: 'vs' }, h('b', {}, `~${MAIN_MINUTES} min`), h('small', {}, 'à la main'))),
+    h('button', { class: 'go', onclick: () => { el.remove(); ouvrirRapport(c); } }, 'Voir mon rapport', ic('chevr2', 16, 16)));
+  pied.hidden = false;
+  requestAnimationFrame(() => el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' }));
+}
+
+/* ---------- l'aperçu du rapport : la carte au gabarit AIBQCarteRapport ---------- */
+function ouvrirRapport(c) {
+  $('#rapport')?.remove();
+  const ic0 = CATS.findIndex(x => x[0] === c.cat), cat = CATS[ic0], is = cat ? Math.max(0, cat[2].indexOf(c.sub)) : 0;
+  const no = `${ic0 + 1}.${is + 1}`;
+  const [fond, encre] = teinte(c.gravite);
+  const d = new Date(), date = d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
+  const photo = c.photos[0];
+  const el = h('div', { id: 'rapport' },
+    h('div', { class: 'barre' }, h('button', { 'aria-label': 'Fermer', onclick: () => fermerRapport(c) }, ic('xmark', 14, 14)), h('b', {}, 'Ce que ton client reçoit'), h('span')),
+    h('div', { class: 'defile' },
+      h('div', { class: 'papier' },
+        h('div', { class: 'entete-r' }, h('small', {}, 'RAPPORT D’INSPECTION PRÉACHAT'), h('h2', {}, dossier.adresse), h('span', {}, `${dossier.ville} · ${date}`)),
+        h('div', { class: 'sec' }, h('b', {}, `${ic0 + 1} · ${catLabel(c.cat)}`), h('span', {}, `${no} · ${c.sub}`)),
+        h('div', { class: 'cb' },
+          h('div', { class: 'cb-head' }, h('span', { class: 'sev', style: `background:${fond};color:${encre}` }, GRAV[c.gravite][0]), h('span', { class: 'code' }, `${no}-1`), h('span', { class: 'sp' }),
+            h('span', { class: 'etq' }, ic('check', 9, 9), 'au rapport')),
+          h('b', { class: 'ti' }, c.titre), h('p', {}, c.constat),
+          c.reco ? h('div', { class: 'reco' }, h('span', {}, '→ '), h('i', {}, c.reco)) : null,
+          h('div', { class: 'lieu' }, `📍 ${c.lieu || 'Lieu non précisé'} · relevé par toi`),
+          h('div', { class: 'photos' }, h('button', { class: 'ph', onclick: () => { el.remove(); ouvrirAnnotation(photo, () => ouvrirRapport(c)); } },
+            h('img', { src: photo.url, alt: 'Photo du constat' }), h('span', { class: 'annoter' }, ic('pencil', 12, 12), 'Entoure le problème')),
+            photo.legende ? h('small', {}, photo.legende) : null)),
+        h('div', { class: 'suite', 'aria-hidden': 'true' }, h('i', { style: 'width:62%' }), h('i', { style: 'width:88%' }), h('i', { style: 'width:74%' }), h('i', { style: 'width:40%' })),
+        h('div', { class: 'pied-papier' }, 'Préparé avec BatiFlow · banque de constats AIBQ')),
+      h('div', { class: 'appel' },
+        h('b', {}, `Ce constat t’a pris ${P?.secondes || '…'} secondes.`),
+        h('p', {}, 'Une inspection en compte des dizaines. Imagine le rapport complet, rédigé pendant que tu inspectes.'),
+        h('button', { class: 'go', onclick: () => toast('Le PDF par courriel arrive avec le formulaire du site') }, 'Recevoir ce rapport en PDF'),
+        h('button', { class: 'sec2', onclick: () => fermerRapport(c) }, 'Explorer BatiFlow librement'),
+        h('button', { class: 'lien', onclick: () => { el.remove(); parcoursEtape1(); } }, 'Refaire un constat'))));
+  ecran.append(el);
+}
+function fermerRapport(c) { $('#rapport')?.remove(); P = null; dernierId = c.id; majChrome(); ouvrirOnglet('chat', c.id); }
+
+/* ---------- démarrage ---------- */
+parcoursDemarrer();
 
 })();
 </script>

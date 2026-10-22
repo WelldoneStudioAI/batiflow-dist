@@ -269,7 +269,7 @@ function lotAjouter(p) {
   cam.lot.push(p);
   const v = $('#vignettes'); v.append(h('i', { style: `background-image:url(${p.url})` }));
   while (v.children.length > 4) v.firstChild.remove();
-  majChrome();
+  majChrome(); parcoursPhoto();
 }
 async function photoAuLot() { if (!cam.lot) lotOuvrir(); const p = await prendrePhoto(); lotAjouter(p); }
 $('#file-photo').onchange = async e => {
@@ -392,6 +392,7 @@ function maintienDebut() {
     secours: () => { cam.dictee.bulle = cam.dictee.bulle || bulleCamera('Dis ce que tu vois, et où.'); cam.dictee.bulle.clavier('Micro non disponible ici — écris, ou touche le micro du clavier'); } };
   if (!micro.actif && !micro.ko) micro.demarrer();
   bandeau({ titre: 'Note vocale en cours', aide: 'Lâche : le micro reste ouvert', arreter: null });
+  parcoursDictee();
   if (micro.ko) cam.dictee.secours();
   majChrome();
 }
@@ -404,6 +405,7 @@ function maintienLacher() {
 function capsuleStop() {
   const d = cam.dictee; if (!d) return;
   const texte = (d.bulle ? d.bulle.valeur() : '') || d.micro.arreter(false);
+  if (!texte && parcoursActif()) { toast('Dis ou écris ce que tu vois d’abord'); d.bulle?.clavier('Écris ce que tu vois, ou touche un exemple'); return; }
   d.micro.arreter(false);
   const photos = cam.lot ? cam.lot.slice() : [];
   const duree = Math.max(1, Math.round((performance.now() - debutDictee) / 1000));
@@ -412,6 +414,7 @@ function capsuleStop() {
   if (!texte && !photos.length) { majChrome(); return; }
   const c = { id: nouvelId(), cat: cam.cat, sub: cam.sub, titre: '', constat: '', reco: '', gravite: null, lieu: photos[0]?.lieu || cam.lieu?.caption || '', photos, dictee: texte, duree, createdAt: Date.now(), statut: 'rediger', notes: [], inclus: true };
   dossier.constats.push(c); dernierId = c.id; majChrome();
+  if (texte && parcoursConstat(c)) return;
   ouvrirOnglet('chat', c.id);
   if (texte) redigerEnFond(c);
 }

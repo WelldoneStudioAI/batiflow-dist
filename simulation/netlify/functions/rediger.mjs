@@ -27,6 +27,7 @@ ${cands.map((c, i) => `${i + 1}. [${c.e.c} / ${c.e.s}] ${c.e.t} (gravité ${c.e.
 
 Parole de l'inspecteur : « ${texte} »`;
 
+const titresProches = cands => cands.slice(0, 3).map(c => c.e.t);
 const depuisBanque = e => ({ src: 'banque', section: e.c, sous_section: e.s, gravite: e.g || 'correctif', titre: e.t, constat: e.o, recommandation: e.r, localisation: '' });
 
 export default async req => {
@@ -52,12 +53,12 @@ export default async req => {
     if (r.stop_reason !== 'refusal' && r.stop_reason !== 'max_tokens') {
       const bloc = r.content.find(b => b.type === 'text');
       const j = bloc ? JSON.parse(bloc.text) : null;
-      if (j?.titre?.trim() && j?.constat?.trim()) return reponse({ src: 'ia', ...j });
+      if (j?.titre?.trim() && j?.constat?.trim()) return reponse({ src: 'ia', ...j, proches: titresProches(cands) });
     }
   } catch (e) {
     console.error('rediger', e instanceof Anthropic.APIError ? `${e.status} ${e.message}` : e?.message);
   }
   const proche = cands[0];
-  return proche && proche.s >= 5 ? reponse(depuisBanque(proche.e)) : reponse({ src: 'aucun' });
+  return proche && proche.s >= 5 ? reponse({ ...depuisBanque(proche.e), proches: titresProches(cands) }) : reponse({ src: 'aucun' });
 };
 export const config = { path: '/api/rediger' };

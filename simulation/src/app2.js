@@ -101,7 +101,7 @@ async function redigerDistant(texte, { cat, sub, theme }) {
     const j = r.ok ? await r.json() : null;
     if (!j?.titre || !j?.constat) return null;
     const c = catParLabel(j.section);
-    return { src: j.src, cat: c ? c[0] : cat, sub: j.sous_section || sub, gravite: GRAV[j.gravite] ? j.gravite : 'correctif', titre: j.titre.trim().replace(/\.$/, ''), constat: j.constat.trim(), reco: (j.recommandation || '').trim(), lieu: (j.localisation || '').trim() };
+    return { src: j.src, cat: c ? c[0] : cat, sub: j.sous_section || sub, gravite: GRAV[j.gravite] ? j.gravite : 'correctif', titre: j.titre.trim().replace(/\.$/, ''), constat: j.constat.trim(), reco: (j.recommandation || '').trim(), lieu: (j.localisation || '').trim(), proches: Array.isArray(j.proches) ? j.proches : [] };
   } catch (e) { return null; }
 }
 async function rediger(texte, { cat, sub, theme } = {}) {
@@ -785,4 +785,3 @@ function ouvrirAnnotation(photo, surFin) {
 
 /* ---------- démarrage ---------- */
 majTitre(); majChrome();
-guide('Touchez : photo · Maintenez : note vocale');
