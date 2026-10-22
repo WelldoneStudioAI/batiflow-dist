@@ -19,6 +19,19 @@ function chercherBanque(q) {
   return INDEX.filter(e => ws.every(w => e.ti.some(x => x.startsWith(w)) || [...e.ob].some(x => x.startsWith(w)))).map(e => e.t).slice(0, 12);
 }
 const topDix = () => (BANQUE || []).filter(t => t.s === cam.sub).sort((a, b) => (b.n || 0) - (a.n || 0)).slice(0, 10);
+/* site public (API) : la banque reste sur le serveur, la page ne reçoit que des résultats ; null = en cours */
+const cacheBanque = new Map(); let minuterieBanque = 0;
+function itemsBanque() {
+  const q = banque.q.trim();
+  if (!API) return q ? chercherBanque(q) : topDix();
+  const cle = q ? 'q=' + sansAccent(q) : 's=' + cam.sub;
+  if (cacheBanque.has(cle)) return banque.vus = cacheBanque.get(cle);
+  clearTimeout(minuterieBanque);
+  minuterieBanque = setTimeout(() => fetch(`${API}/banque?` + new URLSearchParams(q ? { q } : { sub: cam.sub }))
+    .then(r => r.ok ? r.json() : []).catch(() => [])
+    .then(l => { cacheBanque.set(cle, Array.isArray(l) ? l : []); if (banque) rendreBanque(); }), q ? 250 : 0);
+  return banque.vus || null;
+}
 
 /* ---------- la Banque de la refonte (vue 03) : glisser ← sur le viseur ---------- */
 let banque = null;
@@ -40,10 +53,11 @@ function fermerBanque() { if (!banque) return; banque.micro?.arreter(true); banq
 function rendreBanque() {
   const p = $('#banque'); if (!p || !banque) return;
   const enRecherche = !!banque.q.trim();
-  const items = enRecherche ? chercherBanque(banque.q) : topDix();
+  const items = itemsBanque();
   const liste = h('div', { class: 'liste' });
-  if (!items.length) liste.append(h('div', { class: 'vide' }, enRecherche ? `Rien pour « ${banque.q.trim()} ». Essaie un autre mot.` : 'Aucun constat récurrent ici. Cherche dans toute la banque ci-dessous.'));
-  items.forEach((t, k) => liste.append(h('button', { class: 'item', onclick: () => choisirTheme(t) },
+  if (!items) liste.append(h('div', { class: 'vide' }, 'Recherche dans la banque…'));
+  else if (!items.length) liste.append(h('div', { class: 'vide' }, enRecherche ? `Rien pour « ${banque.q.trim()} ». Essaie un autre mot.` : 'Aucun constat récurrent ici. Cherche dans toute la banque ci-dessous.'));
+  (items || []).forEach((t, k) => liste.append(h('button', { class: 'item', onclick: () => choisirTheme(t) },
     h('span', { class: 'rg' }, String(k + 1).padStart(2, '0')),
     h('span', { class: 't' }, h('b', {}, t.t), enRecherche ? h('small', {}, `${t.c} › ${t.s}`) : null),
     ic('pluscercle', 22, 22))));
@@ -81,7 +95,17 @@ Parole de l'inspecteur : « ${texte} »
 
 Réponds uniquement avec l'objet JSON {"section","sous_section","gravite","titre","constat","recommandation","localisation"}.`;
 }
+async function redigerDistant(texte, { cat, sub, theme }) {
+  try {
+    const r = await fetch(`${API}/rediger`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ texte, sub, theme: theme?.t || '' }), signal: AbortSignal.timeout(20000) });
+    const j = r.ok ? await r.json() : null;
+    if (!j?.titre || !j?.constat) return null;
+    const c = catParLabel(j.section);
+    return { src: j.src, cat: c ? c[0] : cat, sub: j.sous_section || sub, gravite: GRAV[j.gravite] ? j.gravite : 'correctif', titre: j.titre.trim().replace(/\.$/, ''), constat: j.constat.trim(), reco: (j.recommandation || '').trim(), lieu: (j.localisation || '').trim() };
+  } catch (e) { return null; }
+}
 async function rediger(texte, { cat, sub, theme } = {}) {
+  if (API && !sample) return redigerDistant(texte, { cat, sub, theme });
   const cands = candidats(texte + ' ' + (theme ? theme.t : ''));
   if (theme) cands.unshift({ e: theme, s: 99 });
   if (sample) {
