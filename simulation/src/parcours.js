@@ -166,6 +166,7 @@ function ouvrirRapport(c) {
   const [fond, encre] = teinte(c.gravite);
   const d = new Date(), date = d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
   const photo = c.photos[0];
+  const annoter = () => { $('#rapport')?.remove(); ouvrirAnnotation(photo, () => ouvrirRapport(c)); };
   const el = h('div', { id: 'rapport' },
     h('div', { class: 'barre' }, h('button', { 'aria-label': 'Fermer', onclick: () => fermerRapport(c) }, ic('xmark', 14, 14)), h('b', {}, 'Ce que ton client reçoit'), h('span')),
     h('div', { class: 'defile' },
@@ -178,9 +179,9 @@ function ouvrirRapport(c) {
           h('b', { class: 'ti' }, c.titre), h('p', {}, c.constat),
           c.reco ? h('div', { class: 'reco' }, h('span', {}, '→ '), h('i', {}, c.reco)) : null,
           h('div', { class: 'lieu' }, `📍 ${c.lieu || 'Lieu non précisé'} · relevé par toi`),
-          h('div', { class: 'photos' }, h('button', { class: 'ph', onclick: () => { el.remove(); ouvrirAnnotation(photo, () => ouvrirRapport(c)); } },
-            h('img', { src: photo.url, alt: 'Photo du constat' }), h('span', { class: 'annoter' }, ic('pencil', 12, 12), 'Entoure le problème')),
-            photo.legende ? h('small', {}, photo.legende) : null)),
+          h('div', { class: 'ph-rapport' }, h('button', { class: 'ph', 'aria-label': 'Annoter la photo', onclick: annoter }, h('img', { src: photo.url, alt: 'Photo du constat' })),
+            photo.legende ? h('small', {}, photo.legende) : null,
+            h('button', { class: 'annoter' + (photo.traits?.length ? ' fait' : ''), onclick: annoter }, ic('pencil', 12, 12), photo.traits?.length ? 'Modifier l’annotation' : 'Entoure le problème sur la photo'))),
         h('div', { class: 'suite', 'aria-hidden': 'true' }, h('i', { style: 'width:62%' }), h('i', { style: 'width:88%' }), h('i', { style: 'width:74%' }), h('i', { style: 'width:40%' })),
         h('div', { class: 'pied-papier' }, 'Préparé avec BatiFlow · banque de constats AIBQ')),
       h('div', { class: 'appel' },

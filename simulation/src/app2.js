@@ -676,8 +676,9 @@ function ouvrirAnnotation(photo, surFin) {
   $$('#an .champ .mic').forEach(m => m.prepend(ic('mic')));
   [['fleche', 'tarrow'], ['cercle', 'tcircle'], ['rect', 'trect'], ['trait', 'tpencil'], ['texte', 'taa']].forEach(([t, i]) => { const b = $(`#outils [data-t="${t}"]`), x = ic(i); x.style.top = (766.6 - 750.7 - ICONES[i].h / 2) + 'px'; b.prepend(x); });
   const cv = $('#cv'), ctx = cv.getContext('2d'), zone = $('#an-zone'), zoomEl = $('#an-zoom');
-  const W0 = photo.c.width, H0 = photo.c.height, s = Math.min(402 / W0, 778 / H0);
-  A = { photo, surFin, outil: 'fleche', couleur: PALETTE[0], traits: [], courant: null, trace: [], sel: null, rect: { w: W0 * s, h: H0 * s, x: (402 - W0 * s) / 2, y: (778 - H0 * s) / 2 }, z: { k: 1, x: 0, y: 0 }, doigts: new Map(), champ: null, micro: null };
+  /* la photo tient entre la barre du haut et les deux champs dictés : rien ne la masque (zone y 100 → 533) */
+  const W0 = photo.c.width, H0 = photo.c.height, ZH = 433, s = Math.min(402 / W0, ZH / H0);
+  A = { photo, surFin, outil: 'fleche', couleur: PALETTE[0], traits: (photo.traits || []).map(t => ({ ...t, p: t.p.map(q => q.slice()) })), courant: null, trace: [], sel: null, rect: { w: W0 * s, h: H0 * s, x: (402 - W0 * s) / 2, y: 100 + (ZH - H0 * s) / 2 }, z: { k: 1, x: 0, y: 0 }, doigts: new Map(), champ: null, micro: null };
   const R = A.rect, dpr = Math.min(3, (devicePixelRatio || 1) * echelleCourante());
   cv.width = Math.round(R.w * dpr); cv.height = Math.round(R.h * dpr); cv.style.width = R.w + 'px'; cv.style.height = R.h + 'px';
   const zoomer = () => { zoomEl.style.transform = `translate(${R.x + A.z.x}px, ${R.y + A.z.y}px) scale(${A.z.k})`; };
@@ -785,7 +786,8 @@ function ouvrirAnnotation(photo, surFin) {
   $('#btn-ok').onclick = () => {
     const c = document.createElement('canvas'); c.width = W0; c.height = H0; const x = c.getContext('2d'); x.drawImage(photo.c, 0, 0);
     for (const t of A.traits) tracer(x, t, W0, H0, Math.max(4, W0 * 0.012), Math.max(18, W0 * 0.05), Math.max(16, W0 * 0.05));
-    if (A.traits.length) { photo.url = c.toDataURL('image/jpeg', .86); }
+    photo.traits = A.traits; /* rouvrir l'annotation retrouve les tracés, modifiables */
+    photo.url = (A.traits.length ? c : photo.c).toDataURL('image/jpeg', .86);
     vibrer([8, 30, 8]); quitter();
   };
   function majChamps() {
