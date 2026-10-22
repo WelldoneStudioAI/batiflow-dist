@@ -43,7 +43,7 @@ tete = ('<title>Essai BatiFlow</title>\n'
         '<style>\n' + lire('style.css') + '</style>\n')
 corps = (lire('corps.html').replace('__PHOTO__', photo) +
          '<script>\n(() => {\nconst ICONES = ' + json.dumps(icones, separators=(',', ':')) + ';\nconst BANQUE = ' + banque + ';\nconst API = ' + api + ';\n' +
-         lire('app1.js') + '\n' + lire('app2.js') + '\n' + lire('parcours.js') + '\n})();\n</script>\n')
+         lire('app1.js') + '\n' + lire('app2.js') + '\n' + lire('vendor/qrcode.js') + '\n' + lire('parcours.js') + '\n})();\n</script>\n')
 if page:
     html = ('<!doctype html>\n<html lang="fr-CA">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">\n'

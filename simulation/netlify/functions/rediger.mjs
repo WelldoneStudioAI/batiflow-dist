@@ -5,16 +5,15 @@ import Anthropic from '@anthropic-ai/sdk';
 import { candidats, parTitre, SECTIONS, GRAVITES } from '../lib/banque.mjs';
 import { refuser, reponse } from '../lib/garde.mjs';
 
-const client = new Anthropic({ timeout: 8500, maxRetries: 0 });   // Netlify coupe une fonction à 10 s
+const client = new Anthropic({ timeout: 9000, maxRetries: 0 });   // Netlify coupe une fonction à 10 s
 const MODELE = process.env.MODELE_IA || 'claude-opus-5-5';
 
-const SCHEMA = {
+const SCHEMA = {   // l'ordre des champs est celui de l'écriture : l'en-tête d'abord, puis le texte
   type: 'object', additionalProperties: false,
-  required: ['section', 'sous_section', 'gravite', 'titre', 'constat', 'recommandation', 'localisation'],
+  required: ['gravite', 'section', 'sous_section', 'titre', 'constat', 'recommandation', 'localisation'],
   properties: {
-    section: { type: 'string', enum: SECTIONS }, sous_section: { type: 'string' },
-    gravite: { type: 'string', enum: GRAVITES }, titre: { type: 'string' },
-    constat: { type: 'string' }, recommandation: { type: 'string' }, localisation: { type: 'string' },
+    gravite: { type: 'string', enum: GRAVITES }, section: { type: 'string', enum: SECTIONS }, sous_section: { type: 'string' },
+    titre: { type: 'string' }, constat: { type: 'string' }, recommandation: { type: 'string' }, localisation: { type: 'string' },
   },
 };
 
@@ -27,7 +26,6 @@ ${cands.map((c, i) => `${i + 1}. [${c.e.c} / ${c.e.s}] ${c.e.t} (gravité ${c.e.
 
 Parole de l'inspecteur : « ${texte} »`;
 
-const titresProches = cands => cands.slice(0, 3).map(c => c.e.t);
 const depuisBanque = e => ({ src: 'banque', section: e.c, sous_section: e.s, gravite: e.g || 'correctif', titre: e.t, constat: e.o, recommandation: e.r, localisation: '' });
 
 export default async req => {
@@ -41,24 +39,40 @@ export default async req => {
 
   const cands = candidats(texte + ' ' + (theme ? theme.t : ''));
   if (theme) cands.unshift({ e: theme, s: 99 });
-  try {
-    const r = await client.beta.messages.create({
-      model: MODELE,
-      max_tokens: 2000,
-      output_config: { effort: 'low', format: { type: 'json_schema', schema: SCHEMA } },
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
-      messages: [{ role: 'user', content: consigne(texte, cands.slice(0, 6), sub) }],
-    });
-    if (r.stop_reason !== 'refusal' && r.stop_reason !== 'max_tokens') {
-      const bloc = r.content.find(b => b.type === 'text');
-      const j = bloc ? JSON.parse(bloc.text) : null;
-      if (j?.titre?.trim() && j?.constat?.trim()) return reponse({ src: 'ia', ...j, proches: titresProches(cands) });
-    }
-  } catch (e) {
-    console.error('rediger', e instanceof Anthropic.APIError ? `${e.status} ${e.message}` : e?.message);
-  }
-  const proche = cands[0];
-  return proche && proche.s >= 5 ? reponse({ ...depuisBanque(proche.e), proches: titresProches(cands) }) : reponse({ src: 'aucun' });
+  const proches = cands.slice(0, 3).map(c => c.e.t);
+  const repli = () => { const p = cands[0]; return p && p.s >= 5 ? { ...depuisBanque(p.e), proches } : { src: 'aucun' }; };
+
+  /* Réponse en flux (une ligne JSON par événement) : {d} = morceau du JSON rédigé, {reprise} = tout
+     effacer (l'IA de repli reprend du début), {fin} = le constat final ou le repli de la banque. */
+  const enc = new TextEncoder();
+  const flux = new ReadableStream({
+    async start(ctl) {
+      const envoyer = o => ctl.enqueue(enc.encode(JSON.stringify(o) + '\n'));
+      let ecrit = '';
+      try {
+        const stream = client.beta.messages.stream({
+          model: MODELE,
+          max_tokens: 2000,
+          output_config: { effort: 'low', format: { type: 'json_schema', schema: SCHEMA } },
+          betas: ['server-side-fallback-2026-07-01'],
+          fallbacks: 'default',
+          messages: [{ role: 'user', content: consigne(texte, cands.slice(0, 6), sub) }],
+        });
+        for await (const ev of stream) {
+          if (ev.type === 'content_block_start' && ev.content_block.type === 'fallback') { ecrit = ''; envoyer({ reprise: true }); }
+          else if (ev.type === 'content_block_delta' && ev.delta.type === 'text_delta') { ecrit += ev.delta.text; envoyer({ d: ev.delta.text }); }
+        }
+        const r = await stream.finalMessage();
+        if (r.stop_reason !== 'refusal' && r.stop_reason !== 'max_tokens') {
+          const j = JSON.parse(ecrit);
+          if (j?.titre?.trim() && j?.constat?.trim()) { envoyer({ fin: { src: 'ia', ...j, proches } }); ctl.close(); return; }
+        }
+      } catch (e) {
+        console.error('rediger', e instanceof Anthropic.APIError ? `${e.status} ${e.message}` : e?.message);
+      }
+      envoyer({ fin: repli() }); ctl.close();
+    },
+  });
+  return new Response(flux, { headers: { 'content-type': 'application/x-ndjson; charset=utf-8', 'cache-control': 'no-store' } });
 };
 export const config = { path: '/api/rediger' };

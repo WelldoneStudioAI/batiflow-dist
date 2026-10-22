@@ -82,7 +82,14 @@ $('#shutter .plus i').style.cssText += ';width:26px;height:26px';
 /* ---------- mise à l'échelle de la toile ---------- */
 /* Dans l'aperçu claude.ai (page encadrée), les boutons ✕ et … du visualiseur flottent sur les 64 px du haut : la toile commence dessous. */
 const HAUT = window.self !== window.top ? 64 : 0;
-function echelle() { const r = document.documentElement.style; r.setProperty('--haut', HAUT + 'px'); r.setProperty('--s', Math.min(innerWidth / 402, (innerHeight - HAUT) / 812)); }
+/* ordinateur (souris, écran large) : l'app entière dans un cadre d'iPhone, à côté du code QR */
+const surBureau = () => innerWidth >= 820 && matchMedia('(hover: hover) and (pointer: fine)').matches;
+function echelle() {
+  const r = document.documentElement.style, bureau = surBureau();
+  document.body.classList.toggle('bureau', bureau);
+  r.setProperty('--haut', HAUT + 'px');
+  r.setProperty('--s', bureau ? Math.min(1, (innerHeight - HAUT - 48) / 902) : Math.min(innerWidth / 402, (innerHeight - HAUT) / 812));
+}
 addEventListener('resize', echelle); echelle();
 const echelleCourante = () => $('#cadre').getBoundingClientRect().width / 402;
 /* coordonnées d'un pointeur dans la toile (pt, repère des captures) */

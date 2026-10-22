@@ -93,35 +93,60 @@ ${cands.map((c, i) => `${i + 1}. [${c.e.c} / ${c.e.s}] ${c.e.t} (gravité ${c.e.
 
 Parole de l'inspecteur : « ${texte} »
 
-Réponds uniquement avec l'objet JSON {"section","sous_section","gravite","titre","constat","recommandation","localisation"}.`;
+Réponds uniquement avec l'objet JSON {"gravite","section","sous_section","titre","constat","recommandation","localisation"}, dans cet ordre.`;
 }
-async function redigerDistant(texte, { cat, sub, theme }) {
+/* lecture du JSON pendant qu'il s'écrit : chaque champ texte déjà commencé, et s'il est terminé */
+const CHAMPS = ['gravite', 'section', 'sous_section', 'titre', 'constat', 'recommandation', 'localisation'];
+function champsPartiels(s) {
+  const o = { fini: {} };
+  for (const k of CHAMPS) {
+    const m = s.match(new RegExp('"' + k + '"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)(")?'));
+    if (!m) continue;
+    let v = m[1];
+    for (let n = 0; n < 7; n++) { try { o[k] = JSON.parse('"' + v + '"'); break; } catch (e) { v = v.slice(0, -1); } }
+    o.fini[k] = !!m[2];
+  }
+  return o;
+}
+function versConstat(j, src, cat, sub) {
+  const s = k => typeof j?.[k] === 'string' ? j[k].trim() : '';
+  if (!s('titre') || !s('constat')) return null;
+  const c = catParLabel(s('section'));
+  return { src, cat: c ? c[0] : cat, sub: s('sous_section') || sub, gravite: GRAV[s('gravite')] ? s('gravite') : 'correctif', titre: s('titre').replace(/\.$/, ''), constat: s('constat'), reco: s('recommandation'), lieu: s('localisation'), proches: Array.isArray(j.proches) ? j.proches : [] };
+}
+/* site public : /api/rediger répond en flux, une ligne JSON par événement ({d}, {reprise}, {fin}) */
+async function redigerDistant(texte, { cat, sub, theme, surFlux }) {
   try {
     const r = await fetch(`${API}/rediger`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ texte, sub, theme: theme?.t || '' }), signal: AbortSignal.timeout(20000) });
-    const j = r.ok ? await r.json() : null;
-    if (!j?.titre || !j?.constat) return null;
-    const c = catParLabel(j.section);
-    return { src: j.src, cat: c ? c[0] : cat, sub: j.sous_section || sub, gravite: GRAV[j.gravite] ? j.gravite : 'correctif', titre: j.titre.trim().replace(/\.$/, ''), constat: j.constat.trim(), reco: (j.recommandation || '').trim(), lieu: (j.localisation || '').trim(), proches: Array.isArray(j.proches) ? j.proches : [] };
+    if (!r.ok || !r.body) return null;
+    const lecteur = r.body.pipeThrough(new TextDecoderStream()).getReader();
+    let tampon = '', ecrit = '', fin = null;
+    for (;;) {
+      const { value, done } = await lecteur.read(); if (done) break;
+      tampon += value; const lignes = tampon.split('\n'); tampon = lignes.pop();
+      for (const l of lignes) {
+        if (!l.trim()) continue; const ev = JSON.parse(l);
+        if (ev.reprise) ecrit = ''; else if (ev.d) ecrit += ev.d; else if (ev.fin) fin = ev.fin;
+        if (ev.d || ev.reprise) surFlux?.(champsPartiels(ecrit));
+      }
+    }
+    return fin && fin.src !== 'aucun' ? versConstat(fin, fin.src, cat, sub) : null;
   } catch (e) { return null; }
 }
-async function rediger(texte, { cat, sub, theme } = {}) {
-  if (API && !sample) return redigerDistant(texte, { cat, sub, theme });
+async function rediger(texte, { cat, sub, theme, surFlux } = {}) {
+  if (API && !sample) return redigerDistant(texte, { cat, sub, theme, surFlux });
   const cands = candidats(texte + ' ' + (theme ? theme.t : ''));
   if (theme) cands.unshift({ e: theme, s: 99 });
   if (sample) {
     const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 45000);
     try {
-      const r = await sample.json(consigne(texte, cands.slice(0, 6), sub), { modelTier: 'quick', signal: ctl.signal });
-      const s = k => typeof r?.[k] === 'string' ? r[k].trim() : '';
-      if (s('titre') && s('constat')) {
-        const c = catParLabel(s('section'));
-        return { src: 'ia', cat: c ? c[0] : cat, sub: s('sous_section') || sub, gravite: GRAV[s('gravite')] ? s('gravite') : 'correctif', titre: s('titre').replace(/\.$/, ''), constat: s('constat'), reco: s('recommandation'), lieu: s('localisation') };
-      }
+      const r = await sample.json(consigne(texte, cands.slice(0, 6), sub), { modelTier: 'quick', signal: ctl.signal, onText: surFlux ? ({ text }) => surFlux(champsPartiels(text)) : undefined });
+      const c = versConstat(r, 'ia', cat, sub); if (c) return c;
     } catch (e) {} finally { clearTimeout(to); }
   }
-  await new Promise(ok => setTimeout(ok, 900));
+  await new Promise(ok => setTimeout(ok, 300));
   const c = cands[0];
-  if (c && c.s >= 5) { const k = catParLabel(c.e.c); return { src: 'banque', cat: k ? k[0] : cat, sub: c.e.s, gravite: c.e.g || 'correctif', titre: c.e.t, constat: c.e.o, reco: c.e.r, lieu: '' }; }
+  if (c && c.s >= 5) { const k = catParLabel(c.e.c); return { src: 'banque', cat: k ? k[0] : cat, sub: c.e.s, gravite: c.e.g || 'correctif', titre: c.e.t, constat: c.e.o, reco: c.e.r, lieu: '', proches: cands.slice(0, 3).map(x => x.e.t) }; }
   return null;
 }
 async function redigerEnFond(c) {

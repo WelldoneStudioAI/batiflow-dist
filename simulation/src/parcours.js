@@ -104,16 +104,35 @@ async function sceneRedaction(c) {
   const fait = (l, detail) => { l.classList.remove('cours'); l.classList.add('fait'); l.querySelector('.rond').replaceChildren(ic('check', 12, 12)); if (detail != null) l.querySelector('small').textContent = detail; };
   const encours = (l, detail) => { l.classList.add('cours'); if (detail != null) l.querySelector('small').textContent = detail; };
 
-  const redaction = rediger(c.dictee, { cat: c.cat, sub: c.sub });
-  encours(l1); await attendre(500);
+  /* la carte du constat se remplit pendant que l'IA écrit (flux), champ par champ, curseur au bout */
+  const sev = h('span', { class: 'sev', hidden: true }), sec = h('span', { class: 'sec' }, `${catLabel(c.cat)} › ${c.sub}`);
+  const tT = h('b', { class: 'ti' }), tC = h('p'), tRi = h('i'), tR = h('div', { class: 'reco', hidden: true }, h('span', {}, '→ '), tRi);
+  carte.append(h('div', { class: 'tete' }, sev, sec), tT, tC, tR);
+  const poserSev = g => { if (!GRAV[g]) return; const [fond, encre] = teinte(g); sev.textContent = GRAV[g][0]; sev.style.cssText = `background:${fond};color:${encre}`; sev.hidden = false; };
+  const montrerCarte = () => { if (!carte.hidden) return; carte.hidden = false; carte.classList.add('attente'); requestAnimationFrame(() => carte.scrollIntoView({ behavior: 'smooth', block: 'nearest' })); };
+  let enFlux = false;
+  const surFlux = part => {
+    if (!enFlux) { enFlux = true; encours(l3, 'L’IA écrit…'); }
+    montrerCarte(); carte.classList.remove('attente');
+    poserSev(part.gravite);
+    const k = catParLabel(part.section); if (k) sec.textContent = `${k[1]} › ${part.sous_section || ''}`;
+    tT.textContent = part.titre || ''; tC.textContent = part.constat || '';
+    if (part.recommandation) { tR.hidden = false; tRi.textContent = part.recommandation; }
+    const courant = ['recommandation', 'constat', 'titre'].find(f => part[f] != null);
+    [tT, tC, tRi].forEach(x => x.classList.remove('curseur'));
+    if (courant && !part.fini[courant]) ({ titre: tT, constat: tC, recommandation: tRi })[courant].classList.add('curseur');
+  };
+
+  const redaction = rediger(c.dictee, { cat: c.cat, sub: c.sub, surFlux });
+  encours(l1); await attendre(250);
   fait(l1, `${c.dictee.split(/\s+/).filter(Boolean).length} mots · ${c.duree} s de dictée`);
-  encours(l2, `${NB_BANQUE.toLocaleString('fr-CA')} constats types`); await attendre(700);
+  encours(l2, `${NB_BANQUE.toLocaleString('fr-CA')} constats types`); await attendre(350);
   const proches = BANQUE ? candidats(c.dictee, 3).map(x => x.e.t) : [];
   fait(l2, `${NB_BANQUE.toLocaleString('fr-CA')} constats types · ${proches.length ? 'les plus proches :' : 'comparés à ta phrase'}`);
   if (proches.length) l2.lastChild.append(h('div', { class: 'proches' }, ...proches.map(t => h('span', {}, t))));
-  encours(l3, 'Style, gravité, recommandation…');
-  const [r] = await Promise.all([redaction, attendre(900)]);
-  if (!proches.length && r?.proches?.length) l2.lastChild.append(h('div', { class: 'proches' }, ...r.proches.slice(0, 3).map(t => h('span', {}, t))));
+  if (!enFlux) { encours(l3, 'Style, gravité, recommandation…'); montrerCarte(); }
+  const r = await redaction;
+  if (!proches.length && r?.proches?.length) { fait(l2, `${NB_BANQUE.toLocaleString('fr-CA')} constats types · les plus proches :`); l2.lastChild.append(h('div', { class: 'proches' }, ...r.proches.slice(0, 3).map(t => h('span', {}, t)))); }
   const res = r || { src: 'brouillon', cat: c.cat, sub: c.sub, gravite: 'correctif', titre: c.dictee.split(/[.,;]/)[0].slice(0, 60), constat: 'Nous avons constaté ' + c.dictee.charAt(0).toLowerCase() + c.dictee.slice(1), reco: 'Faire évaluer la situation par un entrepreneur qualifié.', lieu: '' };
   Object.assign(c, { cat: res.cat, sub: res.sub, titre: res.titre, constat: res.constat, reco: res.reco, gravite: res.gravite, statut: 'valider', iaSrc: res.src, lieu: c.lieu || res.lieu });
   const secondes = Math.max(1, Math.round((performance.now() - P.t0) / 1000));
@@ -121,17 +140,15 @@ async function sceneRedaction(c) {
   fait(l3, res.src === 'ia' ? 'Rédigé par l’IA dans le style de la banque' : res.src === 'banque' ? 'Tiré du constat type le plus proche' : 'Brouillon à compléter');
   majChrome();
 
-  /* le constat s'écrit sous les yeux du visiteur */
-  const [fond, encre] = teinte(c.gravite);
-  const tT = h('b', { class: 'ti' }), tC = h('p'), tR = h('div', { class: 'reco' });
-  carte.append(h('div', { class: 'tete' }, h('span', { class: 'sev', style: `background:${fond};color:${encre}` }, GRAV[c.gravite][0]),
-    h('span', { class: 'sec' }, `${catLabel(c.cat)} › ${c.sub}`)), tT, tC, tR);
-  carte.hidden = false;
-  requestAnimationFrame(() => carte.scrollIntoView({ behavior: 'smooth', block: 'nearest' }));
-  await taper(tT, c.titre, 450);
-  await taper(tC, c.constat, Math.min(1800, 18 * c.constat.length));
-  tR.hidden = !c.reco;
-  if (c.reco) { tR.append(h('span', {}, '→ '), h('i')); await taper(tR.querySelector('i'), c.reco, Math.min(1200, 16 * c.reco.length)); }
+  /* texte final (identique au flux quand l'IA a écrit ; sinon, il s'écrit vite sous les yeux) */
+  carte.classList.remove('attente'); [tT, tC, tRi].forEach(x => x.classList.remove('curseur'));
+  poserSev(c.gravite); sec.textContent = `${catLabel(c.cat)} › ${c.sub}`;
+  if (enFlux) { tT.textContent = c.titre; tC.textContent = c.constat; tRi.textContent = c.reco; tR.hidden = !c.reco; }
+  else {
+    await taper(tT, c.titre, 250);
+    await taper(tC, c.constat, Math.min(700, 6 * c.constat.length));
+    tR.hidden = !c.reco; if (c.reco) await taper(tRi, c.reco, Math.min(450, 5 * c.reco.length));
+  }
   vibrer(14);
   pied.append(
     h('div', { class: 'chrono' }, ic('clock', 18, 18), h('div', {}, h('b', {}, `${secondes} s`), h('small', {}, 'de la photo au constat rédigé')),
@@ -175,6 +192,32 @@ function ouvrirRapport(c) {
   ecran.append(el);
 }
 function fermerRapport(c) { $('#rapport')?.remove(); P = null; dernierId = c.id; majChrome(); ouvrirOnglet('chat', c.id); }
+
+/* ---------- sur ordinateur : barre d'état d'iPhone + panneau « Essaie-le sur ton téléphone » ---------- */
+const SITE = 'https://essai-batiflow.netlify.app/';   /* adresse publique ; dans l'aperçu claude.ai, le QR y mène */
+function codeQR(texte) {
+  const q = qrcode(0, 'M'); q.addData(texte); q.make();
+  const n = q.getModuleCount(); let d = '';
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (q.isDark(y, x)) d += `M${x} ${y}h1v1h-1z`;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `-2 -2 ${n + 4} ${n + 4}`); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', 'Code QR vers ' + texte);
+  const fond = document.createElementNS(svg.namespaceURI, 'rect'); fond.setAttribute('x', -2); fond.setAttribute('y', -2); fond.setAttribute('width', n + 4); fond.setAttribute('height', n + 4); fond.setAttribute('fill', '#fff');
+  const path = document.createElementNS(svg.namespaceURI, 'path'); path.setAttribute('d', d); path.setAttribute('fill', '#111214');
+  svg.append(fond, path); return svg;
+}
+function poserBureau() {
+  const adresse = window.self === window.top && location.protocol.startsWith('http') ? location.href : SITE;
+  ecran.append(h('div', { id: 'ile', 'aria-hidden': 'true' }), h('div', { id: 'barre-etat', 'aria-hidden': 'true' }, h('b', {}, '9:41'),
+    h('span', { class: 'ind' }, h('i', { class: 'reseau' }, h('i'), h('i'), h('i'), h('i')), h('i', { class: 'pile' }, h('i')))));
+  document.body.append(h('aside', { id: 'panneau-bureau' },
+    h('div', { class: 'marque' }, h('i'), h('b', {}, 'BatiFlow')),
+    h('h1', {}, 'Essaie-le sur ton téléphone.'),
+    h('p', {}, 'Scanne ce code avec l’appareil photo de ton iPhone : la caméra et la dictée y fonctionnent pour vrai. Ou fais l’essai ici, à la souris.'),
+    h('div', { class: 'qr' }, codeQR(adresse)),
+    h('small', {}, adresse.replace(/^https?:\/\//, '').replace(/\/$/, '')),
+    h('ul', {}, h('li', {}, 'Rien à installer'), h('li', {}, 'Un constat AIBQ en 60 secondes'), h('li', {}, 'Rédigé par l’IA, dans le style de la banque'))));
+}
+poserBureau();
 
 /* ---------- démarrage ---------- */
 parcoursDemarrer();
