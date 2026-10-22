@@ -25,5 +25,7 @@ export function chercher(q) {
 }
 export const topDix = sub => BANQUE.filter(t => t.s === sub).sort((a, b) => (b.n || 0) - (a.n || 0)).slice(0, 10);
 export const parTitre = titre => BANQUE.find(t => t.t === titre) || null;
-/* ce que la page reçoit : un thème, sans le compteur d'occurrences */
+/* listes (Top 10, recherche) : le titre seulement, jamais le texte — sinon la banque se copie en une heure */
+export const pourListe = ({ c, s, t, g }) => ({ c, s, t, g });
+/* un seul thème choisi, avec son texte (route /api/theme, plafond séparé et bas) */
 export const pourPage = ({ c, s, t, o, r, g }) => ({ c, s, t, o, r, g });

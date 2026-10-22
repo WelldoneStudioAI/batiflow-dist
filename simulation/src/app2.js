@@ -76,8 +76,17 @@ function rendreBanque() {
 }
 function choisirTheme(t) {
   fermerBanque();
+  /* site public : les listes n'ont que le titre ; le texte du thème choisi vient de /api/theme */
+  if (API && t.o == null) {
+    fetch(`${API}/theme?` + new URLSearchParams({ t: t.t })).then(r => r.ok ? r.json() : null).catch(() => null)
+      .then(x => ouvrirTheme(x && x.t ? x : t));
+    return;
+  }
+  ouvrirTheme(t);
+}
+function ouvrirTheme(t) {
   const cat = catParLabel(t.c); if (cat) { cam.cat = cat[0]; if (cat[2].includes(t.s)) cam.sub = t.s; } majTitre();
-  ouvrirFeuille({ mode: 'banque', photos: [], cat: cam.cat, sub: t.s, titre: t.t, constat: t.o, reco: t.r, gravite: t.g || 'correctif', confirmee: true, lieu: cam.lieu?.caption || '', theme: t });
+  ouvrirFeuille({ mode: 'banque', photos: [], cat: cam.cat, sub: t.s, titre: t.t, constat: t.o || '', reco: t.r || '', gravite: t.g || 'correctif', confirmee: true, lieu: cam.lieu?.caption || '', theme: t });
 }
 
 /* ---------- rédaction IA (AssistantService.extraireConstatAIBQ → ici l'IA du visiteur) ---------- */
