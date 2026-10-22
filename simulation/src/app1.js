@@ -81,14 +81,16 @@ $('#shutter .plus i').style.cssText += ';width:26px;height:26px';
 
 /* ---------- mise à l'échelle de la toile ---------- */
 /* Dans l'aperçu claude.ai (page encadrée), les boutons ✕ et … du visualiseur flottent sur les 64 px du haut : la toile commence dessous. */
-const HAUT = window.self !== window.top ? 64 : 0;
+/* « ?integre » : la page est encadrée par le site inspecteur.expert — l'iPhone seul, sans marge ni panneau. */
+const INTEGRE = new URLSearchParams(location.search).has('integre');
+const HAUT = !INTEGRE && window.self !== window.top ? 64 : 0;
 /* ordinateur (souris, écran large) : l'app entière dans un cadre d'iPhone, à côté du code QR */
-const surBureau = () => innerWidth >= 820 && matchMedia('(hover: hover) and (pointer: fine)').matches;
+const surBureau = () => INTEGRE || (innerWidth >= 820 && matchMedia('(hover: hover) and (pointer: fine)').matches);
 function echelle() {
   const r = document.documentElement.style, bureau = surBureau();
-  document.body.classList.toggle('bureau', bureau);
+  document.body.classList.toggle('bureau', bureau); document.body.classList.toggle('integre', INTEGRE);
   r.setProperty('--haut', HAUT + 'px');
-  r.setProperty('--s', bureau ? Math.min(1, (innerHeight - HAUT - 48) / 902) : Math.min(innerWidth / 402, (innerHeight - HAUT) / 812));
+  r.setProperty('--s', INTEGRE ? Math.min(1, (innerHeight - 8) / 902, (innerWidth - 8) / 432) : bureau ? Math.min(1, (innerHeight - HAUT - 48) / 902) : Math.min(innerWidth / 402, (innerHeight - HAUT) / 812));
 }
 addEventListener('resize', echelle); echelle();
 const echelleCourante = () => $('#cadre').getBoundingClientRect().width / 402;

@@ -643,3 +643,7 @@ body.bureau #panneau-bureau { display: block; position: fixed; left: calc(50% + 
 #panneau-bureau ul { list-style: none; margin: 26px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
 #panneau-bureau li { font-size: 14.5px; color: rgba(235,235,245,.8); padding-left: 24px; position: relative; }
 #panneau-bureau li::before { content: ""; position: absolute; left: 0; top: 3px; width: 14px; height: 14px; border-radius: 50%; background: rgba(48,209,88,.18) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M4 7.2l2 2 4-4.4' fill='none' stroke='%2330D158' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat; }
+
+/* intégrée au site (?integre) : l’iPhone seul, centré, sur le fond de la carte du site (#0E0E10) */
+html:has(body.integre), body.integre, body.integre.bureau { background: #0E0E10; }
+body.integre #cadre { left: 50%; top: 50%; box-shadow: 0 0 0 11px #050505, 0 0 0 13px #3a3a3c, 0 0 0 14px #1c1c1e; }

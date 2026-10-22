@@ -1,0 +1,71 @@
+<!-- ===== BatiFlow · section « Essaie BatiFlow » (à coller dans index.html de inspecteur.expert) =====
+     Autonome : styles préfixés .bfe-, aucun conflit avec le reste de la page.
+     Ordinateur : l'essai tourne dans un iPhone, en direct, à côté d'un code QR.
+     Téléphone : un bouton ouvre l'essai en plein écran (caméra et dictée réelles).
+     Adresse de l'essai : __ESSAI__ (site Netlify séparé « essai-batiflow »). -->
+<section id="essai" class="bfe">
+  <style>
+    .bfe { --bfe-orange: #F15A24; --bfe-fond: #0E0E10; --bfe-texte: #fff; --bfe-doux: rgba(235,235,245,.68);
+      padding: clamp(56px, 8vw, 110px) 20px; background: radial-gradient(70% 80% at 75% 50%, #2b1a10 0%, var(--bfe-fond) 62%); color: var(--bfe-texte); }
+    .bfe * { box-sizing: border-box; }
+    .bfe-in { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: 1fr 460px; gap: clamp(32px, 6vw, 88px); align-items: center; }
+    .bfe-sur { font: 600 12px/1 ui-monospace, Menlo, monospace; letter-spacing: 1.6px; color: #FAC775; text-transform: uppercase; }
+    .bfe h2 { margin: 14px 0 16px; font-size: clamp(32px, 4.4vw, 52px); line-height: 1.04; letter-spacing: -1.2px; font-weight: 700; color: inherit; }
+    .bfe-lead { margin: 0 0 28px; font-size: 18px; line-height: 1.5; color: var(--bfe-doux); max-width: 520px; }
+    .bfe-etapes { list-style: none; margin: 0 0 32px; padding: 0; display: grid; gap: 14px; }
+    .bfe-etapes li { display: flex; gap: 14px; align-items: flex-start; font-size: 16px; line-height: 1.4; }
+    .bfe-etapes b { display: block; }
+    .bfe-etapes span { color: var(--bfe-doux); font-size: 14.5px; }
+    .bfe-n { flex: none; width: 30px; height: 30px; border-radius: 50%; background: rgba(241,90,36,.16); color: var(--bfe-orange); font-weight: 700; display: grid; place-items: center; font-size: 14px; }
+    .bfe-qr { display: flex; gap: 18px; align-items: center; padding: 16px; border-radius: 20px; background: rgba(255,255,255,.06); max-width: 460px; }
+    .bfe-qr svg { flex: none; width: 112px; height: 112px; border-radius: 12px; }
+    .bfe-qr b { display: block; font-size: 16px; margin-bottom: 4px; }
+    .bfe-qr span { font-size: 14px; line-height: 1.45; color: var(--bfe-doux); }
+    .bfe-go { display: none; width: 100%; height: 56px; border-radius: 16px; background: var(--bfe-orange); color: #fff; font-size: 18px; font-weight: 700; text-decoration: none; align-items: center; justify-content: center; gap: 8px; }
+    .bfe-tel { position: relative; height: min(880px, 86vh); border-radius: 36px; background: var(--bfe-fond); overflow: hidden; box-shadow: 0 40px 120px rgba(0,0,0,.55); }
+    .bfe-tel iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+    .bfe-tel .bfe-attente { position: absolute; inset: 0; display: grid; place-items: center; color: var(--bfe-doux); font-size: 14px; }
+    .bfe-note { margin-top: 12px; text-align: center; font-size: 13px; color: var(--bfe-doux); }
+    @media (max-width: 899px), (hover: none) {
+      .bfe-in { grid-template-columns: 1fr; }
+      .bfe-droite, .bfe-qr { display: none; }
+      .bfe-go { display: flex; }
+    }
+  </style>
+  <div class="bfe-in">
+    <div>
+      <div class="bfe-sur">Essai · 60 secondes · rien à installer</div>
+      <h2>Rédige ton premier constat. Là, maintenant.</h2>
+      <p class="bfe-lead">Prends une photo, décris le défaut à voix haute : BatiFlow rédige le constat dans le style de la banque AIBQ, prêt pour le rapport de ton client.</p>
+      <ol class="bfe-etapes">
+        <li><i class="bfe-n">1</i><div><b>Prends une photo</b><span>Un mur, un plancher, une fenêtre… ou la photo d’exemple.</span></div></li>
+        <li><i class="bfe-n">2</i><div><b>Décris ce que tu vois</b><span>Maintiens le déclencheur et parle, comme sur un chantier.</span></div></li>
+        <li><i class="bfe-n">3</i><div><b>BatiFlow rédige</b><span>Gravité, constat, recommandation — sous tes yeux.</span></div></li>
+      </ol>
+      <a class="bfe-go" href="__ESSAI__">Lancer l’essai <span aria-hidden="true">→</span></a>
+      <div class="bfe-qr">__QR__<div><b>C’est encore mieux sur ton iPhone</b><span>Scanne le code : la caméra et la dictée y fonctionnent pour vrai. Ou essaie-le ici, à la souris.</span></div></div>
+    </div>
+    <div class="bfe-droite">
+      <div class="bfe-tel" data-essai="__ESSAI__?integre"><div class="bfe-attente">Chargement de l’essai…</div></div>
+      <div class="bfe-note">Simulation interactive de l’app iPhone BatiFlow</div>
+    </div>
+  </div>
+  <script>
+    /* L'essai (≈ 500 Ko) ne se charge que sur ordinateur, quand la section approche de l'écran. */
+    (function () {
+      var tel = document.querySelector('#essai .bfe-tel');
+      if (!tel || !matchMedia('(min-width: 900px) and (hover: hover)').matches) return;
+      var poser = function () {
+        if (tel.querySelector('iframe')) return;
+        var f = document.createElement('iframe');
+        f.src = tel.getAttribute('data-essai'); f.title = 'Essai interactif de BatiFlow';
+        f.allow = 'camera; microphone'; f.onload = function () { var a = tel.querySelector('.bfe-attente'); if (a) a.remove(); };
+        tel.appendChild(f);
+      };
+      if (!('IntersectionObserver' in window)) return poser();
+      var o = new IntersectionObserver(function (e) { if (e[0].isIntersecting) { poser(); o.disconnect(); } }, { rootMargin: '600px' });
+      o.observe(tel);
+    })();
+  </script>
+</section>
+<!-- ===== fin de la section BatiFlow « Essaie BatiFlow » ===== -->
