@@ -1,0 +1,38 @@
+<div id="cadre"><div id="ecran">
+
+  <!-- ===== Caméra (BFCameraScreen · unitCaptureChrome) ===== -->
+  <section id="cam">
+    <button class="hb" style="left:16px" id="btn-tiroir" aria-label="Raccourcis du dossier"><i data-i="menu"></i></button>
+    <div id="cam-titre"></div>
+    <button class="hb" style="left:346px;color:var(--bleu)" id="btn-accueil" aria-label="Accueil"><i data-i="house"></i></button>
+    <div id="vf">
+      <img class="fond" alt="" src="__PHOTO__" id="vf-img">
+      <video id="vf-video" playsinline muted autoplay></video>
+      <div id="grille"><i style="left:0;right:0;top:160px;height:1px"></i></div>
+      <div id="zoom-pills" hidden></div>
+      <button id="lieu-pastille" hidden></button>
+      <div id="vignettes"></div>
+    </div>
+    <div id="pil"></div>
+    <button class="r46" style="left:35px" id="btn-gauche" aria-label="Raccourcis"><span class="teinte"></span><i data-i="bolt"></i></button>
+    <button class="r46" style="left:101px" id="btn-crayon" aria-label="Note interne — micro et photos, jamais au rapport"><span class="teinte"></span><i data-i="pencil"></i></button>
+    <button id="shutter" aria-label="Déclencheur"><span class="coeur"></span><span class="plus" hidden><i data-i="plus26"></i></span><svg viewBox="0 0 68 68"><circle cx="34" cy="34" r="32"/></svg></button>
+    <div id="tip" hidden>Maintiens pour dicter</div>
+    <button class="r46" style="left:255px" id="lieux-rond" aria-label="Localisation. Toucher pour basculer, maintenir pour choisir le lieu."><span class="teinte"></span><i data-i="house2"></i></button>
+    <button class="r46" style="left:321px" id="btn-droite" aria-label="Sections. Maintenir pour choisir la section et la sous-section."><span class="teinte"></span><i data-i="layers"></i></button>
+    <div id="aide-cam">Appui long : note vocale</div>
+    <button id="dernier"><span class="icd"><i data-i="doc"></i></span><span class="t l1" id="dernier-t">Aucun constat encore</span><i data-i="photo" id="dernier-ph" hidden></i><span class="n" id="dernier-n" hidden></span><i data-i="chev" id="dernier-ch" hidden></i></button>
+  </section>
+
+  <!-- barre d'onglets (BFInspectionNavBar), redessinée par-dessus le calque -->
+  <nav class="barre-onglets sombre" id="onglets" aria-label="Onglets">
+    <button class="tab on" data-onglet="viseur" style="left:29.3px"><i data-i="tcam" data-c="74.33,814.5"></i><span>Caméra</span></button>
+    <button class="tab" data-onglet="chat" style="left:101.7px"><i data-i="tstack" data-c="146.67,814.83"></i><span>Constats</span></button>
+    <button class="tab" data-onglet="apercu" style="left:174.3px"><i data-i="tgrid" data-c="219.33,814.83"></i><span>Aperçu</span></button>
+    <button class="tab" data-onglet="compteRendu" style="left:264.8px"><i data-i="tdoc" data-c="309.83,815.67"></i><span>Compte rendu</span></button>
+  </nav>
+
+  <div id="couches-calque"></div>
+  <div id="flash"></div>
+  <input type="file" id="file-photo" accept="image/*" multiple hidden>
+</div></div>
