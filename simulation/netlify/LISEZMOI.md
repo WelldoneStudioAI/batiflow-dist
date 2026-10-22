@@ -21,7 +21,11 @@ la banque AIBQ et la clé Anthropic restent côté serveur, dans deux fonctions 
 ```
 
 La 1re fois : connexion Netlify dans le navigateur, création du site `essai-batiflow` (ou `NOM_SITE=… ./deployer.sh …`),
-puis la clé `ANTHROPIC_API_KEY` est demandée sans s'afficher. Les fois suivantes : reconstruit et redéploie.
+puis la clé Anthropic est demandée sans s'afficher et posée en secret sous `ESSAI_ANTHROPIC_KEY`. Les fois suivantes : reconstruit et redéploie.
 
 Réglages : variable `MODELE_IA` (défaut `claude-opus-5-5`). Débit : 20 rédactions et 30 thèmes par heure et par adresse IP,
 240 recherches par 10 min. Ces plafonds vivent en mémoire de chaque fonction : ils freinent, ils ne garantissent rien. Fixer aussi un plafond de dépenses dans la console Anthropic.
+
+**Jamais la passerelle IA de Netlify.** Sur un forfait à crédits, Netlify injecte `ANTHROPIC_API_KEY` et se paie en crédits ;
+crédits à zéro = tous les sites de l'équipe en pause. La fonction lit donc `ESSAI_ANTHROPIC_KEY` et vise `api.anthropic.com` ;
+sans cette variable, l'essai répond avec la banque (`"src":"banque"`), sans IA.

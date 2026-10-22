@@ -1,11 +1,15 @@
 /* POST /api/rediger { texte, sub, theme } → un constat rédigé dans le style de la banque AIBQ.
-   Même consigne que la simulation (src/app2.js : consigne). La clé ANTHROPIC_API_KEY reste ici,
-   côté serveur. Si l'IA ne répond pas à temps, on renvoie le thème le plus proche de la banque. */
+   Même consigne que la simulation (src/app2.js : consigne). La clé ESSAI_ANTHROPIC_KEY reste ici,
+   côté serveur. Si l'IA ne répond pas à temps, on renvoie le thème le plus proche de la banque.
+   Jamais la passerelle IA de Netlify : elle injecte ANTHROPIC_API_KEY / ANTHROPIC_BASE_URL et se paie
+   en crédits Netlify (crédits à zéro = TOUS les sites de l'équipe en pause). On lit donc une variable
+   à nous et on vise api.anthropic.com en dur ; sans clé, c'est le repli de la banque, sans IA. */
 import Anthropic from '@anthropic-ai/sdk';
 import { candidats, parTitre, SECTIONS, GRAVITES } from '../lib/banque.mjs';
 import { refuser, reponse } from '../lib/garde.mjs';
 
-const client = new Anthropic({ timeout: 9000, maxRetries: 0 });   // Netlify coupe une fonction à 10 s
+const CLE = process.env.ESSAI_ANTHROPIC_KEY;
+const client = CLE ? new Anthropic({ apiKey: CLE, baseURL: 'https://api.anthropic.com', timeout: 9000, maxRetries: 0 }) : null;   // Netlify coupe une fonction à 10 s
 const MODELE = process.env.MODELE_IA || 'claude-opus-5-5';
 
 const SCHEMA = {   // l'ordre des champs est celui de l'écriture : l'en-tête d'abord, puis le texte
@@ -49,7 +53,7 @@ export default async req => {
     async start(ctl) {
       const envoyer = o => ctl.enqueue(enc.encode(JSON.stringify(o) + '\n'));
       let ecrit = '';
-      try {
+      if (client) try {
         const stream = client.beta.messages.stream({
           model: MODELE,
           max_tokens: 2000,
