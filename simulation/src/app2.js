@@ -110,7 +110,7 @@ async function redigerEnFond(c) {
 /* ---------- feuille « Préparer le constat » (calque pleine largeur, entrée par le bas) ---------- */
 let feuilleEtat = null, feuilleMicro = null;
 function ouvrirFeuille(etat) {
-  fermerCalque(true);
+  fermerCalque(true); finGuide();
   feuilleEtat = Object.assign({ titre: '', constat: '', reco: '', gravite: null, confirmee: false, lieu: '', dictee: '', duree: 0, redaction: null, notes: '' }, etat);
   rendreFeuille();
 }
@@ -240,7 +240,7 @@ function enregistrerFeuille(statut) {
 /* ---------- calque des onglets (AIBQDrawerLayer : plein écran en refonte) ---------- */
 let onglet = null, filtre = { sec: null, sous: null }, focusId = null, indexFiche = 0, retournee = false, apercu = { filtre: 'tous', q: '', ouvert: null, tout: false }, crSegment = 'dossier', crOuvertes = new Set([1]);
 function ouvrirOnglet(o, id) {
-  fermerRaccourcis(); fermerTiroir(); fermerBanque();
+  fermerRaccourcis(); fermerTiroir(); fermerBanque(); finGuide();
   if (o === 'viseur') return fermerCalque();
   vibrer(4); onglet = o; if (id) focusId = id; retournee = false;
   if (!$('#calque')) ecran.append(h('div', { id: 'calque' }));

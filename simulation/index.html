@@ -31,7 +31,7 @@ body { margin: 0; background: #000; overflow: hidden; font-family: var(--sf); -w
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; text-align: center; }
 button:disabled { cursor: default; }
 button:focus-visible, textarea:focus-visible, input:focus-visible { outline: 2px solid var(--bleu); outline-offset: 2px; }
-#cadre { position: absolute; left: 50%; top: 50%; width: 402px; height: 812px; overflow: hidden; transform: translate(-50%, -50%) scale(var(--s, 1)); -webkit-user-select: none; user-select: none; }
+#cadre { position: absolute; left: 50%; top: calc(var(--haut, 0px) + (100% - var(--haut, 0px)) / 2); width: 402px; height: 812px; overflow: hidden; transform: translate(-50%, -50%) scale(var(--s, 1)); -webkit-user-select: none; user-select: none; }
 #ecran { position: absolute; left: 0; top: -62px; width: 402px; height: 874px; overflow: hidden; }
 textarea, input { -webkit-user-select: text; user-select: text; }
 .ic { display: block; background: currentColor; -webkit-mask: var(--m) center / 100% 100% no-repeat; mask: var(--m) center / 100% 100% no-repeat; flex: none; }
@@ -129,7 +129,8 @@ textarea, input { -webkit-user-select: text; user-select: text; }
 .bulle.sombre .arreter { background: #fff; color: #000; }
 .bulle .clavier { box-shadow: inset 0 0 0 1.2px rgba(0,0,0,.08); font-weight: 500; }
 .bulle.sombre .clavier { box-shadow: inset 0 0 0 1.2px rgba(255,255,255,.35); }
-#bulle-cam { position: absolute; left: 12px; width: 378px; top: 440px; z-index: 61; }
+#bulle-cam { position: absolute; left: 12px; width: 378px; bottom: 282px; z-index: 61; }
+.bulle textarea:focus-visible { outline: none; }
 
 /* panneau ⚡ « RACCOURCIS » (panneauCarnets) */
 #raccourcis { position: absolute; left: 38px; top: 350.3px; width: 326px; box-sizing: border-box; padding: 13px; border-radius: 24px; background: rgba(0,0,0,.85); z-index: 30; display: flex; flex-direction: column; gap: 10px; transform-origin: 50% 100%; animation: pop .22s cubic-bezier(.3,.8,.4,1); }
@@ -617,7 +618,9 @@ $$('[data-i]').forEach(el => {
 $('#shutter .plus i').style.cssText += ';width:26px;height:26px';
 
 /* ---------- mise à l'échelle de la toile ---------- */
-function echelle() { document.documentElement.style.setProperty('--s', Math.min(innerWidth / 402, innerHeight / 812)); }
+/* Dans l'aperçu claude.ai (page encadrée), les boutons ✕ et … du visualiseur flottent sur les 64 px du haut : la toile commence dessous. */
+const HAUT = window.self !== window.top ? 64 : 0;
+function echelle() { const r = document.documentElement.style; r.setProperty('--haut', HAUT + 'px'); r.setProperty('--s', Math.min(innerWidth / 402, (innerHeight - HAUT) / 812)); }
 addEventListener('resize', echelle); echelle();
 const echelleCourante = () => $('#cadre').getBoundingClientRect().width / 402;
 /* coordonnées d'un pointeur dans la toile (pt, repère des captures) */
@@ -848,16 +851,16 @@ function majChrome() {
   else { d.className = 'r46' + (cascCat ? ' jaune30 grand' : ''); poserIc(d, 'layers'); d.setAttribute('aria-label', 'Sections. Maintenir pour choisir la section et la sous-section.'); }
   const lr = $('#lieux-rond'); poserIc(lr, cascLieux ? 'main' : cam.bord === 'exterieur' ? 'arbre' : 'house2', cascLieux ? 19 : cam.bord === 'exterieur' ? 17 : undefined, cascLieux ? 19 : cam.bord === 'exterieur' ? 17 : undefined);
   const enDictee = !!cam.dictee;
-  $('#aide-cam').textContent = enDictee || lot ? 'Appui court : photo · Arrêter : créer le constat' : 'Appui long : note vocale';
+  $('#aide-cam').textContent = enDictee ? 'Appui court : photo · Arrêter : créer le constat' : 'Appui long : note vocale';
   majDernier();
   const pa = $('#lieu-pastille');
-  pa.hidden = !cam.lieu || !!$('#lieux-panneau');
+  pa.hidden = !cam.lieu || !!$('#lieux-panneau') || !!cam.dictee;
   if (cam.lieu) { pa.textContent = ''; pa.append(ic(cam.lieu.bord === 'exterieur' ? 'arbre' : 'house2', 12, 12), cam.lieu.caption); }
   $('#zoom-pills').style.bottom = (cam.lot && cam.lot.length ? 72 : 10) + 'px';
 }
 function majDernier() {
   const t = $('#dernier-t'), d = dossier.constats.find(x => x.id === dernierId) || dossier.constats.slice().sort((a, b) => b.createdAt - a.createdAt)[0];
-  const enDictee = !!cam.dictee || !!cam.lot;
+  const enDictee = !!cam.dictee;
   t.classList.toggle('dict', enDictee);
   t.textContent = enDictee ? 'Dictée + photos → nouveau constat' : d ? (d.titre || 'Constat sans titre') : 'Aucun constat encore';
   const voir = !enDictee && !!d;
@@ -875,6 +878,7 @@ function guide(texte, top = 548) {
   ecran.append(h('div', { class: 'guide', id: 'guide', style: `top:${top}px` }, texte));
 }
 function finGuide() { if (!guideVu) { guideVu = true; guide(null); } }
+['#btn-gauche', '#btn-crayon', '#lieux-rond', '#btn-droite', '#btn-tiroir', '#btn-accueil', '#dernier', '#onglets'].forEach(s => $(s).addEventListener('pointerdown', finGuide));
 
 /* ---------- déclencheur : toucher = photo · maintenir 0,3 s = note vocale ---------- */
 const sh = $('#shutter');
@@ -1189,7 +1193,7 @@ $('#btn-tiroir').addEventListener('click', ouvrirTiroir);
   ecran.addEventListener('pointermove', e => { if (!x0) return; const p = pt(e); if (p[0] - x0[0] > 30) { x0 = null; ouvrirTiroir(); } }, true);
 })();
 function ouvrirTiroir() {
-  if ($('#tiroir')) return;
+  if ($('#tiroir')) return; finGuide();
   vibrer(10); fermerRaccourcis();
   const n = photosDuDossier(), m = dossier.constats.length;
   const res = `Préachat · ${n === 1 ? '1 photo' : n + ' photos'} · ${m === 1 ? '1 constat' : m + ' constats'}`;
@@ -1352,7 +1356,7 @@ async function redigerEnFond(c) {
 /* ---------- feuille « Préparer le constat » (calque pleine largeur, entrée par le bas) ---------- */
 let feuilleEtat = null, feuilleMicro = null;
 function ouvrirFeuille(etat) {
-  fermerCalque(true);
+  fermerCalque(true); finGuide();
   feuilleEtat = Object.assign({ titre: '', constat: '', reco: '', gravite: null, confirmee: false, lieu: '', dictee: '', duree: 0, redaction: null, notes: '' }, etat);
   rendreFeuille();
 }
@@ -1482,7 +1486,7 @@ function enregistrerFeuille(statut) {
 /* ---------- calque des onglets (AIBQDrawerLayer : plein écran en refonte) ---------- */
 let onglet = null, filtre = { sec: null, sous: null }, focusId = null, indexFiche = 0, retournee = false, apercu = { filtre: 'tous', q: '', ouvert: null, tout: false }, crSegment = 'dossier', crOuvertes = new Set([1]);
 function ouvrirOnglet(o, id) {
-  fermerRaccourcis(); fermerTiroir(); fermerBanque();
+  fermerRaccourcis(); fermerTiroir(); fermerBanque(); finGuide();
   if (o === 'viseur') return fermerCalque();
   vibrer(4); onglet = o; if (id) focusId = id; retournee = false;
   if (!$('#calque')) ecran.append(h('div', { id: 'calque' }));

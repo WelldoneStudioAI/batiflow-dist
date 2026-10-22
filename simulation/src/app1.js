@@ -80,7 +80,9 @@ $$('[data-i]').forEach(el => {
 $('#shutter .plus i').style.cssText += ';width:26px;height:26px';
 
 /* ---------- mise à l'échelle de la toile ---------- */
-function echelle() { document.documentElement.style.setProperty('--s', Math.min(innerWidth / 402, innerHeight / 812)); }
+/* Dans l'aperçu claude.ai (page encadrée), les boutons ✕ et … du visualiseur flottent sur les 64 px du haut : la toile commence dessous. */
+const HAUT = window.self !== window.top ? 64 : 0;
+function echelle() { const r = document.documentElement.style; r.setProperty('--haut', HAUT + 'px'); r.setProperty('--s', Math.min(innerWidth / 402, (innerHeight - HAUT) / 812)); }
 addEventListener('resize', echelle); echelle();
 const echelleCourante = () => $('#cadre').getBoundingClientRect().width / 402;
 /* coordonnées d'un pointeur dans la toile (pt, repère des captures) */
@@ -311,16 +313,16 @@ function majChrome() {
   else { d.className = 'r46' + (cascCat ? ' jaune30 grand' : ''); poserIc(d, 'layers'); d.setAttribute('aria-label', 'Sections. Maintenir pour choisir la section et la sous-section.'); }
   const lr = $('#lieux-rond'); poserIc(lr, cascLieux ? 'main' : cam.bord === 'exterieur' ? 'arbre' : 'house2', cascLieux ? 19 : cam.bord === 'exterieur' ? 17 : undefined, cascLieux ? 19 : cam.bord === 'exterieur' ? 17 : undefined);
   const enDictee = !!cam.dictee;
-  $('#aide-cam').textContent = enDictee || lot ? 'Appui court : photo · Arrêter : créer le constat' : 'Appui long : note vocale';
+  $('#aide-cam').textContent = enDictee ? 'Appui court : photo · Arrêter : créer le constat' : 'Appui long : note vocale';
   majDernier();
   const pa = $('#lieu-pastille');
-  pa.hidden = !cam.lieu || !!$('#lieux-panneau');
+  pa.hidden = !cam.lieu || !!$('#lieux-panneau') || !!cam.dictee;
   if (cam.lieu) { pa.textContent = ''; pa.append(ic(cam.lieu.bord === 'exterieur' ? 'arbre' : 'house2', 12, 12), cam.lieu.caption); }
   $('#zoom-pills').style.bottom = (cam.lot && cam.lot.length ? 72 : 10) + 'px';
 }
 function majDernier() {
   const t = $('#dernier-t'), d = dossier.constats.find(x => x.id === dernierId) || dossier.constats.slice().sort((a, b) => b.createdAt - a.createdAt)[0];
-  const enDictee = !!cam.dictee || !!cam.lot;
+  const enDictee = !!cam.dictee;
   t.classList.toggle('dict', enDictee);
   t.textContent = enDictee ? 'Dictée + photos → nouveau constat' : d ? (d.titre || 'Constat sans titre') : 'Aucun constat encore';
   const voir = !enDictee && !!d;
@@ -338,6 +340,7 @@ function guide(texte, top = 548) {
   ecran.append(h('div', { class: 'guide', id: 'guide', style: `top:${top}px` }, texte));
 }
 function finGuide() { if (!guideVu) { guideVu = true; guide(null); } }
+['#btn-gauche', '#btn-crayon', '#lieux-rond', '#btn-droite', '#btn-tiroir', '#btn-accueil', '#dernier', '#onglets'].forEach(s => $(s).addEventListener('pointerdown', finGuide));
 
 /* ---------- déclencheur : toucher = photo · maintenir 0,3 s = note vocale ---------- */
 const sh = $('#shutter');
@@ -652,7 +655,7 @@ $('#btn-tiroir').addEventListener('click', ouvrirTiroir);
   ecran.addEventListener('pointermove', e => { if (!x0) return; const p = pt(e); if (p[0] - x0[0] > 30) { x0 = null; ouvrirTiroir(); } }, true);
 })();
 function ouvrirTiroir() {
-  if ($('#tiroir')) return;
+  if ($('#tiroir')) return; finGuide();
   vibrer(10); fermerRaccourcis();
   const n = photosDuDossier(), m = dossier.constats.length;
   const res = `Préachat · ${n === 1 ? '1 photo' : n + ' photos'} · ${m === 1 ? '1 constat' : m + ' constats'}`;
