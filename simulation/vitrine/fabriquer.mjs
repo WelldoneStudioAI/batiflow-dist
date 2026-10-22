@@ -1,9 +1,9 @@
-// Produit section-essai.html (le bloc à coller dans inspecteur.expert) à partir de modele-section.html :
+// Produit section-essai.html (le bloc à coller dans la vitrine batiflow.app) à partir de modele-section.html :
 // l'adresse de l'essai et son code QR (SVG statique, rien à charger sur le site).
-//   node fabriquer.mjs [https://essai.inspecteur.expert/]
+//   node fabriquer.mjs [https://essai.batiflow.app/]
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
-const ESSAI = process.argv[2] || 'https://essai.inspecteur.expert/';
+const ESSAI = process.argv[2] || 'https://essai.batiflow.app/';
 const qrcode = createRequire(import.meta.url)('../src/vendor/qrcode.js');
 const q = qrcode(0, 'M'); q.addData(ESSAI); q.make();
 const n = q.getModuleCount(); let d = '';

@@ -1,8 +1,8 @@
 # Essai BatiFlow — déploiement Netlify
 
-Adresse publique visée : **essai.inspecteur.expert** (voir `../vitrine/LISEZMOI.md` pour le domaine et la section du site).
+Adresse publique visée : **essai.batiflow.app** (voir `../vitrine/LISEZMOI.md` pour le domaine et la section du site).
 
-Site séparé de inspecteur.expert. La page (`public/index.html`) est la simulation de l'onglet caméra ;
+Site séparé de la vitrine batiflow.app. La page (`public/index.html`) est la simulation de l'onglet caméra ;
 la banque AIBQ et la clé Anthropic restent côté serveur, dans deux fonctions :
 
 | Route | Rôle |

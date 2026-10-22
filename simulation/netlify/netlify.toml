@@ -1,4 +1,4 @@
-# Essai BatiFlow — site Netlify séparé (ne touche pas au site inspecteur.expert)
+# Essai BatiFlow — site Netlify séparé (ne touche pas à la vitrine batiflow.app)
 [build]
   publish = "public"
   functions = "functions"

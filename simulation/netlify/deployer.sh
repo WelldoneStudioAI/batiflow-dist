@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Déploie l'Essai BatiFlow sur un site Netlify SÉPARÉ (jamais le site inspecteur.expert).
+# Déploie l'Essai BatiFlow sur un site Netlify SÉPARÉ (jamais la vitrine batiflow.app).
 #   ./deployer.sh /chemin/vers/batiflow-app/BatiFlow/Resources/aibq_banque.json
 # 1re fois : ouvre la connexion Netlify, crée le site « essai-batiflow » (ou NOM_SITE=…),
 # puis demande la clé Anthropic sans l'afficher. Ensuite : reconstruit et redéploie.

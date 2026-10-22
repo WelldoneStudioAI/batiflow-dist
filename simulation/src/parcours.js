@@ -195,7 +195,7 @@ function ouvrirRapport(c) {
 function fermerRapport(c) { $('#rapport')?.remove(); P = null; dernierId = c.id; majChrome(); ouvrirOnglet('chat', c.id); }
 
 /* ---------- sur ordinateur : barre d'état d'iPhone + panneau « Essaie-le sur ton téléphone » ---------- */
-const SITE = 'https://essai.inspecteur.expert/';   /* adresse publique ; dans l'aperçu claude.ai, le QR y mène */
+const SITE = 'https://essai.batiflow.app/';   /* adresse publique ; dans l'aperçu claude.ai, le QR y mène */
 function codeQR(texte) {
   const q = qrcode(0, 'M'); q.addData(texte); q.make();
   const n = q.getModuleCount(); let d = '';

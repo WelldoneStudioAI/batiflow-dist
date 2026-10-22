@@ -81,7 +81,7 @@ $('#shutter .plus i').style.cssText += ';width:26px;height:26px';
 
 /* ---------- mise à l'échelle de la toile ---------- */
 /* Dans l'aperçu claude.ai (page encadrée), les boutons ✕ et … du visualiseur flottent sur les 64 px du haut : la toile commence dessous. */
-/* « ?integre » : la page est encadrée par le site inspecteur.expert — l'iPhone seul, sans marge ni panneau. */
+/* « ?integre » : la page est encadrée par le site batiflow.app — l'iPhone seul, sans marge ni panneau. */
 const INTEGRE = new URLSearchParams(location.search).has('integre');
 const HAUT = !INTEGRE && window.self !== window.top ? 64 : 0;
 /* ordinateur (souris, écran large) : l'app entière dans un cadre d'iPhone, à côté du code QR */
